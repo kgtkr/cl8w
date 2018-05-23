@@ -1,0 +1,33 @@
+type : int | float | str | [<type>] | bool | char | <symbol>
+symbol:[a-zA-Z][a-zA-Z0-9]*
+
+expr : <par> | <call> | <literal> | <calc>
+prefix_op: !
+op : + | - | * | / | % | && | ||
+suffix_op : [<expr>]
+literal : <struct_literal> | <int_literal> | <float_literal> | <string_literal> | <array_literal> | <boolean_literal> | <char_literal> | <null_literal>
+num:[0-9]+
+int_literal:<num>
+float_literal : <num>.<num>
+array_literal : [<type>;<expr>]
+struct_literal : <symbol>{(<symbol>:<expr>,)+}
+string_literal : "<char>*"
+boolean_literal : true | false
+char_literal : '<char>'
+null_literal : null
+char : 察せ
+call : <symbol>((<expr>,)*)
+par : (<expr>)
+calc : (<expr><op>)+<expr> | <prefix_op><expr> | <expr><suffix_op>
+
+stat: <block> | <expr2stat> | <let> | <return> | <while> | <if>
+block: {(<stat>)+}
+expr2stat: <expr>;
+let: let <symbol>:<type> = <expr>;
+if: if(<expr>)<stat>
+while: while(<expr>)<stat>
+return: return <expr>?;
+
+member: <function> | <struct>
+struct: struct <symbol>{(<symbol>:<type>,)*}
+function:fun <symbol>((<symbol>:<type>)*)(:<type>)?<stat>
