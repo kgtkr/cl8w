@@ -2,8 +2,7 @@ type : int | float | str | [<type>] | bool | char | <symbol>
 symbol:[a-zA-Z][a-zA-Z0-9]*
 
 expr : <par> | <call> | <literal> | <calc>
-prefix_op: <not_op>
-not_op:!
+prefix_op: !
 op : + | - | * | / | % | && | || | & | | | ^ | **
 suffix_op : [<expr>]
 literal : <struct_literal> | <int_literal> | <float_literal> | <string_literal> | <array_literal> | <boolean_literal> | <char_literal> | <null_literal>
@@ -30,6 +29,7 @@ while: while(<expr>)<stat>
 return: return <expr>?;
 set: <symbol>=<expr>;
 
-member: <function> | <struct>
+member: <function> | <struct> | <extern_function>
 struct: struct <symbol>{(<symbol>:<type>,)*}
-function:fun <symbol>((<symbol>:<type>)*)(:<type>)? = <stat>
+function:fun <symbol>((<symbol>:<type>,)*)(:<type>)? = <stat>
+extern_function:extern fun <string_literal> <symbol>((<symbol>:<type>,)*)(:<type>)?
