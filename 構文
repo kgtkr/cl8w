@@ -30,4 +30,4 @@ return: return <expr>?;
 
 member: <function> | <struct>
 struct: struct <symbol>{(<symbol>:<type>,)*}
-function:fun <symbol>((<symbol>:<type>)*)(:<type>)?<stat>
+function:fun <symbol>((<symbol>:<type>)*)(:<type>)? = <stat>
