@@ -1,0 +1,7 @@
+[package]
+name = "cl8w"
+version = "0.1.0"
+authors = ["tkr <kgtkr.jp@gmail.com>"]
+
+[dependencies]
+nom="4.0.0"
