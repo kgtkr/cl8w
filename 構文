@@ -27,7 +27,8 @@ let: let <symbol>:<type> = <expr>;
 if: if(<expr>)<stat>
 while: while(<expr>)<stat>
 return: return <expr>?;
-set: <symbol>=<expr>;
+set: <set_symbol>=<expr>;
+set_symbol:<symbol>|<set_symbol>.<symbol>|<set_symbol>[<expr>]
 
 member: <function> | <struct> | <extern_function>
 struct: struct <symbol>{(<symbol>:<type>,)*}
