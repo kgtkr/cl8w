@@ -1,5 +1,5 @@
-type : int | float | str | [<type>] | bool | char | <symbol>
-symbol:[a-zA-Z][a-zA-Z0-9]*
+type : int | float | str | [<type>] | bool | char | <ident>
+ident:[a-zA-Z][a-zA-Z0-9]*
 
 expr : <par> | <call> | <literal> | <calc>
 prefix_op: !
@@ -10,27 +10,27 @@ num:[0-9]+
 int_literal:-?<num>
 float_literal : -?<num>.<num>
 array_literal : [<type>;<expr>]
-struct_literal : <symbol>{(<symbol>:<expr>,)+}
+struct_literal : <ident>{(<ident>:<expr>,)+}
 string_literal : "<char>*"
 boolean_literal : true | false
 char_literal : '<char>'
 null_literal : null
 char : この余白はそれを書くには狭すぎる
-call : <symbol>((<expr>,)*)
+call : <ident>((<expr>,)*)
 par : (<expr>)
 calc : (<expr><op>)+<expr> | <prefix_op><expr> | <expr><suffix_op>
 
 stat: <block> | <expr2stat> | <let> | <return> | <while> | <if> | <set>
 block: {(<stat>)+}
 expr2stat: <expr>;
-let: let <symbol>:<type> = <expr>;
+let: let <ident>:<type> = <expr>;
 if: if(<expr>)<stat>
 while: while(<expr>)<stat>
 return: return <expr>?;
-set: <set_symbol>=<expr>;
-set_symbol:<symbol>|<set_symbol>.<symbol>|<set_symbol>[<expr>]
+set: <set_ident>=<expr>;
+set_ident:<ident>|<set_ident>.<ident>|<set_ident>[<expr>]
 
 member: <function> | <struct> | <extern_function>
-struct: struct <symbol>{(<symbol>:<type>,)*}
-function:fun <symbol>((<symbol>:<type>,)*)(:<type>)? = <stat>
-extern_function:extern fun <string_literal> <symbol>((<symbol>:<type>,)*)(:<type>)?
+struct: struct <ident>{(<ident>:<type>,)*}
+function:fun <ident>((<ident>:<type>,)*)(:<type>)? = <stat>
+extern_function:extern fun <string_literal> <ident>((<ident>:<type>,)*)(:<type>)?
