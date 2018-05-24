@@ -1,4 +1,21 @@
-type : int | float | str | [<type>] | bool | char | <ident>
+予約語
+int
+float
+string
+bool
+char
+true
+false
+null
+let
+if
+while
+return
+struct
+fun
+extern
+
+type : int | float | string | [<type>] | bool | char | <ident>
 ident:[a-zA-Z][a-zA-Z0-9]*
 
 expr : <par> | <call> | <literal> | <calc>
