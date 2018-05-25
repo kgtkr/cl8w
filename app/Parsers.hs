@@ -44,3 +44,26 @@ data Expr = EParens Expr
         |EIndex Expr Expr
         |EPlus Expr
         |EMinus Expr
+
+data SetIdent=SIIdent Ident
+              |SIField SetIdent Ident
+              |SIIndex SetIdent Expr
+
+data Stat =SBlock [Stat]
+            |SExprToStat Expr
+            |SLet Ident Type Expr
+            |SIf Expr Stat
+            |SWhile Expr Stat
+            |SReturn (Maybe Expr)
+            |SSet SetIdent Expr
+
+data FuncDef=FuncDef{
+  name::Ident,
+  params::[(Ident,Type)],
+  result::(Maybe Type)
+}
+
+data Member=MStruct Ident [(Ident,Type)]
+            |MFun FuncDef Stat
+            |MExternFun FuncDef String
+
