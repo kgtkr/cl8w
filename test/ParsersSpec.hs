@@ -1,9 +1,11 @@
 module ParsersSpec where
 
+import           Text.ParserCombinators.Parsec
 import           Test.Hspec
 import           Parsers
 
 spec :: Spec
 spec = do
   describe "exprP" $ do
-    it "aaaa" $ 5 + 6 `shouldBe` 11
+    it "test" $ (parse exprP "test" "Struct {x:Foo{},y:f(),}") `shouldBe` Right
+      (EStructL "Struct" [("x", EStructL "Foo" []), ("y", ECall "f" [])])

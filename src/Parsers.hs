@@ -54,7 +54,7 @@ data Type = TI32
           | TBool
           | TChar
           | TStruct Ident
-          deriving Show
+          deriving (Show, Eq)
 
 data Expr = ECall Ident [Expr]
         |EStructL Ident [(Ident,Expr)]
@@ -87,7 +87,7 @@ data Expr = ECall Ident [Expr]
         |EIndex Expr Expr
         |EPlus Expr
         |EMinus Expr
-      deriving Show
+      deriving (Show, Eq)
 
 identP :: Parser String
 identP = P.identifier tokenParser
@@ -127,7 +127,7 @@ structLP = do
 data SetIdent=SIIdent Ident
               |SIField SetIdent Ident
               |SIIndex SetIdent Expr
-              deriving Show
+              deriving (Show, Eq)
 
 data Stat =SBlock [Stat]
             |SExprToStat Expr
@@ -136,15 +136,15 @@ data Stat =SBlock [Stat]
             |SWhile Expr Stat
             |SReturn (Maybe Expr)
             |SSet SetIdent Expr
-            deriving Show
+            deriving (Show, Eq)
 
 data FuncDef=FuncDef{
   name::Ident,
   params::[(Ident,Type)],
   result::(Maybe Type)
-}deriving Show
+}deriving (Show, Eq)
 
 data Member=MStruct Ident [(Ident,Type)]
             |MFun FuncDef Stat
             |MExternFun FuncDef String
-            deriving Show
+            deriving (Show, Eq)
