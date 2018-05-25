@@ -107,6 +107,21 @@ callP = do
   char ')'
   return $ ECall ident exprs
 
+structLP :: Parser Expr
+structLP = do
+  ident <- identP
+  char '{'
+  member <- many
+    (do
+      mIdent <- identP
+      char ':'
+      mExpr <- exprP
+      char ','
+      return (mIdent, mExpr)
+    )
+  char '}'
+  return $ EStructL ident member
+
 data SetIdent=SIIdent Ident
               |SIField SetIdent Ident
               |SIIndex SetIdent Expr
