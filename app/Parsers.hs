@@ -2,6 +2,8 @@ module Parsers where
 
 import           Text.ParserCombinators.Parsec
 import           Text.ParserCombinators.Parsec.Language
+import           Text.ParserCombinators.Parsec.Token as P
+import           Text.ParserCombinators.Parsec.Expr
 
 type Ident=String
 
@@ -35,27 +37,12 @@ def = LanguageDef
   , identLetter     = alphaNum <|> oneOf "_"
   , opStart         = oneOf "+-*/%&|^=<>!"
   , opLetter        = oneOf "+-*/%&|^=<>!"
-  , reservedOpNames = [ "+"
-                      , "-"
-                      , "*"
-                      , "/"
-                      , "%"
-                      , "&&"
-                      , "||"
-                      , "&"
-                      , "|"
-                      , "^"
-                      , "**"
-                      , "=="
-                      , "<"
-                      , "<="
-                      , ">"
-                      , ">="
-                      , "!"
-                      ]
+  , reservedOpNames = []
   , reservedNames   = keywords
   , caseSensitive   = True
   }
+
+tokenParser = makeTokenParser def
 
 data Type = TI32
           | TI64
@@ -67,8 +54,7 @@ data Type = TI32
           | TChar
           | TStruct Ident
 
-data Expr = EParens Expr
-        |ECall Ident [Expr]
+data Expr = ECall Ident [Expr]
         |EStructL Ident [(Ident,Expr)]
         |EI32L Int
         |EI64L Integer
