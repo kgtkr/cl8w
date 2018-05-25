@@ -37,7 +37,7 @@ null_literal : null
 char : この余白はそれを書くには狭すぎる
 call : <ident>((<expr>,)*)
 parens : (<expr>)
-calc : (<expr><op>)+<expr> | <prefix_op><expr> | <expr><suffix_op>
+calc : <expr><op><expr> | <prefix_op><expr> | <expr><suffix_op>
 
 stat: <block> | <expr2stat> | <let> | <return> | <while> | <if> | <set>
 block: {(<stat>)+}
