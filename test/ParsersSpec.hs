@@ -7,5 +7,6 @@ import           Parsers
 spec :: Spec
 spec = do
   describe "exprP" $ do
-    it "test" $ (parse exprP "test" "Struct {x:Foo{},y:f(),}") `shouldBe` Right
-      (EStructL "Struct" [("x", EStructL "Foo" []), ("y", ECall "f" [])])
+    it "test" $ do
+      (parse exprP "test" "Struct {x:Foo{},y:f(),}") `shouldBe` Right
+        (EStructL "Struct" [("x", EStructL "Foo" []), ("y", ECall "f" [])])
