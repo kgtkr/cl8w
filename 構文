@@ -40,7 +40,7 @@ parens : (<expr>)
 calc : <expr><op><expr> | <prefix_op><expr> | <expr><suffix_op>
 
 stat: <block> | <expr2stat> | <let> | <return> | <while> | <if> | <set>
-block: {(<stat>)+}
+block: {(<stat>)*}
 expr2stat: <expr>;
 let: let <ident>:<type> = <expr>;
 if: if(<expr>)<stat>
