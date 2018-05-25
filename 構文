@@ -18,7 +18,7 @@ fun
 extern
 
 type : i32 | i64 | f32 | f64 | string | [<type>] | bool | char | <ident>
-ident:[a-zA-Z][a-zA-Z0-9]*
+ident:[a-zA-Z][a-zA-Z0-9_]*
 
 expr : <parens> | <call> | <literal> | <calc> | <index>
 index : <expr>[<expr>]
