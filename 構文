@@ -24,7 +24,7 @@ expr : <parens> | <call> | <literal> | <calc>
 prefix_op: !
 op : + | - | * | / | % | && | || | & | | | ^ | ** | == | < | <= | > | >=
 suffix_op : [<expr>]
-literal : <struct_literal> | <int_literal> | <float_literal> | <string_literal> | <array_literal> | <boolean_literal> | <char_literal> | <null_literal>
+literal : <struct_literal> | <i32_literal> | <i64_literal> | <f32_literal> | <f64_literal> | <string_literal> | <array_literal> | <bool_literal> | <char_literal> | <null_literal>
 num:[0-9]+
 int_literal:-?<num>
 float_literal : -?<num>.<num>
