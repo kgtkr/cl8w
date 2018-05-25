@@ -87,6 +87,26 @@ data Expr = ECall Ident [Expr]
         |EPlus Expr
         |EMinus Expr
 
+identP :: Parser String
+identP = P.identifier tokenParser
+
+exprP :: Parser Expr
+exprP = undefined
+
+callP :: Parser Expr
+callP = do
+  ident <- identP
+  char '('
+  exprs <- many
+    (do
+      expr <- exprP
+      char ','
+      return expr
+    )
+
+  char ')'
+  return $ ECall ident exprs
+
 data SetIdent=SIIdent Ident
               |SIField SetIdent Ident
               |SIIndex SetIdent Expr
