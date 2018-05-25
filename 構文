@@ -20,7 +20,7 @@ ident:[a-zA-Z][a-zA-Z0-9]*
 
 expr : <par> | <call> | <literal> | <calc>
 prefix_op: !
-op : + | - | * | / | % | && | || | & | | | ^ | **
+op : + | - | * | / | % | && | || | & | | | ^ | ** | == | < | <= | > | >=
 suffix_op : [<expr>]
 literal : <struct_literal> | <int_literal> | <float_literal> | <string_literal> | <array_literal> | <boolean_literal> | <char_literal> | <null_literal>
 num:[0-9]+
