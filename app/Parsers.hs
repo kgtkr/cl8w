@@ -2,7 +2,8 @@ module Parsers where
 
 import           Text.ParserCombinators.Parsec
 import           Text.ParserCombinators.Parsec.Language
-import           Text.ParserCombinators.Parsec.Token as P
+import qualified Text.ParserCombinators.Parsec.Token
+                                               as P
 import           Text.ParserCombinators.Parsec.Expr
 
 type Ident=String
@@ -42,7 +43,7 @@ def = LanguageDef
   , caseSensitive   = True
   }
 
-tokenParser = makeTokenParser def
+tokenParser = P.makeTokenParser def
 
 data Type = TI32
           | TI64
