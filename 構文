@@ -20,10 +20,10 @@ extern
 type : i32 | i64 | f32 | f64 | string | [<type>] | bool | char | <ident>
 ident:[a-zA-Z][a-zA-Z0-9]*
 
-expr : <parens> | <call> | <literal> | <calc>
+expr : <parens> | <call> | <literal> | <calc> | <index>
+index : <expr>[<expr>]
 prefix_op: ! | - | +
 op : + | - | * | / | % | && | || | & | | | ^ | ** | == | < | <= | > | >=
-suffix_op : [<expr>]
 literal : <struct_literal> | <i32_literal> | <i64_literal> | <f32_literal> | <f64_literal> | <string_literal> | <array_literal> | <bool_literal> | <char_literal> | <null_literal>
 num:[0-9]+
 int_literal:-?<num>
@@ -37,7 +37,7 @@ null_literal : null
 char : この余白はそれを書くには狭すぎる
 call : <ident>((<expr>,)*)
 parens : (<expr>)
-calc : <expr><op><expr> | <prefix_op><expr> | <expr><suffix_op>
+calc : <expr><op><expr> | <prefix_op><expr>
 
 stat: <block> | <expr2stat> | <let> | <return> | <while> | <if> | <set>
 block: {(<stat>)*}
