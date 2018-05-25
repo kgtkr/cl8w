@@ -1,3 +1,4 @@
 import           Parsers
+import           Text.ParserCombinators.Parsec
 
-main = print "aaa"
+main = print $ parse exprP "test" "Struct {x:Foo{},y:f(),}"

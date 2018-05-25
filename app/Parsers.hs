@@ -93,7 +93,7 @@ identP :: Parser String
 identP = P.identifier tokenParser
 
 exprP :: Parser Expr
-exprP = undefined
+exprP = try callP <|> structLP
 
 callP :: Parser Expr
 callP = do
