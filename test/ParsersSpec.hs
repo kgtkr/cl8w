@@ -2,7 +2,7 @@ module ParsersSpec where
 
 import           Text.ParserCombinators.Parsec
 import           Test.Hspec
-import           Parsers
+import           Parsers.Expr
 
 spec :: Spec
 spec = do
