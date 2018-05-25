@@ -28,7 +28,7 @@ literal : <struct_literal> | <i32_literal> | <i64_literal> | <f32_literal> | <f6
 num:[0-9]+
 int_literal:-?<num>
 float_literal : -?<num>.<num>
-array_literal : [<type>;<expr>]
+array_literal : [<type>;<expr>*]
 struct_literal : <ident>{(<ident>:<expr>,)+}
 string_literal : "<char>*"
 boolean_literal : true | false
