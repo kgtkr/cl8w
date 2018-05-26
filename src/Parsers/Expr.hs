@@ -38,6 +38,7 @@ data Expr = ECall L.Ident [Expr]
         |EIndex Expr Expr
         |EPlus Expr
         |EMinus Expr
+        |EVar L.Ident
       deriving (Show, Eq)
 
 exprP :: Parser Expr
