@@ -43,7 +43,7 @@ data Expr = ECall L.Ident [Expr]
       deriving (Show, Eq)
 
 exprP :: Parser Expr
-exprP = try callP <|> structLP
+exprP = try callP <|> try structLP <|> try i64LP <|> try i32LP
 
 callP :: Parser Expr
 callP = do
@@ -65,5 +65,16 @@ structLP = do
 
 i32LP :: Parser Expr
 i32LP = do
-  x <- L.integer
-  return $ (EI32L . fromInteger) x
+  L.whiteSpace
+  x<-many1 digit
+  (optional . string) "i32"
+  L.whiteSpace
+  return $ (EI32L . read) x
+
+i64LP :: Parser Expr
+i64LP = do
+  L.whiteSpace
+  x<-many1 digit
+  string "i64"
+  L.whiteSpace
+  return $ (EI64L . read) x
