@@ -5,16 +5,16 @@ import           Text.ParserCombinators.Parsec.Language
 import qualified Text.ParserCombinators.Parsec.Token
                                                as P
 import           Text.ParserCombinators.Parsec.Expr
-import           Parsers.Lang
+import qualified Parsers.Lang                  as L
 
-data Expr = ECall Ident [Expr]
-        |EStructL Ident [(Ident,Expr)]
+data Expr = ECall L.Ident [Expr]
+        |EStructL L.Ident [(L.Ident,Expr)]
         |EI32L Int
         |EI64L Integer
         |EF32L Float
         |EF64L Double
         |EStringL String
-        |EArrayL Type [Expr]
+        |EArrayL L.Type [Expr]
         |EBoolL Bool
         |ECharL Char
         |ENullE
@@ -41,7 +41,7 @@ data Expr = ECall Ident [Expr]
       deriving (Show, Eq)
 
 identP :: Parser String
-identP = P.identifier tokenParser
+identP = P.identifier L.tokenParser
 
 exprP :: Parser Expr
 exprP = try callP <|> structLP

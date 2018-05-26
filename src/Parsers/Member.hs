@@ -5,16 +5,16 @@ import           Text.ParserCombinators.Parsec.Language
 import qualified Text.ParserCombinators.Parsec.Token
                                                as P
 import           Text.ParserCombinators.Parsec.Expr
-import           Parsers.Stat
-import           Parsers.Lang
+import qualified Parsers.Stat                  as S
+import qualified Parsers.Lang                  as L
 
 data FuncDef=FuncDef{
-  name::Ident,
-  params::[(Ident,Type)],
-  result::(Maybe Type)
+  name::L.Ident,
+  params::[(L.Ident,L.Type)],
+  result::Maybe L.Type
 }deriving (Show, Eq)
 
-data Member=MStruct Ident [(Ident,Type)]
-            |MFun FuncDef Stat
+data Member=MStruct L.Ident [(L.Ident,L.Type)]
+            |MFun FuncDef S.Stat
             |MExternFun FuncDef String
             deriving (Show, Eq)
