@@ -40,37 +40,23 @@ data Expr = ECall L.Ident [Expr]
         |EMinus Expr
       deriving (Show, Eq)
 
-identP :: Parser String
-identP = P.identifier L.tokenParser
-
 exprP :: Parser Expr
 exprP = try callP <|> structLP
 
 callP :: Parser Expr
 callP = do
-  ident <- identP
-  char '('
-  exprs <- many
-    (do
-      expr <- exprP
-      char ','
-      return expr
-    )
-
-  char ')'
+  ident <- L.identifier
+  exprs <- (L.parens . L.commaSep) exprP
   return $ ECall ident exprs
 
 structLP :: Parser Expr
 structLP = do
-  ident <- identP
-  char '{'
-  member <- many
+  ident  <- L.identifier
+  member <- (L.braces . L.commaSep)
     (do
-      mIdent <- identP
-      char ':'
+      mIdent <- L.identifier
+      L.colon
       mExpr <- exprP
-      char ','
       return (mIdent, mExpr)
     )
-  char '}'
   return $ EStructL ident member
