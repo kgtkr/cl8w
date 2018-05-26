@@ -6,11 +6,12 @@ import qualified Text.ParserCombinators.Parsec.Token
                                                as P
 import           Text.ParserCombinators.Parsec.Expr
 import qualified Parsers.Lang                  as L
+import           Data.Int
 
 data Expr = ECall L.Ident [Expr]
         |EStructL L.Ident [(L.Ident,Expr)]
-        |EI32L Int
-        |EI64L Integer
+        |EI32L Int32
+        |EI64L Int64
         |EF32L Float
         |EF64L Double
         |EStringL String
@@ -61,3 +62,8 @@ structLP = do
       return (mIdent, mExpr)
     )
   return $ EStructL ident member
+
+i32LP :: Parser Expr
+i32LP = do
+  x <- L.integer
+  return $ (EI32L . fromInteger) x
