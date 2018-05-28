@@ -105,8 +105,21 @@ stringLP = do
   return $ EStringL s
 
 arrayLP :: Parser Expr
-arrayLP = L.brackets (do
-    t<-L.typeParser
+arrayLP = L.brackets
+  (do
+    t <- L.typeParser
     L.semi
-    e<-exprP
-    return $ EArrayL t e)
+    e <- exprP
+    return $ EArrayL t e
+  )
+
+boolLP :: Parser Expr
+boolLP = (<|>)
+  (do
+    L.reserved "true"
+    return $ EBoolL True
+  )
+  (do
+    L.reserved "false"
+    return $ EBoolL False
+  )
