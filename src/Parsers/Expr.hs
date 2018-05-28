@@ -19,6 +19,13 @@ data Expr = ECall L.Ident [Expr]
         |EBoolL Bool
         |ECharL Char
         |ENullE
+        |ENot Expr
+        |EIndex Expr Expr
+        |EPlus Expr
+        |EMinus Expr
+        |EVar L.Ident
+
+        ;; 二項演算子
         |EAdd Expr Expr
         |ESub Expr Expr
         |EMult Expr Expr
@@ -35,11 +42,6 @@ data Expr = ECall L.Ident [Expr]
         |ELte Expr Expr
         |EGt Expr Expr
         |EGte Expr Expr
-        |ENot Expr
-        |EIndex Expr Expr
-        |EPlus Expr
-        |EMinus Expr
-        |EVar L.Ident
       deriving (Show, Eq)
 
 exprP :: Parser Expr
@@ -129,4 +131,8 @@ nullLP = do
   L.reserved "null"
   return $ ENullE
 
-
+notP::Parser Expr
+notP=do
+  L.operator "!"
+  e <- exprP
+  return $ ENot e
