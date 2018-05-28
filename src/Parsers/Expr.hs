@@ -15,7 +15,7 @@ data Expr = ECall L.Ident [Expr]
         |EF32L Float
         |EF64L Double
         |EStringL String
-        |EArrayL L.Type [Expr]
+        |EArrayL L.Type Expr
         |EBoolL Bool
         |ECharL Char
         |ENullE
@@ -103,3 +103,10 @@ stringLP :: Parser Expr
 stringLP = do
   s <- L.stringLiteral
   return $ EStringL s
+
+arrayLP :: Parser Expr
+arrayLP = L.brackets (do
+    t<-L.typeParser
+    L.semi
+    e<-exprP
+    return $ EArrayL t e)
