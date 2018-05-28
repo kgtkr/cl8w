@@ -145,6 +145,6 @@ indexP = do
 
 plusP :: Parser Expr
 plusP = do
-  L.reservedOp "!"
+  L.reservedOp "+"
   e <- exprP
   return $ EPlus e
