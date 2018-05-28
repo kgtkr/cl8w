@@ -136,3 +136,9 @@ notP=do
   L.operator "!"
   e <- exprP
   return $ ENot e
+
+indexP::Parser Expr
+indexP=do
+  e <- exprP
+  i<-L.brackets exprP
+  return $ EIndex e i
