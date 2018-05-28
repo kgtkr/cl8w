@@ -26,7 +26,7 @@ keywords =
   , "extern"
   ]
 
-reservedOp =
+op =
   [ "!"
   , "+"
   , "-"
@@ -56,7 +56,7 @@ def = LanguageDef
   , identLetter     = alphaNum <|> oneOf "_"
   , opStart         = oneOf "+-*/%&|^=<>!"
   , opLetter        = oneOf "+-*/%&|^=<>!"
-  , reservedOpNames = reservedOp
+  , reservedOpNames = op
   , reservedNames   = keywords
   , caseSensitive   = True
   }
@@ -69,6 +69,8 @@ identifier = P.identifier tokenParser
 operator :: Parser String
 operator = P.operator tokenParser
 
+reservedOp :: String -> Parser ()
+reservedOp = P.reservedOp tokenParser
 
 reserved :: String -> Parser ()
 reserved = P.reserved tokenParser
