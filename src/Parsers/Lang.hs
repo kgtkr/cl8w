@@ -113,3 +113,6 @@ data Type = TI32
           | TChar
           | TStruct Ident
           deriving (Show, Eq)
+
+typeParser::Parser Type
+typeParser=undefined
