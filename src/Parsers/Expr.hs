@@ -148,3 +148,9 @@ plusP = do
   L.reservedOp "+"
   e <- exprP
   return $ EPlus e
+
+minusP :: Parser Expr
+minusP = do
+  L.reservedOp "-"
+  e <- exprP
+  return $ EPlus e
