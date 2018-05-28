@@ -66,7 +66,7 @@ structLP = do
 i32LP :: Parser Expr
 i32LP = do
   L.whiteSpace
-  x<-many1 digit
+  x <- many1 digit
   (optional . string) "i32"
   L.whiteSpace
   return $ (EI32L . read) x
@@ -74,7 +74,27 @@ i32LP = do
 i64LP :: Parser Expr
 i64LP = do
   L.whiteSpace
-  x<-many1 digit
+  x <- many1 digit
   string "i64"
   L.whiteSpace
   return $ (EI64L . read) x
+
+f32LP :: Parser Expr
+f32LP = do
+  L.whiteSpace
+  n <- many1 digit
+  char '.'
+  m <- many1 digit
+  string "f32"
+  L.whiteSpace
+  return $ (EF32L . read) (n ++ "." ++ m)
+
+f64LP :: Parser Expr
+f64LP = do
+  L.whiteSpace
+  n <- many1 digit
+  char '.'
+  m <- many1 digit
+  (optional . string) "f64"
+  L.whiteSpace
+  return $ (EF64L . read) (n ++ "." ++ m)
