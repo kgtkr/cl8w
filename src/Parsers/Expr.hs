@@ -19,13 +19,13 @@ data Expr = ECall L.Ident [Expr]
         |EBoolL Bool
         |ECharL Char
         |ENullE
-        |ENot Expr
         |EIndex Expr Expr
+        |EVar L.Ident
+        -- 前置演算子
+        |ENot Expr
         |EPlus Expr
         |EMinus Expr
-        |EVar L.Ident
-
-        ;; 二項演算子
+        -- 二項演算子
         |EAdd Expr Expr
         |ESub Expr Expr
         |EMult Expr Expr
@@ -131,14 +131,20 @@ nullLP = do
   L.reserved "null"
   return $ ENullE
 
-notP::Parser Expr
-notP=do
-  L.operator "!"
+notP :: Parser Expr
+notP = do
+  L.reservedOp "!"
   e <- exprP
   return $ ENot e
 
-indexP::Parser Expr
-indexP=do
+indexP :: Parser Expr
+indexP = do
   e <- exprP
-  i<-L.brackets exprP
+  i <- L.brackets exprP
   return $ EIndex e i
+
+plusP :: Parser Expr
+plusP = do
+  L.reservedOp "!"
+  e <- exprP
+  return $ EPlus e
