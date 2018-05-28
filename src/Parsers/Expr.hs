@@ -114,12 +114,18 @@ arrayLP = L.brackets
   )
 
 boolLP :: Parser Expr
-boolLP = (<|>)
-  (do
-    L.reserved "true"
-    return $ EBoolL True
-  )
-  (do
-    L.reserved "false"
-    return $ EBoolL False
-  )
+boolLP =
+  (<|>)
+    (do
+      L.reserved "true"
+      return $ EBoolL True
+    )
+    (do
+      L.reserved "false"
+      return $ EBoolL False
+    )
+
+nullLP :: Parser Expr
+nullLP = do
+  L.reserved "null"
+  return $ ENullE
