@@ -26,6 +26,26 @@ keywords =
   , "extern"
   ]
 
+reservedOp =
+  [ "!"
+  , "+"
+  , "-"
+  , "*"
+  , "/"
+  , "%"
+  , "&&"
+  , "||"
+  , "&"
+  , "|"
+  , "^"
+  , "**"
+  , "=="
+  , "<"
+  , "<="
+  , ">"
+  , ">="
+  ]
+
 def :: LanguageDef st
 def = LanguageDef
   { commentStart    = "/*"
@@ -36,7 +56,7 @@ def = LanguageDef
   , identLetter     = alphaNum <|> oneOf "_"
   , opStart         = oneOf "+-*/%&|^=<>!"
   , opLetter        = oneOf "+-*/%&|^=<>!"
-  , reservedOpNames = []
+  , reservedOpNames = reservedOp
   , reservedNames   = keywords
   , caseSensitive   = True
   }
@@ -114,5 +134,5 @@ data Type = TI32
           | TStruct Ident
           deriving (Show, Eq)
 
-typeParser::Parser Type
-typeParser=undefined
+typeParser :: Parser Type
+typeParser = undefined
