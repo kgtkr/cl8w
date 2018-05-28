@@ -98,3 +98,8 @@ f64LP = do
   (optional . string) "f64"
   L.whiteSpace
   return $ (EF64L . read) (n ++ "." ++ m)
+
+stringLP :: Parser Expr
+stringLP = do
+  s <- L.stringLiteral
+  return $ EStringL s
