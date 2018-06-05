@@ -8,8 +8,7 @@ import           Text.ParserCombinators.Parsec.Expr
 import qualified Parsers.Lang                  as L
 import           Data.Int
 
-data Expr = ECall L.Ident [Expr]
-        |EStructL L.Ident [(L.Ident,Expr)]
+data Expr = EStructL L.Ident [(L.Ident,Expr)]
         |EI32L Int32
         |EI64L Int64
         |EF32L Float
@@ -19,16 +18,19 @@ data Expr = ECall L.Ident [Expr]
         |EBoolL Bool
         |ECharL Char
         |ENullE
-        |EIndex Expr Expr
         |EVar L.Ident
         -- 前置演算子
         |ENot Expr
         |EPlus Expr
         |EMinus Expr
+        -- 後置演算子
+        | EStructDot L.Ident Expr
+        | EIndex Expr Expr
+        | ECall [Expr] Expr
         -- 二項演算子
         |EAdd Expr Expr
         |ESub Expr Expr
-        |EMult Expr Expr
+        |EMul Expr Expr
         |EDiv Expr Expr
         |EMod Expr Expr
         |EAnd Expr Expr
@@ -49,9 +51,9 @@ exprP = try callP <|> try structLP <|> try i64LP <|> try i32LP
 
 callP :: Parser Expr
 callP = do
-  ident <- L.identifier
+  func <- exprP
   exprs <- (L.parens . L.commaSep) exprP
-  return $ ECall ident exprs
+  return $ ECall exprs func
 
 structLP :: Parser Expr
 structLP = do
@@ -141,7 +143,7 @@ indexP :: Parser Expr
 indexP = do
   e <- exprP
   i <- L.brackets exprP
-  return $ EIndex e i
+  return $ EIndex i e
 
 plusP :: Parser Expr
 plusP = do
@@ -154,3 +156,18 @@ minusP = do
   L.reservedOp "-"
   e <- exprP
   return $ EPlus e
+
+table =
+  [ 
+    {-[Postfix (do{
+      L.dot
+      ident<-L.identifier
+      return EStructDot ident
+    }) AssocLeft],-}
+    [ Infix (L.reservedOp "*" >> return EMul) AssocLeft
+    , Infix (L.reservedOp "/" >> return EDiv) AssocLeft
+    ]
+  , [ Infix (L.reservedOp "+" >> return EAdd) AssocLeft
+    , Infix (L.reservedOp "-" >> return ESub) AssocLeft
+    ]
+  ]
