@@ -159,11 +159,12 @@ minusP = do
 
 table =
   [ [ Postfix
-        (do
-          L.dot
-          ident <- L.identifier
-          return $ EMember ident
-        )
+      (do
+        L.dot
+        ident <- L.identifier
+        return $ EMember ident
+      )
+    , Postfix $ EIndex <$> L.brackets exprP
     ]
   , [ Infix (L.reservedOp "*" >> return EMul) AssocLeft
     , Infix (L.reservedOp "/" >> return EDiv) AssocLeft
