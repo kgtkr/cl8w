@@ -47,7 +47,7 @@ data Expr = EStructL L.Ident [(L.Ident,Expr)]
       deriving (Show, Eq)
 
 exprP :: Parser Expr
-exprP = try callP <|> try structLP <|> try i64LP <|> try i32LP
+exprP = try structLP <|> try i64LP <|> try i32LP
 
 structLP :: Parser Expr
 structLP = do
@@ -153,7 +153,11 @@ table =
         return $ EMember ident
       )
     , Postfix $ EIndex <$> L.brackets exprP
-    , Postfix $ ECall <$> L.brackets (L.parens . L.commaSep) exprP
+    , Postfix
+        (do
+          es<-(L.parens . L.commaSep) exprP  
+          return $ECall es
+        )
     ]
   , [ Infix (L.reservedOp "*" >> return EMul) AssocLeft
     , Infix (L.reservedOp "/" >> return EDiv) AssocLeft
