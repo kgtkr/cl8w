@@ -40,6 +40,7 @@ data Expr = EStructL L.Ident [(L.Ident,Expr)]
         |EBitXor Expr Expr
         |EPow Expr Expr
         |EEq Expr Expr
+        |ENe Expr Expr
         |ELt Expr Expr
         |ELte Expr Expr
         |EGt Expr Expr
@@ -169,5 +170,8 @@ table =
     , Infix (L.reservedOp "<=" >> return ELte) AssocLeft
     , Infix (L.reservedOp ">" >> return EGt) AssocLeft
     , Infix (L.reservedOp ">=" >> return EGte) AssocLeft
+    ]
+  , [ Infix (L.reservedOp "==" >> return EEq) AssocLeft
+    , Infix (L.reservedOp "!=" >> return ENe) AssocLeft
     ]
   ]
