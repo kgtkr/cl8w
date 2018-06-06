@@ -159,6 +159,13 @@ table =
           return $ECall es
         )
     ]
+  ,[
+    Prefix
+      (do
+        L.reservedOp "!"
+        return ENot
+      )
+  ]
   , [ Infix (L.reservedOp "*" >> return EMul) AssocLeft
     , Infix (L.reservedOp "/" >> return EDiv) AssocLeft
     ]
