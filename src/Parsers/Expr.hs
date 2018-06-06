@@ -160,6 +160,7 @@ table =
   ]
   , [ Infix (L.reservedOp "*" >> return EMul) AssocLeft
     , Infix (L.reservedOp "/" >> return EDiv) AssocLeft
+    , Infix (L.reservedOp "%" >> return EMod) AssocLeft
     ]
   , [ Infix (L.reservedOp "+" >> return EAdd) AssocLeft
     , Infix (L.reservedOp "-" >> return ESub) AssocLeft
