@@ -159,6 +159,7 @@ table =
         return EMinus
       )
   ]
+  , [ Infix (L.reservedOp "**" >> return EPow) AssocLeft]
   , [ Infix (L.reservedOp "*" >> return EMul) AssocLeft
     , Infix (L.reservedOp "/" >> return EDiv) AssocLeft
     , Infix (L.reservedOp "%" >> return EMod) AssocLeft
