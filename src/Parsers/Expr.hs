@@ -174,4 +174,8 @@ table =
   , [ Infix (L.reservedOp "==" >> return EEq) AssocLeft
     , Infix (L.reservedOp "!=" >> return ENe) AssocLeft
     ]
+  , [ Infix (L.reservedOp "&" >> return EBitAnd) AssocLeft
+    , Infix (L.reservedOp "|" >> return EBitOr) AssocLeft
+    , Infix (L.reservedOp "^" >> return EBitXor) AssocLeft
+    ]
   ]
