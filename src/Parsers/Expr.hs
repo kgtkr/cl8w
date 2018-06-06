@@ -165,4 +165,9 @@ table =
   , [ Infix (L.reservedOp "+" >> return EAdd) AssocLeft
     , Infix (L.reservedOp "-" >> return ESub) AssocLeft
     ]
+  , [ Infix (L.reservedOp "<" >> return ELt) AssocLeft
+    , Infix (L.reservedOp "<=" >> return ELte) AssocLeft
+    , Infix (L.reservedOp ">" >> return EGt) AssocLeft
+    , Infix (L.reservedOp ">=" >> return EGte) AssocLeft
+    ]
   ]
