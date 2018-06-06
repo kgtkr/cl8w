@@ -178,4 +178,7 @@ table =
     , Infix (L.reservedOp "|" >> return EBitOr) AssocLeft
     , Infix (L.reservedOp "^" >> return EBitXor) AssocLeft
     ]
+  , [ Infix (L.reservedOp "&&" >> return EAnd) AssocLeft
+    , Infix (L.reservedOp "||" >> return EOr) AssocLeft
+    ]
   ]
