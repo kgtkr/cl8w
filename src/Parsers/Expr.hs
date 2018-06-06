@@ -24,7 +24,7 @@ data Expr = EStructL L.Ident [(L.Ident,Expr)]
         |EPlus Expr
         |EMinus Expr
         -- 後置演算子
-        | EStructDot L.Ident Expr
+        | EMember L.Ident Expr
         | EIndex Expr Expr
         | ECall [Expr] Expr
         -- 二項演算子
@@ -51,7 +51,7 @@ exprP = try callP <|> try structLP <|> try i64LP <|> try i32LP
 
 callP :: Parser Expr
 callP = do
-  func <- exprP
+  func  <- exprP
   exprs <- (L.parens . L.commaSep) exprP
   return $ ECall exprs func
 
@@ -158,13 +158,14 @@ minusP = do
   return $ EPlus e
 
 table =
-  [ 
-    {-[Postfix (do{
-      L.dot
-      ident<-L.identifier
-      return EStructDot ident
-    }) AssocLeft],-}
-    [ Infix (L.reservedOp "*" >> return EMul) AssocLeft
+  [ [ Postfix
+        (do
+          L.dot
+          ident <- L.identifier
+          return $ EMember ident
+        )
+    ]
+  , [ Infix (L.reservedOp "*" >> return EMul) AssocLeft
     , Infix (L.reservedOp "/" >> return EDiv) AssocLeft
     ]
   , [ Infix (L.reservedOp "+" >> return EAdd) AssocLeft
