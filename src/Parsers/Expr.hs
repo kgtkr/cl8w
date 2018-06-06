@@ -49,12 +49,6 @@ data Expr = EStructL L.Ident [(L.Ident,Expr)]
 exprP :: Parser Expr
 exprP = try callP <|> try structLP <|> try i64LP <|> try i32LP
 
-callP :: Parser Expr
-callP = do
-  func  <- exprP
-  exprs <- (L.parens . L.commaSep) exprP
-  return $ ECall exprs func
-
 structLP :: Parser Expr
 structLP = do
   ident  <- L.identifier
@@ -139,12 +133,6 @@ notP = do
   e <- exprP
   return $ ENot e
 
-indexP :: Parser Expr
-indexP = do
-  e <- exprP
-  i <- L.brackets exprP
-  return $ EIndex i e
-
 plusP :: Parser Expr
 plusP = do
   L.reservedOp "+"
@@ -165,6 +153,7 @@ table =
         return $ EMember ident
       )
     , Postfix $ EIndex <$> L.brackets exprP
+    , Postfix $ ECall <$> L.brackets (L.parens . L.commaSep) exprP
     ]
   , [ Infix (L.reservedOp "*" >> return EMul) AssocLeft
     , Infix (L.reservedOp "/" >> return EDiv) AssocLeft
