@@ -147,16 +147,16 @@ table =
         L.reservedOp "!"
         return ENot
       ),
-      Prefix
-        (do
-          L.reservedOp "+"
-          return EPlus
-        ),
-      Prefix
-        (do
-          L.reservedOp "-"
-          return EMinus
-        )
+    Prefix
+      (do
+        L.reservedOp "+"
+        return EPlus
+      ),
+    Prefix
+      (do
+        L.reservedOp "-"
+        return EMinus
+      )
   ]
   , [ Infix (L.reservedOp "*" >> return EMul) AssocLeft
     , Infix (L.reservedOp "/" >> return EDiv) AssocLeft
