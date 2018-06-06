@@ -127,24 +127,6 @@ nullLP = do
   L.reserved "null"
   return $ ENullE
 
-notP :: Parser Expr
-notP = do
-  L.reservedOp "!"
-  e <- exprP
-  return $ ENot e
-
-plusP :: Parser Expr
-plusP = do
-  L.reservedOp "+"
-  e <- exprP
-  return $ EPlus e
-
-minusP :: Parser Expr
-minusP = do
-  L.reservedOp "-"
-  e <- exprP
-  return $ EPlus e
-
 table =
   [ [ Postfix
       (do
@@ -164,7 +146,17 @@ table =
       (do
         L.reservedOp "!"
         return ENot
-      )
+      ),
+      Prefix
+        (do
+          L.reservedOp "+"
+          return EPlus
+        ),
+      Prefix
+        (do
+          L.reservedOp "-"
+          return EMinus
+        )
   ]
   , [ Infix (L.reservedOp "*" >> return EMul) AssocLeft
     , Infix (L.reservedOp "/" >> return EDiv) AssocLeft
