@@ -48,7 +48,18 @@ data Expr = EStructL L.Ident [(L.Ident,Expr)]
       deriving (Show, Eq)
 
 exprP :: Parser Expr
-exprP = try structLP <|> try i64LP <|> try i32LP
+exprP = buildExpressionParser table termP
+
+termP =
+  try structLP
+    <|> try i32LP
+    <|> try i64LP
+    <|> try f32LP
+    <|> try f64LP
+    <|> try stringLP
+    <|> try arrayLP
+    <|> try boolLP
+    <|> try nullLP
 
 structLP :: Parser Expr
 structLP = do
@@ -137,29 +148,28 @@ table =
       )
     , Postfix $ EIndex <$> L.brackets exprP
     , Postfix
-        (do
-          es<-(L.parens . L.commaSep) exprP  
-          return $ECall es
-        )
+      (do
+        es <- (L.parens . L.commaSep) exprP
+        return $ ECall es
+      )
     ]
-  ,[
-    Prefix
+  , [ Prefix
       (do
         L.reservedOp "!"
         return ENot
-      ),
-    Prefix
+      )
+    , Prefix
       (do
         L.reservedOp "+"
         return EPlus
-      ),
-    Prefix
+      )
+    , Prefix
       (do
         L.reservedOp "-"
         return EMinus
       )
-  ]
-  , [ Infix (L.reservedOp "**" >> return EPow) AssocLeft]
+    ]
+  , [Infix (L.reservedOp "**" >> return EPow) AssocLeft]
   , [ Infix (L.reservedOp "*" >> return EMul) AssocLeft
     , Infix (L.reservedOp "/" >> return EDiv) AssocLeft
     , Infix (L.reservedOp "%" >> return EMod) AssocLeft
@@ -167,19 +177,19 @@ table =
   , [ Infix (L.reservedOp "+" >> return EAdd) AssocLeft
     , Infix (L.reservedOp "-" >> return ESub) AssocLeft
     ]
-  , [ Infix (L.reservedOp "<" >> return ELt) AssocLeft
+  , [ Infix (L.reservedOp "<" >> return ELt)   AssocLeft
     , Infix (L.reservedOp "<=" >> return ELte) AssocLeft
-    , Infix (L.reservedOp ">" >> return EGt) AssocLeft
+    , Infix (L.reservedOp ">" >> return EGt)   AssocLeft
     , Infix (L.reservedOp ">=" >> return EGte) AssocLeft
     ]
   , [ Infix (L.reservedOp "==" >> return EEq) AssocLeft
     , Infix (L.reservedOp "!=" >> return ENe) AssocLeft
     ]
   , [ Infix (L.reservedOp "&" >> return EBitAnd) AssocLeft
-    , Infix (L.reservedOp "|" >> return EBitOr) AssocLeft
+    , Infix (L.reservedOp "|" >> return EBitOr)  AssocLeft
     , Infix (L.reservedOp "^" >> return EBitXor) AssocLeft
     ]
   , [ Infix (L.reservedOp "&&" >> return EAnd) AssocLeft
-    , Infix (L.reservedOp "||" >> return EOr) AssocLeft
+    , Infix (L.reservedOp "||" >> return EOr)  AssocLeft
     ]
   ]
