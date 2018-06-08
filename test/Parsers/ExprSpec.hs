@@ -1,4 +1,4 @@
-module ParsersSpec where
+module Parsers.ExprSpec where
 
 import           Text.ParserCombinators.Parsec
 import           Test.Hspec
@@ -8,5 +8,6 @@ spec :: Spec
 spec = do
   describe "exprP" $ do
     it "test" $ do
-      (parse exprP "test" "Struct {x:Foo{}}") `shouldBe` Right
-        (EStructL "Struct" [("x", EStructL "Foo" [])])
+      (parse exprP "test" "Struct {x:Foo{}}")
+        `shouldBe` Right (EStructL "Struct" [("x", EStructL "Foo" [])])
+
