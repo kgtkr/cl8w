@@ -32,3 +32,5 @@ spec = do
       (parse exprP "test" "x(1,2)")
         `shouldBe` Right (ECall [EI32L 1, EI32L 2] (EVar "x"))
 
+      (parse exprP "test" "x+y") `shouldBe` Right (EAdd (EVar "x") (EVar "y"))
+
