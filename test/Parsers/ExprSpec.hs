@@ -16,4 +16,5 @@ spec = do
       (parse exprP "test" "[i32;1]") `shouldBe` Right (EArrayL TI32 (EI32L 1))
       (parse exprP "test" "true") `shouldBe` Right (EBoolL True)
       (parse exprP "test" "false") `shouldBe` Right (EBoolL False)
+      (parse exprP "test" "'a'") `shouldBe` Right (ECharL 'a')
 
