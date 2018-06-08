@@ -17,7 +17,7 @@ data Expr = EStructL L.Ident [(L.Ident,Expr)]
         |EArrayL L.Type Expr
         |EBoolL Bool
         |ECharL Char
-        |ENullE
+        |ENullL
         |EVar L.Ident
         -- 前置演算子
         |ENot Expr
@@ -137,7 +137,7 @@ boolLP = (<|>)
 nullLP :: Parser Expr
 nullLP = do
   L.reserved "null"
-  return $ ENullE
+  return $ ENullL
 
 table =
   [ [ Postfix
