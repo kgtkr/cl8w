@@ -57,6 +57,7 @@ termP =
     <|> try f32LP
     <|> try f64LP
     <|> try stringLP
+    <|> try charLP
     <|> try arrayLP
     <|> try boolLP
     <|> try nullLP
@@ -113,6 +114,11 @@ stringLP :: Parser Expr
 stringLP = do
   s <- L.stringLiteral
   return $ EStringL s
+
+charLP :: Parser Expr
+charLP = do
+  c <- L.charLiteral
+  return $ ECharL c
 
 arrayLP :: Parser Expr
 arrayLP = L.brackets
