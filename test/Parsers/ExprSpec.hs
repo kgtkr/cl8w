@@ -55,4 +55,9 @@ spec = do
       (parse exprP "test" "x<y") `shouldBe` Right (ELt (EVar "x") (EVar "y"))
       (parse exprP "test" "x<=y") `shouldBe` Right (ELte (EVar "x") (EVar "y"))
 
+      (parse exprP "test" "a+b*c")
+        `shouldBe` Right (EAdd (EVar "a") (EMul (EVar "b") (EVar "c")))
+      (parse exprP "test" "(a+b)*c")
+        `shouldBe` Right (EMul (EAdd (EVar "a") (EVar "b")) (EVar "c"))
+
 
