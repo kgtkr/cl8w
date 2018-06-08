@@ -138,4 +138,60 @@ data Type = TI32
           deriving (Show, Eq)
 
 typeParser :: Parser Type
-typeParser = undefined
+typeParser =
+  try
+      (do
+        reserved "i32"
+        return TI32
+      )
+    <|> try
+          (do
+            reserved "i64"
+            return TI64
+          )
+    <|> try
+          (do
+            reserved "f32"
+            return TF32
+          )
+    <|> try
+          (do
+            reserved "f64"
+            return TF64
+          )
+    <|> try
+          (do
+            reserved "string"
+            return TString
+          )
+    <|> try
+          (do
+            t <- brackets typeParser
+            return $ TArray t
+          )
+    <|> try
+          (do
+            reserved "bool"
+            return TBool
+          )
+    <|> try
+          (do
+            reserved "char"
+            return TChar
+          )
+    <|> try
+          (do
+            params <- (parens . semiSep) typeParser
+            ret    <- optionMaybe
+              (do
+                operator "->"
+                t <- typeParser
+                return t
+              )
+            return TFunc params ret
+          )
+    <|> try
+          (do
+            ident <- identifier
+            return $ TStruct ident
+          )
