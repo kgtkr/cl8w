@@ -61,6 +61,7 @@ termP =
     <|> try arrayLP
     <|> try boolLP
     <|> try nullLP
+    <|> try varP
 
 structLP :: Parser Expr
 structLP = do
@@ -144,6 +145,11 @@ nullLP :: Parser Expr
 nullLP = do
   L.reserved "null"
   return $ ENullL
+
+varP :: Parser Expr
+varP = do
+  ident <- L.identifier
+  return $ EVar ident
 
 table =
   [ [ Postfix
