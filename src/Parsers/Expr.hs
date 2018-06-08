@@ -62,7 +62,10 @@ termP =
     <|> try boolLP
     <|> try nullLP
     <|> try varP
-    <|> try $ L.parens exprP
+    <|> try parensP
+
+parensP :: Parser Expr
+parensP = L.parens exprP
 
 structLP :: Parser Expr
 structLP = do
