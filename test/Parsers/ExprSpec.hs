@@ -26,3 +26,9 @@ spec = do
       (parse exprP "test" "+x") `shouldBe` Right ((EPlus . EVar) "x")
       (parse exprP "test" "-x") `shouldBe` Right ((EMinus . EVar) "x")
 
+      (parse exprP "test" "x.a") `shouldBe` Right (EMember "a" (EVar "x"))
+      (parse exprP "test" "x[i]")
+        `shouldBe` Right (EIndex (EVar "i") (EVar "x"))
+      (parse exprP "test" "x(1,2)")
+        `shouldBe` Right (ECall [EI32L 1, EI32L 2] (EVar "x"))
+
