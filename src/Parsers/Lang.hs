@@ -188,7 +188,7 @@ typeParser =
                 t <- typeParser
                 return t
               )
-            return TFunc params ret
+            return $ TFunc params ret
           )
     <|> try
           (do
