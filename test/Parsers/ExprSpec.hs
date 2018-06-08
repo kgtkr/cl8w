@@ -22,3 +22,7 @@ spec = do
       (parse exprP "test" "null") `shouldBe` Right (ENullL)
       (parse exprP "test" "x") `shouldBe` Right (EVar "x")
 
+      (parse exprP "test" "!x") `shouldBe` Right ((ENot . EVar) "x")
+      (parse exprP "test" "+x") `shouldBe` Right ((EPlus . EVar) "x")
+      (parse exprP "test" "-x") `shouldBe` Right ((EMinus . EVar) "x")
+
