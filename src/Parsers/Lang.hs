@@ -133,6 +133,7 @@ data Type = TI32
           | TArray Type
           | TBool
           | TChar
+          | TFunc [Type] (Maybe Type)
           | TStruct Ident
           deriving (Show, Eq)
 
