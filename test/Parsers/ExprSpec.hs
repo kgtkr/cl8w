@@ -36,4 +36,23 @@ spec = do
         `shouldBe` Right (ECall [EI32L 1, EI32L 2] (EVar "x"))
 
       (parse exprP "test" "x+y") `shouldBe` Right (EAdd (EVar "x") (EVar "y"))
+      (parse exprP "test" "x-y") `shouldBe` Right (ESub (EVar "x") (EVar "y"))
+      (parse exprP "test" "x*y") `shouldBe` Right (EMul (EVar "x") (EVar "y"))
+      (parse exprP "test" "x/y") `shouldBe` Right (EDiv (EVar "x") (EVar "y"))
+      (parse exprP "test" "x%y") `shouldBe` Right (EMod (EVar "x") (EVar "y"))
+      (parse exprP "test" "x&&y") `shouldBe` Right (EAnd (EVar "x") (EVar "y"))
+      (parse exprP "test" "x||y") `shouldBe` Right (EOr (EVar "x") (EVar "y"))
+      (parse exprP "test" "x|y") `shouldBe` Right (EBitOr (EVar "x") (EVar "y"))
+      (parse exprP "test" "x&y")
+        `shouldBe` Right (EBitAnd (EVar "x") (EVar "y"))
+      (parse exprP "test" "x^y")
+        `shouldBe` Right (EBitXor (EVar "x") (EVar "y"))
+      (parse exprP "test" "x**y") `shouldBe` Right (EPow (EVar "x") (EVar "y"))
+      (parse exprP "test" "x==y") `shouldBe` Right (EEq (EVar "x") (EVar "y"))
+      (parse exprP "test" "x!=y") `shouldBe` Right (ENe (EVar "x") (EVar "y"))
+      (parse exprP "test" "x>y") `shouldBe` Right (EGt (EVar "x") (EVar "y"))
+      (parse exprP "test" "x>=y") `shouldBe` Right (EGte (EVar "x") (EVar "y"))
+      (parse exprP "test" "x<y") `shouldBe` Right (ELt (EVar "x") (EVar "y"))
+      (parse exprP "test" "x<=y") `shouldBe` Right (ELte (EVar "x") (EVar "y"))
+
 
