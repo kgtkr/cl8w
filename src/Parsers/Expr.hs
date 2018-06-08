@@ -52,10 +52,10 @@ exprP = buildExpressionParser table termP
 
 termP =
   try structLP
-    <|> try i32LP
-    <|> try i64LP
     <|> try f32LP
     <|> try f64LP
+    <|> try i32LP
+    <|> try i64LP
     <|> try stringLP
     <|> try charLP
     <|> try arrayLP
