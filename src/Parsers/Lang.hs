@@ -184,7 +184,7 @@ typeParser =
             params <- (parens . semiSep) typeParser
             ret    <- optionMaybe
               (do
-                operator "->"
+                reservedOp "->"
                 t <- typeParser
                 return t
               )
