@@ -23,4 +23,10 @@ data Stat =SBlock [Stat]
             deriving (Show, Eq)
 
 statP :: Parser Stat
-statP=undefined
+statP = undefined
+
+exprToStatP :: Parser Stat
+exprToStatP = do
+  e <- E.exprP
+  L.semi
+  return $ SExprToStat e
