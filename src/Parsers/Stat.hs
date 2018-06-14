@@ -21,3 +21,6 @@ data Stat =SBlock [Stat]
             |SReturn (Maybe E.Expr)
             |SSet SetIdent E.Expr
             deriving (Show, Eq)
+
+statP :: Parser Stat
+statP=undefined
