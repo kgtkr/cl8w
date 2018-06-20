@@ -14,7 +14,6 @@ data FuncDef=FuncDef{
   result::Maybe L.Type
 }deriving (Show, Eq)
 
--- <ident>((<ident>:<type>,)*)(:<type>)?
 funcDefP :: Parser FuncDef
 funcDefP = do
   name   <- L.identifier
@@ -58,3 +57,10 @@ structP = do
     )
   return $ MStruct ident m
 
+funP :: Parser Member
+funP = do
+  L.reserved "fun"
+  d <- funcDefP
+  L.reservedOp "="
+  s <- S.statP
+  return $ MFun d s
