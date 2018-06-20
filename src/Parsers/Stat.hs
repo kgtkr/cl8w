@@ -30,3 +30,22 @@ exprToStatP = do
   e <- E.exprP
   L.semi
   return $ SExprToStat e
+
+
+blockP :: Parser Stat
+blockP = L.braces
+  (do
+    ss <- many statP
+    return $ SBlock ss
+  )
+
+letP :: Parser Stat
+letP = do
+  L.reserved "let"
+  ident <- L.identifier
+  L.colon
+  t <- L.typeParser
+  L.reservedOp "="
+  e <- E.exprP
+  L.semi
+  return $ SLet ident t e
