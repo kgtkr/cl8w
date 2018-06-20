@@ -13,6 +13,27 @@ data SetIdent=SIIdent L.Ident
               |SIIndex SetIdent E.Expr
               deriving (Show, Eq)
 
+setIdentP :: Parser SetIdent
+setIdentP = try siIdentP <|> try siFieldP <|> try siIndexP
+
+siIdentP :: Parser SetIdent
+siIdentP = do
+  ident <- L.identifier
+  return $ SIIdent ident
+
+siFieldP :: Parser SetIdent
+siFieldP = do
+  si <- setIdentP
+  L.dot
+  ident <- L.identifier
+  return $ SIField si ident
+
+siIndexP :: Parser SetIdent
+siIndexP = do
+  si <- setIdentP
+  e<-L.brackets E.exprP
+  return $ SIIndex si e
+
 data Stat =SBlock [Stat]
             |SExprToStat E.Expr
             |SLet L.Ident L.Type E.Expr
@@ -85,3 +106,4 @@ returnP = do
   e <- optionMaybe E.exprP
   L.semi
   return $ SReturn e
+
