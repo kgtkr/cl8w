@@ -71,3 +71,10 @@ ifP = do
     )
 
   return $ SIf (e, s) elif el
+
+whileP :: Parser Stat
+whileP = do
+  L.reserved "while"
+  e <- E.exprP
+  s <- statP
+  return $ SWhile e s
