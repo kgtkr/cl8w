@@ -18,3 +18,6 @@ data Member=MStruct L.Ident [(L.Ident,L.Type)]
             |MFun FuncDef S.Stat
             |MExternFun FuncDef String
             deriving (Show, Eq)
+
+memberP :: Parser Member
+memberP = undefined
