@@ -64,3 +64,11 @@ funP = do
   L.reservedOp "="
   s <- S.statP
   return $ MFun d s
+
+externFunP :: Parser Member
+externFunP = do
+  L.reserved "extern"
+  L.reserved "fun"
+  s <- L.stringLiteral
+  d <- funcDefP
+  return $ MExternFun d s
