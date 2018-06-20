@@ -78,3 +78,10 @@ whileP = do
   e <- E.exprP
   s <- statP
   return $ SWhile e s
+
+returnP :: Parser Stat
+returnP = do
+  L.reserved "return"
+  e <- optionMaybe E.exprP
+  L.semi
+  return $ SReturn e
