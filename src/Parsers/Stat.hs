@@ -31,7 +31,7 @@ siFieldP = do
 siIndexP :: Parser SetIdent
 siIndexP = do
   si <- setIdentP
-  e<-L.brackets E.exprP
+  e  <- L.brackets E.exprP
   return $ SIIndex si e
 
 data Stat =SBlock [Stat]
@@ -107,3 +107,10 @@ returnP = do
   L.semi
   return $ SReturn e
 
+setP :: Parser Stat
+setP = do
+  si <- setIdentP
+  L.reservedOp "="
+  e <- E.exprP
+  L.semi
+  return $ SSet si e
