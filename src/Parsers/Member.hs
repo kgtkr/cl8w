@@ -14,6 +14,27 @@ data FuncDef=FuncDef{
   result::Maybe L.Type
 }deriving (Show, Eq)
 
+-- <ident>((<ident>:<type>,)*)(:<type>)?
+funcDefP :: Parser FuncDef
+funcDefP = do
+  name   <- L.identifier
+  params <- L.parens
+    (L.commaSep
+      (do
+        i <- L.identifier
+        L.colon
+        t <- L.typeParser
+        return (i, t)
+      )
+    )
+  result <- optionMaybe
+    (do
+      L.colon
+      t <- L.typeParser
+      return t
+    )
+  return $ FuncDef {name = name, params = params, result = result}
+
 data Member=MStruct L.Ident [(L.Ident,L.Type)]
             |MFun FuncDef S.Stat
             |MExternFun FuncDef String
@@ -36,3 +57,4 @@ structP = do
       )
     )
   return $ MStruct ident m
+
