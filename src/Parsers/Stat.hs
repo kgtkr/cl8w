@@ -16,7 +16,7 @@ data SetIdent=SIIdent L.Ident
 data Stat =SBlock [Stat]
             |SExprToStat E.Expr
             |SLet L.Ident L.Type E.Expr
-            |SIf E.Expr Stat
+            |SIf (E.Expr,Stat) [(E.Expr,Stat)] (Maybe Stat)
             |SWhile E.Expr Stat
             |SReturn (Maybe E.Expr)
             |SSet SetIdent E.Expr
@@ -49,3 +49,25 @@ letP = do
   e <- E.exprP
   L.semi
   return $ SLet ident t e
+
+ifP :: Parser Stat
+ifP = do
+  L.reserved "if"
+  e    <- E.exprP
+  s    <- statP
+  elif <- many
+    (do
+      L.reserved "else"
+      L.reserved "if"
+      ee <- E.exprP
+      ss <- statP
+      return (ee, ss)
+    )
+  el <- optionMaybe
+    (do
+      L.reserved "else"
+      ss <- statP
+      return ss
+    )
+
+  return $ SIf (e, s) elif el
