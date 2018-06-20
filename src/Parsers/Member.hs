@@ -40,7 +40,7 @@ data Member=MStruct L.Ident [(L.Ident,L.Type)]
             deriving (Show, Eq)
 
 memberP :: Parser Member
-memberP = undefined
+memberP = try structP <|> try funP <|> try externFunP
 
 structP :: Parser Member
 structP = do
