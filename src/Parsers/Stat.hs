@@ -44,7 +44,14 @@ data Stat =SBlock [Stat]
             deriving (Show, Eq)
 
 statP :: Parser Stat
-statP = undefined
+statP =
+  try blockP
+    <|> try exprToStatP
+    <|> try letP
+    <|> try ifP
+    <|> try whileP
+    <|> try returnP
+    <|> try setP
 
 exprToStatP :: Parser Stat
 exprToStatP = do
