@@ -21,3 +21,18 @@ data Member=MStruct L.Ident [(L.Ident,L.Type)]
 
 memberP :: Parser Member
 memberP = undefined
+
+structP :: Parser Member
+structP = do
+  L.reserved "struct"
+  ident <- L.identifier
+  m     <- L.braces
+    (L.commaSep
+      (do
+        i <- L.identifier
+        L.colon
+        t <- L.typeParser
+        return (i, t)
+      )
+    )
+  return $ MStruct ident m
