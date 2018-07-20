@@ -55,3 +55,41 @@ data FuncCmd =
     |I64Store32 Int Int
     |CurrentMemory Int
     |GrowMemory Int
+    |I32Const Int
+    |I64Const Int
+    |F32Const Float
+    |F64Const Float
+    |I32Eqz
+    |I32Eq
+    |I32Ne
+    |I32Lts
+    |I32Ltu
+    |I32Gts
+    |I32Gtu
+    |I32Les
+    |I32Leu
+    |I32Ges
+    |I32Geu
+    |I64Eqz
+    |I64Eq
+    |I64Ne
+    |I64Lts
+    |I64Ltu
+    |I64Gts
+    |I64Gtu
+    |I64Les
+    |I64Leu
+    |I64Ges
+    |I64Geu
+    |F32Eq
+    |F32Ne
+    |F32Lt
+    |F32Gt
+    |F32Le
+    |F32Ge
+    |F64Eq
+    |F64Ne
+    |F64Lt
+    |F64Gt
+    |F64Le
+    |F64Ge
