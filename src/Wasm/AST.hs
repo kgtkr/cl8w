@@ -157,3 +157,24 @@ data FuncCmd =
     |F64Min
     |F64Max
     |F64Copysign
+    |I32WrapI64
+    |I32TruncsF32
+    |I32TrancuF32
+    |I32TrancsF64
+    |I32TrancuF64
+    |I64ExtendsI32
+    |I64ExtenduI32
+    |I64TruncsF32
+    |I64TrancuF32
+    |I64TrancsF64
+    |I64TrancuF64
+    |F32ConvertsI32
+    |F32ConvertuI32
+    |F32ConvertsI64
+    |F32ConvertuI64
+    |F32DemoteF64
+    |F64ConvertsI32
+    |F64ConvertuI32
+    |F64ConvertsI64
+    |F64ConvertuI64
+    |F64PromoteF32
