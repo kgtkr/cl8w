@@ -30,28 +30,28 @@ data FuncCmd =
     |TeeLocal Int
     |GetGlobal Int
     |SetGlobal Int
-    |I32Load Int
-    |I64Load Int
-    |F32Load Int
-    |F64Load Int
-    |I32Load8s Int
-    |I32Load8u Int
-    |I32Load16s Int
-    |I32Load16u Int
-    |I64Load8s Int
-    |I64Load8u Int
-    |I64Load16s Int
-    |I64Load16u Int
-    |I64Load32s Int
-    |I64Load32u Int
-    |I32Store Int
-    |I64Store Int
-    |F32Store Int
-    |F64Store Int
-    |I32Store8 Int
-    |I32Store16 Int
-    |I64Store8 Int
-    |I64Store16 Int
-    |I64Store32 Int
+    |I32Load Int Int
+    |I64Load Int Int
+    |F32Load Int Int
+    |F64Load Int Int
+    |I32Load8s Int Int
+    |I32Load8u Int Int
+    |I32Load16s Int Int
+    |I32Load16u Int Int
+    |I64Load8s Int Int
+    |I64Load8u Int Int
+    |I64Load16s Int Int
+    |I64Load16u Int Int
+    |I64Load32s Int Int
+    |I64Load32u Int Int
+    |I32Store Int Int
+    |I64Store Int Int
+    |F32Store Int Int
+    |F64Store Int Int
+    |I32Store8 Int Int
+    |I32Store16 Int Int
+    |I64Store8 Int Int
+    |I64Store16 Int Int
+    |I64Store32 Int Int
     |CurrentMemory Int
     |GrowMemory Int
