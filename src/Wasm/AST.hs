@@ -183,3 +183,6 @@ data FuncCmd =
     |I64ReinterpretF64
     |F32ReinterpretI32
     |F64ReinterpretI64
+
+
+data Section=Type|Import|Function|Table|Memory|Global|Export|Start|Element|Code|Data
