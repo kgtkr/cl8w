@@ -178,3 +178,7 @@ data FuncCmd =
     |F64ConvertsI64
     |F64ConvertuI64
     |F64PromoteF32
+    |I32ReinterpretF32
+    |I64ReinterpretF64
+    |F32ReinterpretI32
+    |F64ReinterpretI64
