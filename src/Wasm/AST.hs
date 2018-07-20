@@ -6,9 +6,10 @@ import           Data.Binary.Get
 
 data ValueType = I32|I64|F32|F64
 
-data Type = ValueType ValueType|AnyFunc|Func|BlockType (Maybe ValueType)
+data Type = ValueType ValueType|AnyFunc|Func Int [ValueType] (Maybe ValueType)|BlockType BlockType
 
 type BlockType = Maybe ValueType
+
 data FuncCmd =
     Unreachable
     |Nop
