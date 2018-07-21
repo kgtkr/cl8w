@@ -195,12 +195,34 @@ type MemoryType=ResizableLimits
 
 type GlobalType=(ValueType,Bool)
 
-data Import=Import String String ImportKind
-data ImportKind=IFunc Int|ITable TableType|IMemory MemoryType|IGlobal GlobalType
+data ExternalKind=EFunction|ETable|EMemory|EGlobal
 
--- data Section=Type|Import|Function|Table|Memory|Global|Export|Start|Element|Code|Data
+type Import=(String ,String ,ExternalKind)
+
+type GlobalVariable=(GlobalType,InitExpr)
+
+type InitExpr=InitI32 Int|InitI64 Int|InitF32 Float|InitF64 Float|InitGlobal Int
+
+type ExportType=(String,ExternalKind,Int)
+
+type FunctionBody=([LocalEntry],[FuncCmd])
+
+type LocalEntry=(Int,ValueType)
+
+type ElemSegment=(Int,Int,[Int])
+
+type DataSegment=(Int,InitExpr,BS.ByteString)
 
 data Section=Section{
     types::[FuncType],
-    imports::[Import]
+    imports::[Import],
+    funcs::[Int],
+    tables::[TableType],
+    memorys::[MemoryType],
+    globals::[GlobalVariable],
+    exports::[ExportType],
+    start::Int,
+    elems::[ElemSegment],
+    codes::[FunctionBody],
+    data::[DataSegment]
 }
