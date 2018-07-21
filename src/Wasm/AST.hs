@@ -201,7 +201,7 @@ type Import=(String ,String ,ExternalKind)
 
 type GlobalVariable=(GlobalType,InitExpr)
 
-type InitExpr=InitI32 Int|InitI64 Int|InitF32 Float|InitF64 Float|InitGlobal Int
+data InitExpr=InitI32 Int|InitI64 Int|InitF32 Float|InitF64 Float|InitGlobal Int
 
 type ExportType=(String,ExternalKind,Int)
 
@@ -224,5 +224,5 @@ data Section=Section{
     start::Int,
     elems::[ElemSegment],
     codes::[FunctionBody],
-    data::[DataSegment]
+    datas::[DataSegment]
 }
