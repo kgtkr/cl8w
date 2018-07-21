@@ -6,9 +6,12 @@ import           Data.Binary.Get
 
 data ValueType = I32|I64|F32|F64
 
-data Type = ValueType ValueType|AnyFunc|Func Int [ValueType] (Maybe ValueType)|BlockType BlockType
+data ElemType=AnyFunc
+
+data Type = ValueType ValueType|ElemType ElemType|Func FuncType|BlockType BlockType
 
 type BlockType = Maybe ValueType
+data FuncType=FuncType Int [ValueType] (Maybe ValueType)
 
 data FuncCmd =
     Unreachable
@@ -184,5 +187,20 @@ data FuncCmd =
     |F32ReinterpretI32
     |F64ReinterpretI64
 
+type ResizableLimits=(Int,Maybe Int)
 
-data Section=Type|Import|Function|Table|Memory|Global|Export|Start|Element|Code|Data
+type TableType=(ElemType,ResizableLimits)
+
+type MemoryType=ResizableLimits
+
+type GlobalType=(ValueType,Bool)
+
+data Import=Import String String ImportKind
+data ImportKind=IFunc Int|ITable TableType|IMemory MemoryType|IGlobal GlobalType
+
+-- data Section=Type|Import|Function|Table|Memory|Global|Export|Start|Element|Code|Data
+
+data Section=Section{
+    types::[FuncType],
+    imports::[Import]
+}
