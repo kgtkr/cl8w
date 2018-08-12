@@ -11,7 +11,8 @@ data ElemType=AnyFunc
 data Type = ValueType ValueType|ElemType ElemType|Func FuncType|BlockType BlockType
 
 type BlockType = Maybe ValueType
-data FuncType=FuncType Int [ValueType] (Maybe ValueType)
+
+type FuncType=(Int,[ValueType],Maybe ValueType)
 
 data FuncCmd =
     Unreachable
