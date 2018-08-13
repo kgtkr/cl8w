@@ -3,6 +3,7 @@ import qualified Data.Binary                   as B
 import qualified Data.ByteString               as BS
 import           Data.Int
 import           Data.Binary.Get
+import qualified Wasm.IndexedList              as IL
 
 data ValueType = I32|I64|F32|F64
 
@@ -215,15 +216,15 @@ type ElemSegment=(Int,Int,[Int])
 type DataSegment=(Int,InitExpr,BS.ByteString)
 
 data Section=Section{
-    types::[FuncType],
-    imports::[Import],
-    funcs::[Int],
-    tables::[TableType],
-    memorys::[MemoryType],
-    globals::[GlobalVariable],
-    exports::[ExportType],
+    types::IL.IndexedList FuncType,
+    imports::IL.IndexedList Import,
+    funcs::IL.IndexedList Int,
+    tables::IL.IndexedList TableType,
+    memorys::IL.IndexedList MemoryType,
+    globals::IL.IndexedList GlobalVariable,
+    exports::IL.IndexedList ExportType,
     start::Int,
-    elems::[ElemSegment],
-    codes::[FunctionBody],
-    datas::[DataSegment]
+    elems::IL.IndexedList ElemSegment,
+    codes::IL.IndexedList FunctionBody,
+    datas::IL.IndexedList DataSegment
 }
