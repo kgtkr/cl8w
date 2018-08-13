@@ -228,3 +228,33 @@ data Section=Section{
     codes::IL.IndexedList FunctionBody,
     datas::IL.IndexedList DataSegment
 }
+
+addTypes :: FuncType -> Section -> Section
+addTypes x s = s { types = (IL.cons x . types) s }
+
+addImports :: Import -> Section -> Section
+addImports x s = s { imports = (IL.cons x . imports) s }
+
+addFuncs :: Int -> Section -> Section
+addFuncs x s = s { funcs = (IL.cons x . funcs) s }
+
+addTables :: TableType -> Section -> Section
+addTables x s = s { tables = (IL.cons x . tables) s }
+
+addMemorys :: MemoryType -> Section -> Section
+addMemorys x s = s { memorys = (IL.cons x . memorys) s }
+
+addGlobals :: GlobalVariable -> Section -> Section
+addGlobals x s = s { globals = (IL.cons x . globals) s }
+
+addExports :: ExportType -> Section -> Section
+addExports x s = s { exports = (IL.cons x . exports) s }
+
+addElems :: ElemSegment -> Section -> Section
+addElems x s = s { elems = (IL.cons x . elems) s }
+
+addCodes :: FunctionBody -> Section -> Section
+addCodes x s = s { codes = (IL.cons x . codes) s }
+
+addDatas :: DataSegment -> Section -> Section
+addDatas x s = s { datas = (IL.cons x . datas) s }
