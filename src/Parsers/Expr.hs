@@ -116,14 +116,10 @@ f64LP = do
   return $ (EF64L . read) (n ++ "." ++ m)
 
 stringLP :: Parser Expr
-stringLP = do
-  s <- L.stringLiteral
-  return $ EStringL s
+stringLP = EStringL <$> L.stringLiteral
 
 charLP :: Parser Expr
-charLP = do
-  c <- L.charLiteral
-  return $ ECharL c
+charLP = ECharL <$> L.charLiteral
 
 arrayLP :: Parser Expr
 arrayLP = L.brackets
