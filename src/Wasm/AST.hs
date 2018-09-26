@@ -3,7 +3,6 @@ import qualified Data.Binary                   as B
 import qualified Data.ByteString               as BS
 import           Data.Int
 import           Data.Binary.Get
-import qualified Wasm.IndexedList              as IL
 
 data ValueType = I32|I64|F32|F64
 
