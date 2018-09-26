@@ -7,13 +7,13 @@ import qualified Wasm.IndexedList              as IL
 
 data ValueType = I32|I64|F32|F64
 
-data ElemType=AnyFunc
-
-data Type = ValueType ValueType|ElemType ElemType|Func FuncType|BlockType BlockType
-
 type BlockType = Maybe ValueType
 
-type FuncType=(Int,[ValueType],Maybe ValueType)
+data ElemType = AnyFunc
+
+type FuncType = (Int,[ValueType],Maybe ValueType)
+
+data LanguageType = ValueType ValueType|ElemType ElemType|FuncType FuncType|BlockType BlockType
 
 data FuncCmd =
     Unreachable
