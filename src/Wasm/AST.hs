@@ -27,7 +27,43 @@ type ResizableLimits = (Int,Maybe Int)
 
 data InitExpr = InitI32 Int|InitI64 Int|InitF32 Float|InitF64 Float|InitGlobal Int
 
-data FuncCmd =
+type TypeSection = [FuncType]
+
+type ImportEntry = (String ,String ,ExternalKind)
+
+type ImportSection = [ImportEntry]
+
+type FunctionSection = [Int]
+
+type TableSection = [TableType]
+
+type MemorySection = [MemoryType]
+
+type GlobalSection = [GlobalVariable]
+
+type GlobalVariable = (GlobalType,InitExpr)
+
+type ExportSection = [ExportEntry]
+
+type ExportEntry = (String,ExternalKind,Int)
+
+type StartSection = Int
+
+type ElementSection = [ElemSegment]
+
+type ElemSegment = (Int,InitExpr,[Int])
+
+type CodeSection = [FunctionBody]
+
+type FunctionBody = ([LocalEntry],[Code])
+
+type LocalEntry = (Int,ValueType)
+
+type DataSection = [DataSegment]
+
+type DataSegment = (Int,InitExpr,BS.ByteString)
+
+data Code =
     Unreachable
     |Nop
     |Block BlockType
@@ -200,39 +236,3 @@ data FuncCmd =
     |I64ReinterpretF64
     |F32ReinterpretI32
     |F64ReinterpretI64
-
-type TypeSection = [FuncType]
-
-type ImportEntry = (String ,String ,ExternalKind)
-
-type ImportSection = [ImportEntry]
-
-type FunctionSection = [Int]
-
-type TableSection = [TableType]
-
-type MemorySection = [MemoryType]
-
-type GlobalSection = [GlobalVariable]
-
-type GlobalVariable = (GlobalType,InitExpr)
-
-type ExportSection = [ExportEntry]
-
-type ExportEntry = (String,ExternalKind,Int)
-
-type StartSection = Int
-
-type ElementSection = [ElemSegment]
-
-type ElemSegment = (Int,InitExpr,[Int])
-
-type CodeSection = [FunctionBody]
-
-type FunctionBody = ([LocalEntry],[FuncCmd])
-
-type LocalEntry = (Int,ValueType)
-
-type DataSection = [DataSegment]
-
-type DataSegment = (Int,InitExpr,BS.ByteString)
