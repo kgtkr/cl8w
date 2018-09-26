@@ -15,6 +15,18 @@ type FuncType = (Int,[ValueType],Maybe ValueType)
 
 data LanguageType = ValueType ValueType|ElemType ElemType|FuncType FuncType|BlockType BlockType
 
+type GlobalType = (ValueType,Bool)
+
+type TableType = (ElemType,ResizableLimits)
+
+type MemoryType = ResizableLimits
+
+data ExternalKind = EFunction|ETable|EMemory|EGlobal
+
+type ResizableLimits = (Int,Maybe Int)
+
+data InitExpr = InitI32 Int|InitI64 Int|InitF32 Float|InitF64 Float|InitGlobal Int
+
 data FuncCmd =
     Unreachable
     |Nop
@@ -189,72 +201,38 @@ data FuncCmd =
     |F32ReinterpretI32
     |F64ReinterpretI64
 
-type ResizableLimits=(Int,Maybe Int)
+type TypeSection = [FuncType]
 
-type TableType=(ElemType,ResizableLimits)
+type ImportEntry = (String ,String ,ExternalKind)
 
-type MemoryType=ResizableLimits
+type ImportSection = [ImportEntry]
 
-type GlobalType=(ValueType,Bool)
+type FunctionSection = [Int]
 
-data ExternalKind=EFunction|ETable|EMemory|EGlobal
+type TableSection = [TableType]
 
-type Import=(String ,String ,ExternalKind)
+type MemorySection = [MemoryType]
 
-type GlobalVariable=(GlobalType,InitExpr)
+type GlobalSection = [GlobalVariable]
 
-data InitExpr=InitI32 Int|InitI64 Int|InitF32 Float|InitF64 Float|InitGlobal Int
+type GlobalVariable = (GlobalType,InitExpr)
 
-type ExportType=(String,ExternalKind,Int)
+type ExportSection = [ExportEntry]
 
-type FunctionBody=([LocalEntry],[FuncCmd])
+type ExportEntry = (String,ExternalKind,Int)
 
-type LocalEntry=(Int,ValueType)
+type StartSection = Int
 
-type ElemSegment=(Int,Int,[Int])
+type ElementSection = [ElemSegment]
 
-type DataSegment=(Int,InitExpr,BS.ByteString)
+type ElemSegment = (Int,InitExpr,[Int])
 
-data Section=Section{
-    types::IL.IndexedList FuncType,
-    imports::IL.IndexedList Import,
-    funcs::IL.IndexedList Int,
-    tables::IL.IndexedList TableType,
-    memorys::IL.IndexedList MemoryType,
-    globals::IL.IndexedList GlobalVariable,
-    exports::IL.IndexedList ExportType,
-    start::Int,
-    elems::IL.IndexedList ElemSegment,
-    codes::IL.IndexedList FunctionBody,
-    datas::IL.IndexedList DataSegment
-}
+type CodeSection = [FunctionBody]
 
-addTypes :: FuncType -> Section -> Section
-addTypes x s = s { types = (IL.cons x . types) s }
+type FunctionBody = ([LocalEntry],[FuncCmd])
 
-addImports :: Import -> Section -> Section
-addImports x s = s { imports = (IL.cons x . imports) s }
+type LocalEntry = (Int,ValueType)
 
-addFuncs :: Int -> Section -> Section
-addFuncs x s = s { funcs = (IL.cons x . funcs) s }
+type DataSection = [DataSegment]
 
-addTables :: TableType -> Section -> Section
-addTables x s = s { tables = (IL.cons x . tables) s }
-
-addMemorys :: MemoryType -> Section -> Section
-addMemorys x s = s { memorys = (IL.cons x . memorys) s }
-
-addGlobals :: GlobalVariable -> Section -> Section
-addGlobals x s = s { globals = (IL.cons x . globals) s }
-
-addExports :: ExportType -> Section -> Section
-addExports x s = s { exports = (IL.cons x . exports) s }
-
-addElems :: ElemSegment -> Section -> Section
-addElems x s = s { elems = (IL.cons x . elems) s }
-
-addCodes :: FunctionBody -> Section -> Section
-addCodes x s = s { codes = (IL.cons x . codes) s }
-
-addDatas :: DataSegment -> Section -> Section
-addDatas x s = s { datas = (IL.cons x . datas) s }
+type DataSegment = (Int,InitExpr,BS.ByteString)
