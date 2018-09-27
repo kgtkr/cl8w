@@ -157,6 +157,9 @@ instance WasmAST MemorySection where
 instance WasmAST GlobalSection where
 
 instance WasmAST GlobalVariable where
+    putWasmAST (GlobalVariable x y)=do
+        putWasmAST x
+        putWasmAST y
 
 instance WasmAST ExportSection where
 
