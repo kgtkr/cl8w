@@ -42,14 +42,14 @@ class WasmAST a where
     putWasmAST::Putter a
 
 instance WasmAST ValueType where
-    putWasmAST I32 = putVarint7 (-0x01)
-    putWasmAST I64 = putVarint7 (-0x02)
-    putWasmAST F32 = putVarint7 (-0x03)
-    putWasmAST F64 = putVarint7 (-0x04)
+    putWasmAST ValI32 = putVarint7 (-0x01)
+    putWasmAST ValI64 = putVarint7 (-0x02)
+    putWasmAST ValF32 = putVarint7 (-0x03)
+    putWasmAST ValF64 = putVarint7 (-0x04)
 
 instance WasmAST BlockType where
-    putWasmAST (Just x) = putValueType x
-    putWasmAST Nothing  = putVarint7 (-0x40)
+    putWasmAST (BlockType (Just x)) = putWasmAST x
+    putWasmAST (BlockType Nothing)  = putVarint7 (-0x40)
 
 instance WasmAST ElemType where
     putWasmAST AnyFunc = putVarint7 (-0x10)
