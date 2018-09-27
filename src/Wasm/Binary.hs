@@ -257,3 +257,18 @@ instance WasmAST OperatorCode where
         putVaruint1 False
     putWasmAST OpDrop=putUint32 0x1a
     putWasmAST OpSelect=putUint32 0x1b
+    putWasmAST (OpGetLocal x)=do
+        putUint32 0x20
+        putVaruint32 x
+    putWasmAST (OpSetLocal x)=do
+        putUint32 0x21
+        putVaruint32 x
+    putWasmAST (OpTeeLocal x)=do
+        putUint32 0x22
+        putVaruint32 x
+    putWasmAST (OpGetGlobal x)=do
+        putUint32 0x23
+        putVaruint32 x
+    putWasmAST (OpSetGlobal x)=do
+        putUint32 0x24
+        putVaruint32 x
