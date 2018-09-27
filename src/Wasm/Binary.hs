@@ -112,3 +112,9 @@ instance WasmAST ResizableLimits where
     putWasmAST (ResizableLimits x Nothing)=do
         putVaruint1 False
         putVaruint32 x
+
+instance WasmAST ExternalKind where
+    putWasmAST ExFunction=putUint8 0
+    putWasmAST ExTable=putUint8 1
+    putWasmAST ExMemory=putUint8 2
+    putWasmAST ExGlobal=putUint8 3
