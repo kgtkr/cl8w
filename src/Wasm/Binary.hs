@@ -120,3 +120,41 @@ instance WasmAST ExternalKind where
     putWasmAST ExGlobal=putUint8 3
 
 instance WasmAST InitExpr where
+
+instance WasmAST TypeSection where
+
+instance WasmAST ImportEntry where
+
+instance WasmAST ImportSection where
+
+instance WasmAST FunctionSection where
+
+instance WasmAST TableSection where
+
+instance WasmAST MemorySection where
+
+instance WasmAST GlobalSection where
+
+instance WasmAST GlobalVariable where
+
+instance WasmAST ExportSection where
+
+instance WasmAST ExportEntry where
+
+instance WasmAST StartSection where
+
+instance WasmAST ElementSection where
+
+instance WasmAST ElemSegment where
+
+instance WasmAST CodeSection where
+
+instance WasmAST FunctionBody where
+
+instance WasmAST LocalEntry where
+
+instance WasmAST DataSection where
+
+instance WasmAST DataSegment where
+
+instance WasmAST OperatorCode where
