@@ -164,6 +164,10 @@ instance WasmAST GlobalVariable where
 instance WasmAST ExportSection where
 
 instance WasmAST ExportEntry where
+    putWasmAST (ExportEntry x y z)=do
+        putString x
+        putWasmAST y
+        putVaruint32 z
 
 instance WasmAST StartSection where
 
