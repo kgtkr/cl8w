@@ -1,5 +1,3 @@
-{-# LANGUAGE DefaultSignatures #-}
-
 module Wasm.Binary where
 
 import           Wasm.AST
@@ -67,14 +65,11 @@ putString = (putBytes . BSU.fromString)
 class WasmAST a where
     putWasmAST::Putter a
 
-    default putWasmAST::(WasmSectionAST a)=>Putter a
-    putWasmAST x=do
-        putVaruint7 $ sectionID x
-        putBytes $ runPut (sectionBody x)
 
-class WasmSectionAST a where
-    sectionID::a->Int
-    sectionBody::Putter a
+putSction :: Int -> Put -> Put
+putSction id body = do
+    putVaruint7 $ id
+    putBytes $ runPut body
 
 instance WasmAST ValueType where
     putWasmAST ValI32 = putVarint7 (-0x01)
@@ -136,7 +131,7 @@ instance WasmAST ExternalKind where
 instance WasmAST InitExpr where
     putWasmAST=undefined
 instance WasmAST TypeSection where
-    putWasmAST=undefined
+    putWasmAST (TypeSection x)=putSction 1 (putArrayAST x)
 instance WasmAST ExternalKindImport where
     putWasmAST (ExImFunction x)=do
         putUint8 0
@@ -161,22 +156,28 @@ instance WasmAST ImportEntry where
         putWasmAST z
 
 instance WasmAST ImportSection where
-    putWasmAST=undefined
+    putWasmAST (ImportSection x)=putSction 2 (putArrayAST x)
+
 instance WasmAST FunctionSection where
-    putWasmAST=undefined
+    putWasmAST (FunctionSection x)=putSction 3 (putArray putVaruint32 x)
+
 instance WasmAST TableSection where
-    putWasmAST=undefined
+    putWasmAST (TableSection x)=putSction 4 (putArrayAST x)
+
 instance WasmAST MemorySection where
-    putWasmAST=undefined
+    putWasmAST (MemorySection x)=putSction 5 (putArrayAST x)
+
 instance WasmAST GlobalSection where
-    putWasmAST=undefined
+    putWasmAST (GlobalSection x)=putSction 6 (putArrayAST x)
+
 instance WasmAST GlobalVariable where
     putWasmAST (GlobalVariable x y)=do
         putWasmAST x
         putWasmAST y
 
 instance WasmAST ExportSection where
-    putWasmAST=undefined
+    putWasmAST (ExportSection x)=putSction 7 (putArrayAST x)
+
 instance WasmAST ExportEntry where
     putWasmAST (ExportEntry x y z)=do
         putString x
@@ -184,9 +185,11 @@ instance WasmAST ExportEntry where
         putVaruint32 z
 
 instance WasmAST StartSection where
-    putWasmAST=undefined
+    putWasmAST (StartSection x)=putSction 8 (putVaruint32 x)
+
 instance WasmAST ElementSection where
-    putWasmAST=undefined
+    putWasmAST (ElementSection x)=putSction 9 (putArrayAST x)
+
 instance WasmAST ElemSegment where
     putWasmAST (ElemSegment x y)=do
         putVaruint32 0
@@ -194,7 +197,8 @@ instance WasmAST ElemSegment where
         putArray putVaruint32 y
 
 instance WasmAST CodeSection where
-    putWasmAST=undefined
+    putWasmAST (CodeSection x)=putSction 10 (putArrayAST x)
+
 instance WasmAST FunctionBody where
     putWasmAST (FunctionBody x y)=do
         let body=runPut $ do
@@ -210,7 +214,8 @@ instance WasmAST LocalEntry where
         putWasmAST y
 
 instance WasmAST DataSection where
-    putWasmAST=undefined
+    putWasmAST (DataSection x)=putSction 11 (putArrayAST x)
+
 instance WasmAST DataSegment where
     putWasmAST (DataSegment x y)=do
         putVaruint32 0
