@@ -133,7 +133,11 @@ instance WasmAST ExternalKind where
     putWasmAST ExGlobal=putUint8 3
 
 instance WasmAST InitExpr where
-    putWasmAST=undefined
+    putWasmAST (InitI32 x)=putWasmAST (OpI32Const x)
+    putWasmAST (InitI64 x)=putWasmAST (OpI64Const x)
+    putWasmAST (InitF32 x)=putWasmAST (OpF32Const x)
+    putWasmAST (InitF64 x)=putWasmAST (OpF64Const x)
+    putWasmAST (InitGlobal x)=putWasmAST (OpGetGlobal x)
 instance WasmAST TypeSection where
     putWasmAST (TypeSection x)=putSction 1 (putArrayAST x)
 instance WasmAST ExternalKindImport where
