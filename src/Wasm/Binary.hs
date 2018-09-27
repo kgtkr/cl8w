@@ -255,3 +255,5 @@ instance WasmAST OperatorCode where
         putUint32 0x11
         putVaruint32 x
         putVaruint1 False
+    putWasmAST OpDrop=putUint32 0x1a
+    putWasmAST OpSelect=putUint32 0x1b
