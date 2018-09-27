@@ -482,3 +482,7 @@ instance WasmAST OperatorCode where
     putWasmAST OpF64ConvertsI64=putUint32 0xb9
     putWasmAST OpF64ConvertuI64=putUint32 0xba
     putWasmAST OpF64PromoteF32=putUint32 0xbb
+    putWasmAST OpI32ReinterpretF32=putUint32 0xbc
+    putWasmAST OpI64ReinterpretF64=putUint32 0xbd
+    putWasmAST OpF32ReinterpretI32=putUint32 0xbe
+    putWasmAST OpF64ReinterpretI64=putUint32 0xbf
