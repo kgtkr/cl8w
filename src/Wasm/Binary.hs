@@ -71,6 +71,10 @@ putSction id body = do
     putVaruint7 $ id
     putBytes $ runPut body
 
+putMaybe :: (WasmAST a) => Maybe a -> Put
+putMaybe Nothing  = return ()
+putMaybe (Just x) = putWasmAST x
+
 instance WasmAST ValueType where
     putWasmAST ValI32 = putVarint7 (-0x01)
     putWasmAST ValI64 = putVarint7 (-0x02)
