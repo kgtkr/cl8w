@@ -124,6 +124,10 @@ instance WasmAST InitExpr where
 instance WasmAST TypeSection where
 
 instance WasmAST ImportEntry where
+    putWasmAST (ImportEntry x y z)=do
+        putString x
+        putString y
+        putWasmAST z
 
 instance WasmAST ImportSection where
 

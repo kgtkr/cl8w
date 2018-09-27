@@ -46,7 +46,7 @@ data  ExportEntry = ExportEntry String ExternalKind Int
 
 data StartSection =  StartSection Int
 
-data  ElementSection = ElementSection [ElemSegment]
+data ElementSection = ElementSection [ElemSegment]
 
 data ElemSegment = ElemSegment Int InitExpr [Int]
 
