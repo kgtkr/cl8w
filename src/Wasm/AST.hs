@@ -60,7 +60,7 @@ data LocalEntry = LocalEntry Int ValueType
 
 data DataSection = DataSection [DataSegment]
 
-data DataSegment = DataSegment Int InitExpr BS.ByteString
+data DataSegment = DataSegment InitExpr BS.ByteString
 
 data OperatorCode =
     OpUnreachable
