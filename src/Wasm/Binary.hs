@@ -37,3 +37,20 @@ putVarint32 x = serialize (fromIntegral x :: VarInt Int32)
 
 putVarint64 :: Putter Int
 putVarint64 x = serialize (fromIntegral x :: VarInt Int64)
+
+class WasmAST a where
+    putWasmAST::Putter a
+
+putValueType :: Putter ValueType
+putValueType I32 = putVarint7 (-0x01)
+putValueType I64 = putVarint7 (-0x02)
+putValueType F32 = putVarint7 (-0x03)
+putValueType F64 = putVarint7 (-0x04)
+
+putBlockType :: Putter BlockType
+putBlockType (Just x) = putValueType x
+putBlockType Nothing  = putVarint7 (-0x40)
+
+putElemType :: Putter ElemType
+putElemType AnyFunc = putVarint7 (-0x10)
+
