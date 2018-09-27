@@ -44,8 +44,8 @@ putFloat32 = putFloat32le
 putFloat64 :: Putter Double
 putFloat64 = putFloat64le
 
-putList :: (WasmAST a) => [a] -> Put
-putList x = do
+putArray :: (WasmAST a) => [a] -> Put
+putArray x = do
     putVaruint32 $ length x
     mapM_ putWasmAST x
 
