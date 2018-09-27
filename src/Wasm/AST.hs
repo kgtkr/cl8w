@@ -72,7 +72,7 @@ data OperatorCode =
     |OpEnd
     |OpBr Int
     |OpBrIf Int
-    |OpBrTable Int [Int] Int
+    |OpBrTable [Int] Int
     |OpReturn
     |OpCall Int
     |OpCallIndirect Int Int

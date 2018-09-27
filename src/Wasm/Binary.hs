@@ -224,4 +224,27 @@ instance WasmAST DataSegment where
 
 
 instance WasmAST OperatorCode where
-    putWasmAST=undefined
+    putWasmAST OpUnreachable=putUint32 0x00
+    putWasmAST OpNop=putUint32 0x01
+    putWasmAST (OpBlock x)=do
+        putUint32 0x02
+        putWasmAST x
+    putWasmAST (OpLoop x)=do
+        putUint32 0x03
+        putWasmAST x
+    putWasmAST (OpIf x)=do
+        putUint32 0x04
+        putWasmAST x
+    putWasmAST OpElse=putUint32 0x05
+    putWasmAST OpEnd=putUint32 0x0b
+    putWasmAST (OpBr x)=do
+        putUint32 0x0c
+        putVaruint32 x
+    putWasmAST (OpBrIf x)=do
+        putUint32 0x0d
+        putVaruint32 x
+    putWasmAST (OpBrTable x y)=do
+        putUint32 0x0e
+        putArray putVaruint32 x
+        putVaruint32 y
+    putWasmAST OpReturn=putUint32 0x0f
