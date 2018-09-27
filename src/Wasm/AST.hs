@@ -6,7 +6,7 @@ data ValueType = ValI32|ValI64|ValF32|ValF64
 
 data BlockType = BlockType (Maybe ValueType)
 
-data ElemType = AnyFunc
+data ElemType = ElAnyFunc
 
 data FuncType = FuncType Int [ValueType] (Maybe ValueType)
 

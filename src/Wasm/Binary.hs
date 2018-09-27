@@ -52,5 +52,5 @@ instance WasmAST BlockType where
     putWasmAST (BlockType Nothing)  = putVarint7 (-0x40)
 
 instance WasmAST ElemType where
-    putWasmAST AnyFunc = putVarint7 (-0x10)
+    putWasmAST ElAnyFunc = putVarint7 (-0x10)
 
