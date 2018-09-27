@@ -248,3 +248,10 @@ instance WasmAST OperatorCode where
         putArray putVaruint32 x
         putVaruint32 y
     putWasmAST OpReturn=putUint32 0x0f
+    putWasmAST (OpCall x)=do
+        putUint32 0x10
+        putVaruint32 x
+    putWasmAST (OpCallIndirect x)=do
+        putUint32 0x11
+        putVaruint32 x
+        putVaruint1 False

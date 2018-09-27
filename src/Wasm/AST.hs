@@ -75,7 +75,7 @@ data OperatorCode =
     |OpBrTable [Int] Int
     |OpReturn
     |OpCall Int
-    |OpCallIndirect Int Int
+    |OpCallIndirect Int
     |OpDrop
     |OpSelect
     |OpGetLocal Int
