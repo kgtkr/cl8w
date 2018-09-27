@@ -1,3 +1,5 @@
+{-# LANGUAGE DefaultSignatures #-}
+
 module Wasm.Binary where
 
 import           Wasm.AST
@@ -65,6 +67,15 @@ putString = (putBytes . BSU.fromString)
 class WasmAST a where
     putWasmAST::Putter a
 
+    default putWasmAST::(WasmSectionAST a)=>Putter a
+    putWasmAST x=do
+        putVaruint7 $ sectionID x
+        putBytes $ runPut (sectionBody x)
+
+class WasmSectionAST a where
+    sectionID::a->Int
+    sectionBody::Putter a
+
 instance WasmAST ValueType where
     putWasmAST ValI32 = putVarint7 (-0x01)
     putWasmAST ValI64 = putVarint7 (-0x02)
@@ -123,9 +134,9 @@ instance WasmAST ExternalKind where
     putWasmAST ExGlobal=putUint8 3
 
 instance WasmAST InitExpr where
-
+    putWasmAST=undefined
 instance WasmAST TypeSection where
-
+    putWasmAST=undefined
 instance WasmAST ExternalKindImport where
     putWasmAST (ExImFunction x)=do
         putUint8 0
@@ -150,22 +161,22 @@ instance WasmAST ImportEntry where
         putWasmAST z
 
 instance WasmAST ImportSection where
-
+    putWasmAST=undefined
 instance WasmAST FunctionSection where
-
+    putWasmAST=undefined
 instance WasmAST TableSection where
-
+    putWasmAST=undefined
 instance WasmAST MemorySection where
-
+    putWasmAST=undefined
 instance WasmAST GlobalSection where
-
+    putWasmAST=undefined
 instance WasmAST GlobalVariable where
     putWasmAST (GlobalVariable x y)=do
         putWasmAST x
         putWasmAST y
 
 instance WasmAST ExportSection where
-
+    putWasmAST=undefined
 instance WasmAST ExportEntry where
     putWasmAST (ExportEntry x y z)=do
         putString x
@@ -173,9 +184,9 @@ instance WasmAST ExportEntry where
         putVaruint32 z
 
 instance WasmAST StartSection where
-
+    putWasmAST=undefined
 instance WasmAST ElementSection where
-
+    putWasmAST=undefined
 instance WasmAST ElemSegment where
     putWasmAST (ElemSegment x y)=do
         putVaruint32 0
@@ -183,7 +194,7 @@ instance WasmAST ElemSegment where
         putArray putVaruint32 y
 
 instance WasmAST CodeSection where
-
+    putWasmAST=undefined
 instance WasmAST FunctionBody where
     putWasmAST (FunctionBody x y)=do
         let body=runPut $ do
@@ -199,7 +210,7 @@ instance WasmAST LocalEntry where
         putWasmAST y
 
 instance WasmAST DataSection where
-
+    putWasmAST=undefined
 instance WasmAST DataSegment where
     putWasmAST (DataSegment x y)=do
         putVaruint32 0
@@ -208,3 +219,4 @@ instance WasmAST DataSegment where
 
 
 instance WasmAST OperatorCode where
+    putWasmAST=undefined
