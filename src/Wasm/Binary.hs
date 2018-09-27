@@ -351,3 +351,15 @@ instance WasmAST OperatorCode where
     putWasmAST OpGrowMemory=do
         putUint32 0x40
         putVaruint1 False
+    putWasmAST (OpI32Const x)=do
+        putUint32 0x41
+        putVarint32 x
+    putWasmAST (OpI64Const x)=do
+        putUint32 0x42
+        putVarint64 x
+    putWasmAST (OpF32Const x)=do
+        putUint32 0x43
+        putFloat32 x
+    putWasmAST (OpF64Const x)=do
+        putUint32 0x44
+        putFloat64 x
