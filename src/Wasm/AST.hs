@@ -52,7 +52,7 @@ type ElemSegment = (Int,InitExpr,[Int])
 
 type CodeSection = [FunctionBody]
 
-type FunctionBody = ([LocalEntry],[Code])
+type FunctionBody = ([LocalEntry],[OperatorCode])
 
 type LocalEntry = (Int,ValueType)
 
@@ -60,7 +60,7 @@ type DataSection = [DataSegment]
 
 type DataSegment = (Int,InitExpr,BS.ByteString)
 
-data Code =
+data OperatorCode =
     Unreachable
     |Nop
     |Block BlockType
