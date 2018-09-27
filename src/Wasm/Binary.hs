@@ -76,21 +76,21 @@ putMaybe Nothing  = return ()
 putMaybe (Just x) = putWasmAST x
 
 instance WasmAST ValueType where
-    putWasmAST ValI32 = putVarint7 (-0x01)
-    putWasmAST ValI64 = putVarint7 (-0x02)
-    putWasmAST ValF32 = putVarint7 (-0x03)
-    putWasmAST ValF64 = putVarint7 (-0x04)
+    putWasmAST ValI32 = putVarint7 0x7f
+    putWasmAST ValI64 = putVarint7 0x7e
+    putWasmAST ValF32 = putVarint7 0x7d
+    putWasmAST ValF64 = putVarint7 0x7c
 
 instance WasmAST BlockType where
     putWasmAST (BlockType (Just x)) = putWasmAST x
-    putWasmAST (BlockType Nothing)  = putVarint7 (-0x40)
+    putWasmAST (BlockType Nothing)  = putVarint7 0x40
 
 instance WasmAST ElemType where
-    putWasmAST ElAnyFunc = putVarint7 (-0x10)
+    putWasmAST ElAnyFunc = putVarint7 0x7c
 
 instance WasmAST FuncType where
     putWasmAST (FuncType p r) = do
-        putVarint7 (-0x20)
+        putVarint7 0x60
         putArrayAST p
         case r of
             Just r->do
