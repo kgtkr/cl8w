@@ -238,7 +238,7 @@ data OperatorCode =
     |OpF32ReinterpretI32
     |OpF64ReinterpretI64
 
-data ASTRoot = ASTRoot
+data WasmASTRoot = WasmASTRoot
                 (Maybe TypeSection)
                 (Maybe ImportSection)
                 (Maybe FunctionSection)
