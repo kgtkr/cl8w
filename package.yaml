@@ -26,6 +26,7 @@ dependencies:
 - cereal
 - bytestring
 - bytes
+- utf8-string
 
 library:
   source-dirs: src
