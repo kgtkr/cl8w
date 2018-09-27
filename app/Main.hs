@@ -19,8 +19,6 @@ ast = WasmASTRoot
     Nothing
 
 main = do
-    (print . BS.length . runPut . putArrayAST)
-        [FunctionBody [] [OpGetLocal 0, OpI32Const 1, OpI32Add]]
     let bin = runPut $ putWasmAST ast
     BS.writeFile "test.wasm" bin
     return ()
