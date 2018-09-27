@@ -75,3 +75,12 @@ instance WasmAST BlockType where
 instance WasmAST ElemType where
     putWasmAST ElAnyFunc = putVarint7 (-0x10)
 
+instance WasmAST FuncType where
+    putWasmAST (FuncType p r) = do
+        putVarint7 (-0x20)
+        putArray p
+        case r of
+            Just r->do
+                putVaruint1 True
+                putWasmAST r
+            Nothing->putVaruint1 False

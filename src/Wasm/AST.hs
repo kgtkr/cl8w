@@ -8,7 +8,7 @@ data BlockType = BlockType (Maybe ValueType)
 
 data ElemType = ElAnyFunc
 
-data FuncType = FuncType Int [ValueType] (Maybe ValueType)
+data FuncType = FuncType [ValueType] (Maybe ValueType)
 
 data LanguageType = LangValueType ValueType|LangElemType ElemType|LangFuncType FuncType|LangBlockType BlockType
 
