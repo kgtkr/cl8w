@@ -201,5 +201,10 @@ instance WasmAST LocalEntry where
 instance WasmAST DataSection where
 
 instance WasmAST DataSegment where
+    putWasmAST (DataSegment x y)=do
+        putVaruint32 0
+        putWasmAST x
+        putBytes y
+
 
 instance WasmAST OperatorCode where
