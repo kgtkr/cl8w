@@ -185,6 +185,13 @@ instance WasmAST ElemSegment where
 instance WasmAST CodeSection where
 
 instance WasmAST FunctionBody where
+    putWasmAST (FunctionBody x y)=do
+        let body=runPut $ do
+                    putArrayAST x
+                    mapM_ putWasmAST y
+                    putWasmAST OpEnd
+        putBytes body
+
 
 instance WasmAST LocalEntry where
 
