@@ -62,6 +62,8 @@ data DataSection = DataSection [DataSegment]
 
 data DataSegment = DataSegment InitExpr BS.ByteString
 
+data MemoryImmediate = MemoryImmediate Int Int
+
 data OperatorCode =
     OpUnreachable
     |OpNop
@@ -83,31 +85,31 @@ data OperatorCode =
     |OpTeeLocal Int
     |OpGetGlobal Int
     |OpSetGlobal Int
-    |OpI32Load Int Int
-    |OpI64Load Int Int
-    |OpF32Load Int Int
-    |OpF64Load Int Int
-    |OpI32Load8s Int Int
-    |OpI32Load8u Int Int
-    |OpI32Load16s Int Int
-    |OpI32Load16u Int Int
-    |OpI64Load8s Int Int
-    |OpI64Load8u Int Int
-    |OpI64Load16s Int Int
-    |OpI64Load16u Int Int
-    |OpI64Load32s Int Int
-    |OpI64Load32u Int Int
-    |OpI32Store Int Int
-    |OpI64Store Int Int
-    |OpF32Store Int Int
-    |OpF64Store Int Int
-    |OpI32Store8 Int Int
-    |OpI32Store16 Int Int
-    |OpI64Store8 Int Int
-    |OpI64Store16 Int Int
-    |OpI64Store32 Int Int
-    |OpCurrentMemory Int
-    |OpGrowMemory Int
+    |OpI32Load MemoryImmediate
+    |OpI64Load MemoryImmediate
+    |OpF32Load MemoryImmediate
+    |OpF64Load MemoryImmediate
+    |OpI32Load8s MemoryImmediate
+    |OpI32Load8u MemoryImmediate
+    |OpI32Load16s MemoryImmediate
+    |OpI32Load16u MemoryImmediate
+    |OpI64Load8s MemoryImmediate
+    |OpI64Load8u MemoryImmediate
+    |OpI64Load16s MemoryImmediate
+    |OpI64Load16u MemoryImmediate
+    |OpI64Load32s MemoryImmediate
+    |OpI64Load32u MemoryImmediate
+    |OpI32Store MemoryImmediate
+    |OpI64Store MemoryImmediate
+    |OpF32Store MemoryImmediate
+    |OpF64Store MemoryImmediate
+    |OpI32Store8 MemoryImmediate
+    |OpI32Store16 MemoryImmediate
+    |OpI64Store8 MemoryImmediate
+    |OpI64Store16 MemoryImmediate
+    |OpI64Store32 MemoryImmediate
+    |OpCurrentMemory
+    |OpGrowMemory
     |OpI32Const Int
     |OpI64Const Int
     |OpF32Const Float

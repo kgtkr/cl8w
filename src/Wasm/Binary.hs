@@ -222,6 +222,10 @@ instance WasmAST DataSegment where
         putWasmAST x
         putBytes y
 
+instance WasmAST MemoryImmediate where
+    putWasmAST (MemoryImmediate x y)=do
+        putVaruint32 x
+        putVaruint32 y
 
 instance WasmAST OperatorCode where
     putWasmAST OpUnreachable=putUint32 0x00
