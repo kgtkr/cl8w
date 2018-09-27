@@ -118,3 +118,5 @@ instance WasmAST ExternalKind where
     putWasmAST ExTable=putUint8 1
     putWasmAST ExMemory=putUint8 2
     putWasmAST ExGlobal=putUint8 3
+
+instance WasmAST InitExpr where
