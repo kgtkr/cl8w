@@ -363,3 +363,37 @@ instance WasmAST OperatorCode where
     putWasmAST (OpF64Const x)=do
         putUint32 0x44
         putFloat64 x
+    putWasmAST OpI32Eqz=putUint32 0x45
+    putWasmAST OpI32Eq=putUint32 0x46
+    putWasmAST OpI32Ne=putUint32 0x47
+    putWasmAST OpI32Lts=putUint32 0x48
+    putWasmAST OpI32Ltu=putUint32 0x49
+    putWasmAST OpI32Gts=putUint32 0x4a
+    putWasmAST OpI32Gtu=putUint32 0x4b
+    putWasmAST OpI32Les=putUint32 0x4c
+    putWasmAST OpI32Leu=putUint32 0x4d
+    putWasmAST OpI32Ges=putUint32 0x4e
+    putWasmAST OpI32Geu=putUint32 0x4f
+    putWasmAST OpI64Eqz=putUint32 0x50
+    putWasmAST OpI64Eq=putUint32 0x51
+    putWasmAST OpI64Ne=putUint32 0x52
+    putWasmAST OpI64Lts=putUint32 0x53
+    putWasmAST OpI64Ltu=putUint32 0x54
+    putWasmAST OpI64Gts=putUint32 0x55
+    putWasmAST OpI64Gtu=putUint32 0x56
+    putWasmAST OpI64Les=putUint32 0x57
+    putWasmAST OpI64Leu=putUint32 0x58
+    putWasmAST OpI64Ges=putUint32 0x59
+    putWasmAST OpI64Geu=putUint32 0x5a
+    putWasmAST OpF32Eq=putUint32 0x5b
+    putWasmAST OpF32Ne=putUint32 0x5c
+    putWasmAST OpF32Lt=putUint32 0x5d
+    putWasmAST OpF32Gt=putUint32 0x5e
+    putWasmAST OpF32Le=putUint32 0x5f
+    putWasmAST OpF32Ge=putUint32 0x60
+    putWasmAST OpF64Eq=putUint32 0x61
+    putWasmAST OpF64Ne=putUint32 0x62
+    putWasmAST OpF64Lt=putUint32 0x63
+    putWasmAST OpF64Gt=putUint32 0x64
+    putWasmAST OpF64Le=putUint32 0x65
+    putWasmAST OpF64Ge=putUint32 0x66
