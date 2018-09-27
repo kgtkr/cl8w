@@ -123,6 +123,23 @@ instance WasmAST InitExpr where
 
 instance WasmAST TypeSection where
 
+instance WasmAST ExternalKindImport where
+    putWasmAST (ExImFunction x)=do
+        putUint8 0
+        putVaruint32 x
+
+    putWasmAST (ExImExTable x)=do
+        putUint8 1
+        putWasmAST x
+
+    putWasmAST (ExImExMemory x)=do
+        putUint8 2
+        putWasmAST x
+
+    putWasmAST (ExImExGlobal x)=do
+        putUint8 3
+        putWasmAST x
+
 instance WasmAST ImportEntry where
     putWasmAST (ImportEntry x y z)=do
         putString x
