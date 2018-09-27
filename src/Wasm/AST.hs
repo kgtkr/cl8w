@@ -237,3 +237,16 @@ data OperatorCode =
     |OpI64ReinterpretF64
     |OpF32ReinterpretI32
     |OpF64ReinterpretI64
+
+data ASTRoot = ASTRoot
+                (Maybe TypeSection)
+                (Maybe ImportSection)
+                (Maybe FunctionSection)
+                (Maybe TableSection)
+                (Maybe MemorySection)
+                (Maybe GlobalSection)
+                (Maybe ExportSection)
+                (Maybe StartSection)
+                (Maybe ElementSection)
+                (Maybe CodeSection)
+                (Maybe DataSection)
