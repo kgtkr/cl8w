@@ -90,3 +90,8 @@ instance WasmAST LanguageType where
     putWasmAST (LangElemType x)=putWasmAST x
     putWasmAST (LangFuncType x)=putWasmAST x
     putWasmAST (LangBlockType x)=putWasmAST x
+
+instance WasmAST GlobalType where
+    putWasmAST (GlobalType x y)=do
+        putWasmAST x
+        putVaruint1 y
