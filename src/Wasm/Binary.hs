@@ -490,3 +490,20 @@ instance WasmAST OperatorCode where
     putWasmAST OpI64ReinterpretF64=putUint32 0xbd
     putWasmAST OpF32ReinterpretI32=putUint32 0xbe
     putWasmAST OpF64ReinterpretI64=putUint32 0xbf
+
+instance WasmAST WasmASTRoot where
+    putWasmAST (WasmASTRoot a b c d e f g h i j k)=do
+        putUint32 0x6d736100
+        putUint32 0x1
+        putMaybe a
+        putMaybe b
+        putMaybe c
+        putMaybe d
+        putMaybe e
+        putMaybe f
+        putMaybe g
+        putMaybe h
+        putMaybe i
+        putMaybe j
+        putMaybe k
+
