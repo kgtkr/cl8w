@@ -101,6 +101,9 @@ instance WasmAST TableType where
         putWasmAST x
         putWasmAST y
 
+instance WasmAST MemoryType where
+    putWasmAST (MemoryType x)=putWasmAST x
+
 instance WasmAST ResizableLimits where
     putWasmAST (ResizableLimits x (Just y))=do
         putVaruint1 True
