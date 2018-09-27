@@ -22,7 +22,7 @@ data ExternalKind = ExFunction|ExTable|ExMemory|ExGlobal
 
 data ResizableLimits = ResizableLimits Int (Maybe Int)
 
-data InitExpr = InitI32 Int|InitI64 Int|InitF32 Float|InitF64 Float|InitGlobal Int
+data InitExpr = InitI32 Int|InitI64 Int|InitF32 Float|InitF64 Double|InitGlobal Int
 
 data TypeSection = TypeSection [FuncType]
 
@@ -109,7 +109,7 @@ data OperatorCode =
     |OpI32Const Int
     |OpI64Const Int
     |OpF32Const Float
-    |OpF64Const Float
+    |OpF64Const Double
     |OpI32Eqz
     |OpI32Eq
     |OpI32Ne

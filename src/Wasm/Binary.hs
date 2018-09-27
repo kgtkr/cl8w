@@ -38,6 +38,17 @@ putVarint32 x = serialize (fromIntegral x :: VarInt Int32)
 putVarint64 :: Putter Int
 putVarint64 x = serialize (fromIntegral x :: VarInt Int64)
 
+putFloat32 :: Putter Float
+putFloat32 = putFloat32le
+
+putFloat64 :: Putter Double
+putFloat64 = putFloat64le
+
+putList :: (WasmAST a) => [a] -> Put
+putList x = do
+    putVaruint32 $ length x
+    mapM_ putWasmAST x
+
 class WasmAST a where
     putWasmAST::Putter a
 
