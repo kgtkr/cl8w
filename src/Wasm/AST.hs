@@ -20,13 +20,15 @@ data MemoryType = MemoryType ResizableLimits
 
 data ExternalKind = ExFunction|ExTable|ExMemory|ExGlobal
 
+data ExternalKindImport = ExImFunction Int|ExImExTable TableType|ExImExMemory MemoryType|ExImExGlobal GlobalType
+
 data ResizableLimits = ResizableLimits Int (Maybe Int)
 
 data InitExpr = InitI32 Int|InitI64 Int|InitF32 Float|InitF64 Double|InitGlobal Int
 
 data TypeSection = TypeSection [FuncType]
 
-data ImportEntry = ImportEntry String String ExternalKind
+data ImportEntry = ImportEntry String String ExternalKindImport
 
 data ImportSection = ImportSection [ImportEntry]
 
