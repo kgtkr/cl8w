@@ -95,3 +95,12 @@ instance WasmAST GlobalType where
     putWasmAST (GlobalType x y)=do
         putWasmAST x
         putVaruint1 y
+
+instance WasmAST ResizableLimits where
+    putWasmAST (ResizableLimits x (Just y))=do
+        putVaruint1 True
+        putVaruint32 x
+        putVaruint32 y
+    putWasmAST (ResizableLimits x Nothing)=do
+        putVaruint1 False
+        putVaruint32 x
