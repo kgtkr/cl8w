@@ -9,6 +9,7 @@ import           Data.Serialize
 import           Data.Bytes.VarInt
 import qualified Data.Bytes.Put                as P
 import           Data.Bytes.Serial              ( serialize )
+import qualified Data.ByteString               as BS
 
 putUint8 :: Putter Int
 putUint8 = putWord8 . fromIntegral
@@ -49,6 +50,10 @@ putArray x = do
     putVaruint32 $ length x
     mapM_ putWasmAST x
 
+putBytes :: Putter BS.ByteString
+putBytes x = do
+    putVaruint32 $ BS.length x
+    putByteString x
 class WasmAST a where
     putWasmAST::Putter a
 
