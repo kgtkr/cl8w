@@ -194,6 +194,9 @@ instance WasmAST FunctionBody where
 
 
 instance WasmAST LocalEntry where
+    putWasmAST (LocalEntry x y)=do
+        putVaruint32 x
+        putWasmAST y
 
 instance WasmAST DataSection where
 
