@@ -68,7 +68,7 @@ class WasmAST a where
 
 putSction :: Int -> Put -> Put
 putSction id body = do
-    putVaruint7 $ id
+    putVaruint32 $ id
     putBytes $ runPut body
 
 putMaybe :: (WasmAST a) => Maybe a -> Put
