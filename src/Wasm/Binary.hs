@@ -84,3 +84,9 @@ instance WasmAST FuncType where
                 putVaruint1 True
                 putWasmAST r
             Nothing->putVaruint1 False
+
+instance WasmAST LanguageType where
+    putWasmAST (LangValueType x)=putWasmAST x
+    putWasmAST (LangElemType x)=putWasmAST x
+    putWasmAST (LangFuncType x)=putWasmAST x
+    putWasmAST (LangBlockType x)=putWasmAST x
