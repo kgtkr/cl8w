@@ -2,234 +2,234 @@ module Wasm.AST where
 import qualified Data.ByteString               as BS
 import           Data.Int
 
-data ValueType = I32|I64|F32|F64
+data ValueType = ValI32|ValI64|ValF32|ValF64
 
-type BlockType = Maybe ValueType
+data BlockType = BlockType (Maybe ValueType)
 
 data ElemType = AnyFunc
 
-type FuncType = (Int,[ValueType],Maybe ValueType)
+data FuncType = FuncType Int [ValueType] (Maybe ValueType)
 
-data LanguageType = ValueType ValueType|ElemType ElemType|FuncType FuncType|BlockType BlockType
+data LanguageType = LangValueType ValueType|LangElemType ElemType|LangFuncType FuncType|LangBlockType BlockType
 
-type GlobalType = (ValueType,Bool)
+data GlobalType = GlobalType ValueType Bool
 
-type TableType = (ElemType,ResizableLimits)
+data TableType = TableType ElemType ResizableLimits
 
-type MemoryType = ResizableLimits
+data MemoryType = MemoryType ResizableLimits
 
-data ExternalKind = EFunction|ETable|EMemory|EGlobal
+data ExternalKind = ExFunction|ExTable|ExMemory|ExGlobal
 
-type ResizableLimits = (Int,Maybe Int)
+data ResizableLimits = ResizableLimits Int (Maybe Int)
 
 data InitExpr = InitI32 Int|InitI64 Int|InitF32 Float|InitF64 Float|InitGlobal Int
 
-type TypeSection = [FuncType]
+data TypeSection = TypeSection [FuncType]
 
-type ImportEntry = (String ,String ,ExternalKind)
+data ImportEntry = ImportEntry String String ExternalKind
 
-type ImportSection = [ImportEntry]
+data ImportSection = ImportSection [ImportEntry]
 
-type FunctionSection = [Int]
+data FunctionSection = FunctionSection [Int]
 
-type TableSection = [TableType]
+data TableSection = TableSection [TableType]
 
-type MemorySection = [MemoryType]
+data MemorySection = MemorySection [MemoryType]
 
-type GlobalSection = [GlobalVariable]
+data GlobalSection = GlobalSection [GlobalVariable]
 
-type GlobalVariable = (GlobalType,InitExpr)
+data GlobalVariable = GlobalVariable GlobalType InitExpr
 
-type ExportSection = [ExportEntry]
+data ExportSection = ExportSection [ExportEntry]
 
-type ExportEntry = (String,ExternalKind,Int)
+data  ExportEntry = ExportEntry String ExternalKind Int
 
-type StartSection = Int
+data StartSection =  StartSection Int
 
-type ElementSection = [ElemSegment]
+data  ElementSection = ElementSection [ElemSegment]
 
-type ElemSegment = (Int,InitExpr,[Int])
+data ElemSegment = ElemSegment Int InitExpr [Int]
 
-type CodeSection = [FunctionBody]
+data CodeSection = CodeSection [FunctionBody]
 
-type FunctionBody = ([LocalEntry],[OperatorCode])
+data FunctionBody = FunctionBody [LocalEntry] [OperatorCode]
 
-type LocalEntry = (Int,ValueType)
+data LocalEntry = LocalEntry Int ValueType
 
-type DataSection = [DataSegment]
+data DataSection = DataSection [DataSegment]
 
-type DataSegment = (Int,InitExpr,BS.ByteString)
+data DataSegment = DataSegment Int InitExpr BS.ByteString
 
 data OperatorCode =
-    Unreachable
-    |Nop
-    |Block BlockType
-    |Loop BlockType
-    |If BlockType
-    |Else
-    |End
-    |Br Int
-    |BrIf Int
-    |BrTable Int [Int] Int
-    |Return
-    |Call Int
-    |CallIndirect Int Int
-    |Drop
-    |Select
-    |GetLocal Int
-    |SetLocal Int
-    |TeeLocal Int
-    |GetGlobal Int
-    |SetGlobal Int
-    |I32Load Int Int
-    |I64Load Int Int
-    |F32Load Int Int
-    |F64Load Int Int
-    |I32Load8s Int Int
-    |I32Load8u Int Int
-    |I32Load16s Int Int
-    |I32Load16u Int Int
-    |I64Load8s Int Int
-    |I64Load8u Int Int
-    |I64Load16s Int Int
-    |I64Load16u Int Int
-    |I64Load32s Int Int
-    |I64Load32u Int Int
-    |I32Store Int Int
-    |I64Store Int Int
-    |F32Store Int Int
-    |F64Store Int Int
-    |I32Store8 Int Int
-    |I32Store16 Int Int
-    |I64Store8 Int Int
-    |I64Store16 Int Int
-    |I64Store32 Int Int
-    |CurrentMemory Int
-    |GrowMemory Int
-    |I32Const Int
-    |I64Const Int
-    |F32Const Float
-    |F64Const Float
-    |I32Eqz
-    |I32Eq
-    |I32Ne
-    |I32Lts
-    |I32Ltu
-    |I32Gts
-    |I32Gtu
-    |I32Les
-    |I32Leu
-    |I32Ges
-    |I32Geu
-    |I64Eqz
-    |I64Eq
-    |I64Ne
-    |I64Lts
-    |I64Ltu
-    |I64Gts
-    |I64Gtu
-    |I64Les
-    |I64Leu
-    |I64Ges
-    |I64Geu
-    |F32Eq
-    |F32Ne
-    |F32Lt
-    |F32Gt
-    |F32Le
-    |F32Ge
-    |F64Eq
-    |F64Ne
-    |F64Lt
-    |F64Gt
-    |F64Le
-    |F64Ge
-    |I32Clz
-    |I32Ctz
-    |I32Popcnt
-    |I32Add
-    |I32Sub
-    |I32Mul
-    |I32Divs
-    |I32Divu
-    |I32Rems
-    |I32Remu
-    |I32And
-    |I32Or
-    |I32Xor
-    |I32Shl
-    |I32Shrs
-    |I32Shru
-    |I32Rotl
-    |I32Rotr
-    |I64Clz
-    |I64Ctz
-    |I64Popcnt
-    |I64Add
-    |I64Sub
-    |I64Mul
-    |I64Divs
-    |I64Divu
-    |I64Rems
-    |I64Remu
-    |I64And
-    |I64Or
-    |I64Xor
-    |I64Shl
-    |I64Shrs
-    |I64Shru
-    |I64Rotl
-    |I64Rotr
-    |F32Abs
-    |F32Neg
-    |F32Ceil
-    |F32Floor
-    |F32Trunc
-    |F32Nearest
-    |F32Sqrt
-    |F32Add
-    |F32Sub
-    |F32Mul
-    |F32Div
-    |F32Min
-    |F32Max
-    |F32Copysign
-    |F64Abs
-    |F64Neg
-    |F64Ceil
-    |F64Floor
-    |F64Trunc
-    |F64Nearest
-    |F64Sqrt
-    |F64Add
-    |F64Sub
-    |F64Mul
-    |F64Div
-    |F64Min
-    |F64Max
-    |F64Copysign
-    |I32WrapI64
-    |I32TruncsF32
-    |I32TrancuF32
-    |I32TrancsF64
-    |I32TrancuF64
-    |I64ExtendsI32
-    |I64ExtenduI32
-    |I64TruncsF32
-    |I64TrancuF32
-    |I64TrancsF64
-    |I64TrancuF64
-    |F32ConvertsI32
-    |F32ConvertuI32
-    |F32ConvertsI64
-    |F32ConvertuI64
-    |F32DemoteF64
-    |F64ConvertsI32
-    |F64ConvertuI32
-    |F64ConvertsI64
-    |F64ConvertuI64
-    |F64PromoteF32
-    |I32ReinterpretF32
-    |I64ReinterpretF64
-    |F32ReinterpretI32
-    |F64ReinterpretI64
+    OpUnreachable
+    |OpNop
+    |OpBlock BlockType
+    |OpLoop BlockType
+    |OpIf BlockType
+    |OpElse
+    |OpEnd
+    |OpBr Int
+    |OpBrIf Int
+    |OpBrTable Int [Int] Int
+    |OpReturn
+    |OpCall Int
+    |OpCallIndirect Int Int
+    |OpDrop
+    |OpSelect
+    |OpGetLocal Int
+    |OpSetLocal Int
+    |OpTeeLocal Int
+    |OpGetGlobal Int
+    |OpSetGlobal Int
+    |OpI32Load Int Int
+    |OpI64Load Int Int
+    |OpF32Load Int Int
+    |OpF64Load Int Int
+    |OpI32Load8s Int Int
+    |OpI32Load8u Int Int
+    |OpI32Load16s Int Int
+    |OpI32Load16u Int Int
+    |OpI64Load8s Int Int
+    |OpI64Load8u Int Int
+    |OpI64Load16s Int Int
+    |OpI64Load16u Int Int
+    |OpI64Load32s Int Int
+    |OpI64Load32u Int Int
+    |OpI32Store Int Int
+    |OpI64Store Int Int
+    |OpF32Store Int Int
+    |OpF64Store Int Int
+    |OpI32Store8 Int Int
+    |OpI32Store16 Int Int
+    |OpI64Store8 Int Int
+    |OpI64Store16 Int Int
+    |OpI64Store32 Int Int
+    |OpCurrentMemory Int
+    |OpGrowMemory Int
+    |OpI32Const Int
+    |OpI64Const Int
+    |OpF32Const Float
+    |OpF64Const Float
+    |OpI32Eqz
+    |OpI32Eq
+    |OpI32Ne
+    |OpI32Lts
+    |OpI32Ltu
+    |OpI32Gts
+    |OpI32Gtu
+    |OpI32Les
+    |OpI32Leu
+    |OpI32Ges
+    |OpI32Geu
+    |OpI64Eqz
+    |OpI64Eq
+    |OpI64Ne
+    |OpI64Lts
+    |OpI64Ltu
+    |OpI64Gts
+    |OpI64Gtu
+    |OpI64Les
+    |OpI64Leu
+    |OpI64Ges
+    |OpI64Geu
+    |OpF32Eq
+    |OpF32Ne
+    |OpF32Lt
+    |OpF32Gt
+    |OpF32Le
+    |OpF32Ge
+    |OpF64Eq
+    |OpF64Ne
+    |OpF64Lt
+    |OpF64Gt
+    |OpF64Le
+    |OpF64Ge
+    |OpI32Clz
+    |OpI32Ctz
+    |OpI32Popcnt
+    |OpI32Add
+    |OpI32Sub
+    |OpI32Mul
+    |OpI32Divs
+    |OpI32Divu
+    |OpI32Rems
+    |OpI32Remu
+    |OpI32And
+    |OpI32Or
+    |OpI32Xor
+    |OpI32Shl
+    |OpI32Shrs
+    |OpI32Shru
+    |OpI32Rotl
+    |OpI32Rotr
+    |OpI64Clz
+    |OpI64Ctz
+    |OpI64Popcnt
+    |OpI64Add
+    |OpI64Sub
+    |OpI64Mul
+    |OpI64Divs
+    |OpI64Divu
+    |OpI64Rems
+    |OpI64Remu
+    |OpI64And
+    |OpI64Or
+    |OpI64Xor
+    |OpI64Shl
+    |OpI64Shrs
+    |OpI64Shru
+    |OpI64Rotl
+    |OpI64Rotr
+    |OpF32Abs
+    |OpF32Neg
+    |OpF32Ceil
+    |OpF32Floor
+    |OpF32Trunc
+    |OpF32Nearest
+    |OpF32Sqrt
+    |OpF32Add
+    |OpF32Sub
+    |OpF32Mul
+    |OpF32Div
+    |OpF32Min
+    |OpF32Max
+    |OpF32Copysign
+    |OpF64Abs
+    |OpF64Neg
+    |OpF64Ceil
+    |OpF64Floor
+    |OpF64Trunc
+    |OpF64Nearest
+    |OpF64Sqrt
+    |OpF64Add
+    |OpF64Sub
+    |OpF64Mul
+    |OpF64Div
+    |OpF64Min
+    |OpF64Max
+    |OpF64Copysign
+    |OpI32WrapI64
+    |OpI32TruncsF32
+    |OpI32TrancuF32
+    |OpI32TrancsF64
+    |OpI32TrancuF64
+    |OpI64ExtendsI32
+    |OpI64ExtenduI32
+    |OpI64TruncsF32
+    |OpI64TrancuF32
+    |OpI64TrancsF64
+    |OpI64TrancuF64
+    |OpF32ConvertsI32
+    |OpF32ConvertuI32
+    |OpF32ConvertsI64
+    |OpF32ConvertuI64
+    |OpF32DemoteF64
+    |OpF64ConvertsI32
+    |OpF64ConvertuI32
+    |OpF64ConvertsI64
+    |OpF64ConvertuI64
+    |OpF64PromoteF32
+    |OpI32ReinterpretF32
+    |OpI64ReinterpretF64
+    |OpF32ReinterpretI32
+    |OpF64ReinterpretI64
