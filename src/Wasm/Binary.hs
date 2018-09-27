@@ -276,3 +276,78 @@ instance WasmAST OperatorCode where
     putWasmAST (OpSetGlobal x)=do
         putUint32 0x24
         putVaruint32 x
+    putWasmAST (OpI32Load x)=do
+        putUint32 0x28
+        putWasmAST x
+    putWasmAST (OpI64Load x)=do
+        putUint32 0x29
+        putWasmAST x
+    putWasmAST (OpF32Load x)=do
+        putUint32 0x2a
+        putWasmAST x
+    putWasmAST (OpF64Load x)=do
+        putUint32 0x2b
+        putWasmAST x
+    putWasmAST (OpI32Load8s x)=do
+        putUint32 0x2c
+        putWasmAST x
+    putWasmAST (OpI32Load8u x)=do
+        putUint32 0x2d
+        putWasmAST x
+    putWasmAST (OpI32Load16s x)=do
+        putUint32 0x2e
+        putWasmAST x
+    putWasmAST (OpI32Load16u x)=do
+        putUint32 0x2f
+        putWasmAST x
+    putWasmAST (OpI64Load8s x)=do
+        putUint32 0x30
+        putWasmAST x
+    putWasmAST (OpI64Load8u x)=do
+        putUint32 0x31
+        putWasmAST x
+    putWasmAST (OpI64Load16s x)=do
+        putUint32 0x32
+        putWasmAST x
+    putWasmAST (OpI64Load16u x)=do
+        putUint32 0x33
+        putWasmAST x
+    putWasmAST (OpI64Load32s x)=do
+        putUint32 0x34
+        putWasmAST x
+    putWasmAST (OpI64Load32u x)=do
+        putUint32 0x35
+        putWasmAST x
+    putWasmAST (OpI32Store x)=do
+        putUint32 0x36
+        putWasmAST x
+    putWasmAST (OpI64Store x)=do
+        putUint32 0x37
+        putWasmAST x
+    putWasmAST (OpF32Store x)=do
+        putUint32 0x38
+        putWasmAST x
+    putWasmAST (OpF64Store x)=do
+        putUint32 0x39
+        putWasmAST x
+    putWasmAST (OpI32Store8 x)=do
+        putUint32 0x3a
+        putWasmAST x
+    putWasmAST (OpI32Store16 x)=do
+        putUint32 0x3b
+        putWasmAST x
+    putWasmAST (OpI64Store8 x)=do
+        putUint32 0x3c
+        putWasmAST x
+    putWasmAST (OpI64Store16 x)=do
+        putUint32 0x3d
+        putWasmAST x
+    putWasmAST (OpI64Store32 x)=do
+        putUint32 0x3e
+        putWasmAST x
+    putWasmAST OpCurrentMemory=do
+        putUint32 0x3f
+        putVaruint1 False
+    putWasmAST OpGrowMemory=do
+        putUint32 0x40
+        putVaruint1 False
