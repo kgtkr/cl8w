@@ -96,6 +96,11 @@ instance WasmAST GlobalType where
         putWasmAST x
         putVaruint1 y
 
+instance WasmAST TableType where
+    putWasmAST (TableType x y)=do
+        putWasmAST x
+        putWasmAST y
+
 instance WasmAST ResizableLimits where
     putWasmAST (ResizableLimits x (Just y))=do
         putVaruint1 True
