@@ -50,7 +50,7 @@ data StartSection =  StartSection Int
 
 data ElementSection = ElementSection [ElemSegment]
 
-data ElemSegment = ElemSegment Int InitExpr [Int]
+data ElemSegment = ElemSegment InitExpr [Int]
 
 data CodeSection = CodeSection [FunctionBody]
 

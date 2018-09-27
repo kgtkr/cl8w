@@ -46,10 +46,13 @@ putFloat32 = putFloat32le
 putFloat64 :: Putter Double
 putFloat64 = putFloat64le
 
-putArray :: (WasmAST a) => [a] -> Put
-putArray x = do
+putArray :: (a -> Put) -> [a] -> Put
+putArray f x = do
     putVaruint32 $ length x
-    mapM_ putWasmAST x
+    mapM_ f x
+
+putArrayAST :: (WasmAST a) => [a] -> Put
+putArrayAST = putArray putWasmAST
 
 putBytes :: Putter BS.ByteString
 putBytes x = do
@@ -78,7 +81,7 @@ instance WasmAST ElemType where
 instance WasmAST FuncType where
     putWasmAST (FuncType p r) = do
         putVarint7 (-0x20)
-        putArray p
+        putArrayAST p
         case r of
             Just r->do
                 putVaruint1 True
@@ -174,6 +177,10 @@ instance WasmAST StartSection where
 instance WasmAST ElementSection where
 
 instance WasmAST ElemSegment where
+    putWasmAST (ElemSegment x y)=do
+        putVaruint32 0
+        putWasmAST x
+        putArray putVaruint32 y
 
 instance WasmAST CodeSection where
 
