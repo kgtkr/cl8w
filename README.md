@@ -5,9 +5,9 @@
 WebAssemblyで動く自作言語
 
 ## 進捗
-* [x]メモリ周りのランタイム作成
-* [x]AST作成
-* [x]コード→AST
-* [x]WasmAST作成
-* [x]WasmAST→バイナリ
-* [ ]AST→WasmAST(めっちゃ大変)
+* [x] メモリ周りのランタイム作成
+* [x] AST作成
+* [x] コード→AST
+* [x] WasmAST作成
+* [x] WasmAST→バイナリ
+* [ ] AST→WasmAST(めっちゃ大変)
