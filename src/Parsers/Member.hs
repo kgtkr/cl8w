@@ -8,11 +8,7 @@ import           Text.ParserCombinators.Parsec.Expr
 import qualified Parsers.Stat                  as S
 import qualified Parsers.Lang                  as L
 
-data FuncDef=FuncDef{
-  name::L.Ident,
-  params::[(L.Ident,L.Type)],
-  result::Maybe L.Type
-}deriving (Show, Eq)
+data FuncDef = FuncDef L.Ident [(L.Ident,L.Type)] (Maybe L.Type) deriving (Show, Eq)
 
 funcDefP :: Parser FuncDef
 funcDefP = do
@@ -32,7 +28,7 @@ funcDefP = do
       t <- L.typeParser
       return t
     )
-  return $ FuncDef {name = name, params = params, result = result}
+  return $ FuncDef name params result
 
 data Member=MStruct L.Ident [(L.Ident,L.Type)]
             |MFun FuncDef S.Stat
