@@ -25,8 +25,7 @@ funcDefP = do
   result <- optionMaybe
     (do
       L.colon
-      t <- L.typeParser
-      return t
+      L.typeParser
     )
   return $ FuncDef name params result
 
