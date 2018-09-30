@@ -185,13 +185,8 @@ typeParser =
             ret    <- optionMaybe
               (do
                 reservedOp "->"
-                t <- typeParser
-                return t
+                typeParser
               )
             return $ TFunc params ret
           )
-    <|> try
-          (do
-            ident <- identifier
-            return $ TStruct ident
-          )
+    <|> try (TStruct <$> identifier)

@@ -147,16 +147,13 @@ nullLP = do
   return $ ENullL
 
 varP :: Parser Expr
-varP = do
-  ident <- L.identifier
-  return $ EVar ident
+varP = EVar <$> L.identifier
 
 table =
   [ [ Postfix
       (do
         L.dot
-        ident <- L.identifier
-        return $ EMember ident
+        EMember <$> L.identifier
       )
     , Postfix $ EIndex <$> L.brackets exprP
     , Postfix

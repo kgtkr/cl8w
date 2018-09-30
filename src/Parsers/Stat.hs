@@ -17,9 +17,7 @@ setIdentP :: Parser SetIdent
 setIdentP = try siIdentP <|> try siFieldP <|> try siIndexP
 
 siIdentP :: Parser SetIdent
-siIdentP = do
-  ident <- L.identifier
-  return $ SIIdent ident
+siIdentP = SIIdent <$> L.identifier
 
 siFieldP :: Parser SetIdent
 siFieldP = do
@@ -94,8 +92,7 @@ ifP = do
   el <- optionMaybe
     (do
       L.reserved "else"
-      ss <- statP
-      return ss
+      statP
     )
 
   return $ SIf (e, s) elif el
