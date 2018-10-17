@@ -7,7 +7,7 @@ import qualified Parsers.Lang                  as L
 
 import           Parsers.Member                 ( StructMembers )
 
-type MemberMap=(M.Map String Int,M.Map String StructMembers
+type MemberMap=(M.Map String Int,M.Map String StructMembers)
 
 sizeOf :: L.Type -> Int
 sizeOf L.TI32  = 4
