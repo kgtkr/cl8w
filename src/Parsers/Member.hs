@@ -29,7 +29,11 @@ funcDefP = do
     )
   return $ FuncDef name params result
 
-data Member=MStruct L.Ident [(L.Ident,L.Type)]
+
+type StructMember=(L.Ident,L.Type)
+type StructMembers=[StructMember]
+
+data Member=MStruct L.Ident StructMembers
             |MFun FuncDef S.Stat
             |MExternFun FuncDef String
             deriving (Show, Eq)
