@@ -22,7 +22,6 @@ spec = do
       (parse exprP "test" "true") `shouldBe` Right (EBoolL True)
       (parse exprP "test" "false") `shouldBe` Right (EBoolL False)
       (parse exprP "test" "'a'") `shouldBe` Right (ECharL 'a')
-      (parse exprP "test" "null") `shouldBe` Right (ENullL)
       (parse exprP "test" "x") `shouldBe` Right (EVar "x")
 
       (parse exprP "test" "!x") `shouldBe` Right ((ENot . EVar) "x")

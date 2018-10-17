@@ -16,7 +16,6 @@ keywords =
   , "char"
   , "true"
   , "false"
-  , "null"
   , "let"
   , "if"
   , "while"
@@ -133,7 +132,6 @@ data Type = TI32
           | TArray Type
           | TBool
           | TChar
-          | TFunc [Type] (Maybe Type)
           | TStruct Ident
           deriving (Show, Eq)
 
@@ -178,15 +176,5 @@ typeParser =
           (do
             reserved "char"
             return TChar
-          )
-    <|> try
-          (do
-            params <- (parens . semiSep) typeParser
-            ret    <- optionMaybe
-              (do
-                reservedOp "->"
-                typeParser
-              )
-            return $ TFunc params ret
           )
     <|> try (TStruct <$> identifier)

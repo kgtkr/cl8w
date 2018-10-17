@@ -17,7 +17,6 @@ data Expr = EStructL L.Ident [(L.Ident,Expr)]
         |EArrayL L.Type Expr
         |EBoolL Bool
         |ECharL Char
-        |ENullL
         |EVar L.Ident
         -- 前置演算子
         |ENot Expr
@@ -60,7 +59,6 @@ termP =
     <|> try charLP
     <|> try arrayLP
     <|> try boolLP
-    <|> try nullLP
     <|> try varP
     <|> try parensP
 
@@ -140,11 +138,6 @@ boolLP = (<|>)
     L.reserved "false"
     return $ EBoolL False
   )
-
-nullLP :: Parser Expr
-nullLP = do
-  L.reserved "null"
-  return $ ENullL
 
 varP :: Parser Expr
 varP = EVar <$> L.identifier
