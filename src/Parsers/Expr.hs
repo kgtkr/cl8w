@@ -6,11 +6,10 @@ import qualified Text.ParserCombinators.Parsec.Token
                                                as P
 import           Text.ParserCombinators.Parsec.Expr
 import qualified Parsers.Lang                  as L
-import           Data.Int
 
 data Expr = EStructL L.Ident [(L.Ident,Expr)]
-        |EI32L Int32
-        |EI64L Int64
+        |EI32L Int
+        |EI64L Int
         |EF32L Float
         |EF64L Double
         |EStringL String

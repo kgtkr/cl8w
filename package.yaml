@@ -28,6 +28,8 @@ dependencies:
 - bytes
 - utf8-string
 - containers
+- dlist
+- mtl
 
 library:
   source-dirs: src

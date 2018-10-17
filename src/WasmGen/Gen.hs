@@ -1,13 +1,15 @@
 module WasmGen.Gen where
 
-import qualified Wasm.AST                      as WA
-import qualified Parsers.Expr                  as PE
+import qualified Wasm.AST                      as W
+import qualified Parsers.Expr                  as E
 import qualified Data.Map                      as M
 import qualified Parsers.Lang                  as L
 
 import qualified Parsers.Member                as Me
 import           Data.Tuple                     ( swap )
 import           Data.Maybe                     ( mapMaybe )
+import qualified Data.DList                    as D
+import           Control.Monad.Writer
 
 type MemberMap=(M.Map String Int,M.Map String Me.StructMembers)
 
@@ -31,3 +33,13 @@ memberMap m =
     fnMap _ = Nothing
     stMap (Me.MStruct a b) = Just (a, b)
     stMap _                = Nothing
+
+type LocalVarMap=M.Map String (Int,L.Type)
+
+exprGen
+    :: MemberMap
+    -> LocalVarMap
+    -> E.Expr
+    -> (Writer (D.DList W.OperatorCode) ())
+exprGen mMap lMap expr = case expr of
+    E.EI32L x -> tell $ return $ W.OpI32Const x
