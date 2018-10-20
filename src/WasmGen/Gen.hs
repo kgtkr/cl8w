@@ -11,7 +11,7 @@ import           Data.Maybe                     ( mapMaybe )
 import qualified Data.DList                    as D
 import           Control.Monad.Writer
 
-type MemberMap=(M.Map String Int,M.Map String Me.StructMembers)
+type MemberMap=(FunctionMap,M.Map String Me.StructMembers)
 
 sizeOf :: L.Type -> Int
 sizeOf L.TI32  = 4
@@ -34,6 +34,8 @@ memberMap m =
     stMap (Me.MStruct a b) = Just (a, b)
     stMap _                = Nothing
 
+type FunctionMap=M.Map String Int
+
 type LocalVarMap=M.Map String (Int,L.Type)
 
 type OpCodeWriter = Writer (D.DList W.OperatorCode) ()
@@ -41,10 +43,10 @@ type OpCodeWriter = Writer (D.DList W.OperatorCode) ()
 tellOp :: W.OperatorCode -> OpCodeWriter
 tellOp = tell . pure
 
-callGen :: Int -> [OpCodeWriter] -> OpCodeWriter
-callGen f args = do
+callGen :: FunctionMap -> String -> [OpCodeWriter] -> OpCodeWriter
+callGen map f args = do
     sequence_ args
-    tellOp $ W.OpCall f
+    tellOp $ W.OpCall $ map M.! f
     return ()
 
 blockGen :: W.BlockType -> OpCodeWriter -> OpCodeWriter
