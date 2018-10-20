@@ -36,10 +36,17 @@ memberMap m =
 
 type LocalVarMap=M.Map String (Int,L.Type)
 
-exprGen
-    :: MemberMap
-    -> LocalVarMap
-    -> E.Expr
-    -> (Writer (D.DList W.OperatorCode) ())
-exprGen mMap lMap expr = case expr of
-    E.EI32L x -> tell $ return $ W.OpI32Const x
+type OpCodeWriter = Writer (D.DList W.OperatorCode) ()
+
+blockGen :: W.BlockType -> OpCodeWriter -> OpCodeWriter
+blockGen t x = do
+    tell $ pure $ W.OpBlock t
+    x
+    tell $ pure $ W.OpEnd
+
+exprGen :: MemberMap -> LocalVarMap -> E.Expr -> OpCodeWriter
+exprGen (fMap, sMap) lMap expr = case expr of
+    E.EStructL name exprs -> do
+
+        return ()
+    E.EI32L x -> tell $ pure $ W.OpI32Const x
