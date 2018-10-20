@@ -38,6 +38,9 @@ type LocalVarMap=M.Map String (Int,L.Type)
 
 type OpCodeWriter = Writer (D.DList W.OperatorCode) ()
 
+tellOp :: W.OperatorCode -> OpCodeWriter
+tellOp = tell . pure
+
 blockGen :: W.BlockType -> OpCodeWriter -> OpCodeWriter
 blockGen t x = do
     tell $ pure $ W.OpBlock t
@@ -46,7 +49,7 @@ blockGen t x = do
 
 exprGen :: MemberMap -> LocalVarMap -> E.Expr -> OpCodeWriter
 exprGen (fMap, sMap) lMap expr = case expr of
-    E.EStructL name exprs -> do
+    E.EStructL name exprs -> blockGen (W.BlockType (Just W.ValI32)) $ do
 
         return ()
     E.EI32L x -> tell $ pure $ W.OpI32Const x
