@@ -41,6 +41,12 @@ type OpCodeWriter = Writer (D.DList W.OperatorCode) ()
 tellOp :: W.OperatorCode -> OpCodeWriter
 tellOp = tell . pure
 
+callGen :: Int -> [OpCodeWriter] -> OpCodeWriter
+callGen f args = do
+    sequence_ args
+    tellOp $ W.OpCall f
+    return ()
+
 blockGen :: W.BlockType -> OpCodeWriter -> OpCodeWriter
 blockGen t x = do
     tell $ pure $ W.OpBlock t
