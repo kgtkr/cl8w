@@ -56,8 +56,9 @@ blockGen t x = do
     tell $ pure $ W.OpEnd
 
 exprGen :: MemberMap -> LocalVarMap -> E.Expr -> OpCodeWriter
-exprGen (fMap, sMap) lMap expr = case expr of
+exprGen mMap@(fMap, sMap) lMap expr = case expr of
     E.EStructL name exprs -> blockGen (W.BlockType (Just W.ValI32)) $ do
-
-        return ()
+        let sDef    = map fst $ sMap M.! name
+        let exprMap = M.fromList exprs
+        callGen fMap "String" (map (exprGen mMap lMap . (exprMap M.!)) sDef)
     E.EI32L x -> tell $ pure $ W.OpI32Const x
