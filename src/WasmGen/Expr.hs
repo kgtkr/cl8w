@@ -79,9 +79,9 @@ modifyLocalsMap f = do
     x <- getLocalsMap
     putLocalsMap $ f x
 
-addLocal :: W.ValueType -> ExprGen Int
+addLocal :: W.ValueType -> ExprGen LocalsLen
 addLocal t = do
-    (ExprGenData _ _ len _) <- get
-    modify f
+    len <- getLocalsLen
+    modifyLocalsLen (+ 1)
+    modifyLocals $ (flip D.snoc) t
     return len
-    where f = undefined
