@@ -144,12 +144,9 @@ mapSort keys m = map (m M.!) keys
 
 exprGen :: E.Expr -> ExprGen ()
 exprGen expr = case expr of
-    {-- E.EStructL name exprs -> blockGen (W.BlockType (Just W.ValI32)) $ do
+    E.EStructL name exprs -> blockGen (W.BlockType (Just W.ValI32)) $ do
         sDef <- (M.! name) <$> getStructs
-        let exprMap = M.fromList exprs
-        callGen fMap
-                (name ++ ":new")
-                (map (exprGen mMap lMap . (exprMap M.!)) sDef) --}
+        putType $ (Just . L.TStruct) name
     E.EI32L x -> addOpCode $ W.OpI32Const x
     E.EI64L x -> addOpCode $ W.OpI64Const x
     E.EF32L x -> addOpCode $ W.OpF32Const x
