@@ -6,6 +6,7 @@ import qualified Data.Map                      as M
 import           Control.Monad.State
 import qualified Parsers.Member                as Me
 import qualified Parsers.Lang                  as L
+import qualified Parsers.Expr                  as E
 
 data ExprGenData=ExprGenData OpCodes Locals LocalsLen LocalsMap FunctionMap StructMap
 type FunctionMap=M.Map String Int
@@ -107,3 +108,27 @@ getNamedLocal name = do
 
 addOpCode :: W.OperatorCode -> ExprGen ()
 addOpCode x = modifyOpCodes $ (flip D.snoc) x
+
+callGen :: FunctionMap -> String -> [ExprGen ()] -> ExprGen ()
+callGen m f args = do
+    sequence_ args
+    addOpCode $ W.OpCall $ m M.! f
+
+blockGen :: W.BlockType -> ExprGen () -> ExprGen ()
+blockGen t x = do
+    addOpCode $ W.OpBlock t
+    x
+    addOpCode $ W.OpEnd
+
+exprGen :: E.Expr -> ExprGen ()
+exprGen expr = case expr of
+    E.EStructL name exprs -> blockGen (W.BlockType (Just W.ValI32)) $ do
+        let sDef    = map fst $ sMap M.! name
+        let exprMap = M.fromList exprs
+        callGen fMap
+                (name ++ ":new")
+                (map (exprGen mMap lMap . (exprMap M.!)) sDef)
+    E.EI32L x -> tellOp $ W.OpI32Const x
+    E.EI64L x -> tellOp $ W.OpI64Const x
+    E.EF32L x -> tellOp $ W.OpF32Const x
+    E.EF64L x -> tellOp $ W.OpF64Const x
