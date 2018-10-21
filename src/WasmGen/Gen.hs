@@ -63,4 +63,7 @@ exprGen mMap@(fMap, sMap) lMap expr = case expr of
         callGen fMap
                 (name ++ ":new")
                 (map (exprGen mMap lMap . (exprMap M.!)) sDef)
-    E.EI32L x -> tell $ pure $ W.OpI32Const x
+    E.EI32L x -> tellOp $ W.OpI32Const x
+    E.EI64L x -> tellOp $ W.OpI64Const x
+    E.EF32L x -> tellOp $ W.OpF32Const x
+    E.EF64L x -> tellOp $ W.OpF64Const x
