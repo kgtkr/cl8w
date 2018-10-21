@@ -145,7 +145,10 @@ mapSort keys m = map (m M.!) keys
 exprGen :: E.Expr -> ExprGen ()
 exprGen expr = case expr of
     E.EStructL name exprs -> blockGen (W.BlockType (Just W.ValI32)) $ do
+        fMap <- getFunctions
         sDef <- (M.! name) <$> getStructs
+        callGen fMap "malloc" [addOpCode $ W.OpI32Const (structSize sDef)]
+        -- TODO 式の値を書き込む
         putType $ (Just . L.RefType . L.TStruct) name
     E.EI32L x -> addOpCode $ W.OpI32Const x
     E.EI64L x -> addOpCode $ W.OpI64Const x
