@@ -101,4 +101,4 @@ getNamedLocal name = do
     return $ x M.! name
 
 addOpCode :: W.OperatorCode -> ExprGen ()
-addOpCode x= modifyOpCodes $ (flip D.snoc) x
+addOpCode x = modifyOpCodes $ (flip D.snoc) x
