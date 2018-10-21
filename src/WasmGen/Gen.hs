@@ -15,15 +15,6 @@ type MemberMap=(FunctionMap,StructMap)
 
 type StructMap=M.Map String Me.StructMembers
 
-sizeOf :: L.Type -> Int
-sizeOf L.TI32        = 4
-sizeOf L.TI64        = 8
-sizeOf L.TF32        = 4
-sizeOf L.TF64        = 8
-sizeOf L.TBool       = 4
-sizeOf L.TChar       = 4
-sizeOf (L.RefType _) = 4
-
 memberMap :: [Me.Member] -> MemberMap
 memberMap m =
     ( (M.fromList . map swap . zip [0 ..] . mapMaybe fnMap) m
