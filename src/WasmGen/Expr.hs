@@ -99,3 +99,6 @@ getNamedLocal :: L.Ident -> ExprGen LocalData
 getNamedLocal name = do
     x <- getLocalsMap
     return $ x M.! name
+
+addOpCode :: W.OperatorCode -> ExprGen ()
+addOpCode x= modifyOpCodes $ (flip D.snoc) x
