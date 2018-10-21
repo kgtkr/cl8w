@@ -128,12 +128,12 @@ data Type = TI32
           | TI64
           | TF32
           | TF64
-          | TString
-          | TArray Type
           | TBool
           | TChar
-          | TStruct Ident
+          | RefType RefType
           deriving (Show, Eq)
+
+data RefType=TString|TArray Type|TStruct Ident deriving (Show, Eq)
 
 typeParser :: Parser Type
 typeParser =
@@ -160,12 +160,12 @@ typeParser =
     <|> try
           (do
             reserved "string"
-            return TString
+            return $ RefType TString
           )
     <|> try
           (do
             t <- brackets typeParser
-            return $ TArray t
+            return $ RefType $ TArray t
           )
     <|> try
           (do
@@ -177,4 +177,4 @@ typeParser =
             reserved "char"
             return TChar
           )
-    <|> try (TStruct <$> identifier)
+    <|> try (RefType . TStruct <$> identifier)

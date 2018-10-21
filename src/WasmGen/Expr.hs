@@ -146,15 +146,17 @@ exprGen :: E.Expr -> ExprGen ()
 exprGen expr = case expr of
     E.EStructL name exprs -> blockGen (W.BlockType (Just W.ValI32)) $ do
         sDef <- (M.! name) <$> getStructs
-        putType $ (Just . L.TStruct) name
+        putType $ (Just . L.RefType . L.TStruct) name
     E.EI32L x -> addOpCode $ W.OpI32Const x
     E.EI64L x -> addOpCode $ W.OpI64Const x
     E.EF32L x -> addOpCode $ W.OpF32Const x
     E.EF64L x -> addOpCode $ W.OpF64Const x
 
 typeToValueType :: L.Type -> W.ValueType
-typeToValueType L.TI32 = W.ValI32
-typeToValueType L.TI64 = W.ValI64
-typeToValueType L.TF32 = W.ValF32
-typeToValueType L.TF64 = W.ValF64
-typeToValueType _      = W.ValI32
+typeToValueType L.TI32        = W.ValI32
+typeToValueType L.TI64        = W.ValI64
+typeToValueType L.TF32        = W.ValF32
+typeToValueType L.TF64        = W.ValF64
+typeToValueType L.TBool       = W.ValI32
+typeToValueType L.TChar       = W.ValI32
+typeToValueType (L.RefType _) = W.ValI32
