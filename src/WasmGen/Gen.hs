@@ -11,7 +11,9 @@ import           Data.Maybe                     ( mapMaybe )
 import qualified Data.DList                    as D
 import           Control.Monad.Writer
 
-type MemberMap=(FunctionMap,M.Map String Me.StructMembers)
+type MemberMap=(FunctionMap,StructMap)
+
+type StructMap=M.Map String Me.StructMembers
 
 sizeOf :: L.Type -> Int
 sizeOf L.TI32  = 4
