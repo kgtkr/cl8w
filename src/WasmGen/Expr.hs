@@ -8,8 +8,8 @@ import qualified Parsers.Member                as Me
 import qualified Parsers.Lang                  as L
 import qualified Parsers.Expr                  as E
 
-data ExprGenData=ExprGenData OpCodes Locals LocalsLen LocalsMap FunctionMap StructMap L.Type
-type FunctionMap=M.Map String Int
+data ExprGenData=ExprGenData OpCodes Locals LocalsLen LocalsMap FunctionMap StructMap ExprType
+type FunctionMap=M.Map String (Int,Me.FuncDef)
 type StructMap=M.Map String Me.StructMembers
 type OpCodes=D.DList W.OperatorCode
 type Locals=D.DList W.ValueType
@@ -17,6 +17,8 @@ type LocalsLen=Int
 type LocalsMap=M.Map String LocalData
 type LocalData=(L.Type,Int)
 type ExprGen = State ExprGenData
+
+type ExprType=Maybe L.Type
 
 getFunctions :: ExprGen FunctionMap
 getFunctions = do
@@ -88,17 +90,17 @@ modifyLocalsMap f = do
     x <- getLocalsMap
     putLocalsMap $ f x
 
-getType :: ExprGen L.Type
+getType :: ExprGen ExprType
 getType = do
     (ExprGenData _ _ _ _ _ _ x) <- get
     return x
 
-putType :: L.Type -> ExprGen ()
+putType :: ExprType -> ExprGen ()
 putType x = do
     (ExprGenData a b c d e f _) <- get
     put $ ExprGenData a b c d e f x
 
-modifyType :: (L.Type -> L.Type) -> ExprGen ()
+modifyType :: (ExprType -> ExprType) -> ExprGen ()
 modifyType f = do
     x <- getType
     putType $ f x
@@ -110,14 +112,14 @@ addLocal t = do
     modifyLocals $ (flip D.snoc . typeToValueType) t
     return len
 
-addNamedLocal :: L.Type -> L.Ident -> ExprGen Int
-addNamedLocal t name = do
+addNamedLocalData :: L.Type -> L.Ident -> ExprGen Int
+addNamedLocalData t name = do
     id <- addLocal t
     modifyLocalsMap (M.insert name (t, id))
     return id
 
-getNamedLocal :: L.Ident -> ExprGen LocalData
-getNamedLocal name = do
+getNamedLocalData :: L.Ident -> ExprGen LocalData
+getNamedLocalData name = do
     x <- getLocalsMap
     return $ x M.! name
 
@@ -127,7 +129,9 @@ addOpCode x = modifyOpCodes $ (flip D.snoc) x
 callGen :: FunctionMap -> String -> [ExprGen ()] -> ExprGen ()
 callGen m f args = do
     sequence_ args
-    addOpCode $ W.OpCall $ m M.! f
+    let (id, Me.FuncDef _ _ re) = m M.! f
+    addOpCode $ W.OpCall id
+    putType $ re
 
 blockGen :: W.BlockType -> ExprGen () -> ExprGen ()
 blockGen t x = do
@@ -135,14 +139,17 @@ blockGen t x = do
     x
     addOpCode $ W.OpEnd
 
+mapSort :: Ord a => [a] -> M.Map a b -> [b]
+mapSort keys m = map (m M.!) keys
+
 exprGen :: E.Expr -> ExprGen ()
 exprGen expr = case expr of
-    E.EStructL name exprs -> blockGen (W.BlockType (Just W.ValI32)) $ do
+    {-- E.EStructL name exprs -> blockGen (W.BlockType (Just W.ValI32)) $ do
         sDef <- (M.! name) <$> getStructs
         let exprMap = M.fromList exprs
         callGen fMap
                 (name ++ ":new")
-                (map (exprGen mMap lMap . (exprMap M.!)) sDef)
+                (map (exprGen mMap lMap . (exprMap M.!)) sDef) --}
     E.EI32L x -> addOpCode $ W.OpI32Const x
     E.EI64L x -> addOpCode $ W.OpI64Const x
     E.EF32L x -> addOpCode $ W.OpF32Const x
