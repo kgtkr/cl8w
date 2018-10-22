@@ -10,17 +10,6 @@ import           WasmGen.Lang
 import           Data.List
 import qualified WasmGen.Lang                  as WL
 
-type FunctionMap=M.Map String (Int,Me.FuncDef)
-type StructMap=M.Map String Me.StructMembers
-
-data MemberData=MemberData{
-    _functions::FunctionMap,
-    _structs::StructMap
-}
-
-makeLenses ''MemberData
-
-
 data StructProps=StructProps{
     _pos::Int,
     _typ::L.Type,
@@ -37,3 +26,13 @@ fromASTStruct ms = M.fromList (f 0 (sortOn fst ms))
     f pos ((ident, t) : xs) =
         (ident, StructProps pos t ident) : (f (pos + WL.sizeOf t) xs)
     f _ [] = []
+
+type FunctionMap=M.Map String (Int,Me.FuncDef)
+type StructMap=M.Map String Struct
+
+data MemberData=MemberData{
+    _functions::FunctionMap,
+    _structs::StructMap
+}
+
+makeLenses ''MemberData
