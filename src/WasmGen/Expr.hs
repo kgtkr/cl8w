@@ -11,6 +11,7 @@ import qualified Parsers.Member                as Me
 import qualified Parsers.Lang                  as L
 import qualified Parsers.Expr                  as E
 import           Control.Lens
+import WasmGen.Lang
 
 type FunctionMap=M.Map String (Int,Me.FuncDef)
 type StructMap=M.Map String Me.StructMembers
@@ -79,24 +80,3 @@ exprGen expr = case expr of
     E.EI64L x -> addOpCode $ W.OpI64Const x
     E.EF32L x -> addOpCode $ W.OpF32Const x
     E.EF64L x -> addOpCode $ W.OpF64Const x
-
-typeToValueType :: L.Type -> W.ValueType
-typeToValueType L.TI32        = W.ValI32
-typeToValueType L.TI64        = W.ValI64
-typeToValueType L.TF32        = W.ValF32
-typeToValueType L.TF64        = W.ValF64
-typeToValueType L.TBool       = W.ValI32
-typeToValueType L.TChar       = W.ValI32
-typeToValueType (L.RefType _) = W.ValI32
-
-sizeOf :: L.Type -> Int
-sizeOf L.TI32        = 4
-sizeOf L.TI64        = 8
-sizeOf L.TF32        = 4
-sizeOf L.TF64        = 8
-sizeOf L.TBool       = 4
-sizeOf L.TChar       = 4
-sizeOf (L.RefType _) = 4
-
-structSize :: Me.StructMembers -> Int
-structSize = sum . map (sizeOf . snd)
