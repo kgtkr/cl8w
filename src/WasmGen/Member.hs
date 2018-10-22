@@ -36,3 +36,6 @@ data MemberData=MemberData{
 }
 
 makeLenses ''MemberData
+
+structSize :: Struct -> Int
+structSize = sum . map (WL.sizeOf . _typ . snd) . M.toList

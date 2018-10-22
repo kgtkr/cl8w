@@ -21,6 +21,3 @@ sizeOf L.TF64        = 8
 sizeOf L.TBool       = 4
 sizeOf L.TChar       = 4
 sizeOf (L.RefType _) = 4
-
-structSize :: Me.StructMembers -> Int
-structSize = sum . map (sizeOf . snd)

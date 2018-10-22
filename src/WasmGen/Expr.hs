@@ -11,10 +11,9 @@ import qualified Parsers.Member                as Me
 import qualified Parsers.Lang                  as L
 import qualified Parsers.Expr                  as E
 import           Control.Lens
-import WasmGen.Lang
+import qualified WasmGen.Lang                  as WL
+import qualified WasmGen.Member                as WM
 
-type FunctionMap=M.Map String (Int,Me.FuncDef)
-type StructMap=M.Map String Me.StructMembers
 type OpCodes=D.DList W.OperatorCode
 type Locals=D.DList W.ValueType
 type LocalsLen=Int
@@ -28,8 +27,8 @@ data ExprGenData=ExprGenData{
     _locals:: Locals,
     _localsLen:: LocalsLen,
     _localsMap:: LocalsMap,
-    _functionMap:: FunctionMap,
-    _structMap:: StructMap,
+    _functionMap:: WM.FunctionMap,
+    _structMap:: WM.StructMap,
     _exprType:: ExprType
 }
 makeLenses ''ExprGenData
@@ -40,7 +39,7 @@ addLocal :: L.Type -> ExprGen Int
 addLocal t = do
     len <- use localsLen
     localsLen += 1
-    locals %= (flip D.snoc . typeToValueType) t
+    locals %= (flip D.snoc . WL.typeToValueType) t
     return len
 
 addNamedLocalData :: L.Type -> L.Ident -> ExprGen Int
@@ -52,7 +51,7 @@ addNamedLocalData t name = do
 addOpCode :: W.OperatorCode -> ExprGen ()
 addOpCode x = opCodes %= (flip D.snoc) x
 
-callGen :: FunctionMap -> String -> [ExprGen ()] -> ExprGen ()
+callGen :: WM.FunctionMap -> String -> [ExprGen ()] -> ExprGen ()
 callGen m f args = do
     sequence_ args
     let (id, Me.FuncDef _ _ re) = m M.! f
@@ -73,7 +72,7 @@ exprGen expr = case expr of
     E.EStructL name exprs -> blockGen (W.BlockType (Just W.ValI32)) $ do
         fMap <- use functionMap
         sDef <- (M.! name) <$> use structMap
-        callGen fMap "malloc" [addOpCode $ W.OpI32Const (structSize sDef)]
+        callGen fMap "malloc" [addOpCode $ W.OpI32Const (WM.structSize sDef)]
         -- TODO 式の値を書き込む
         exprType .= (Just . L.RefType . L.TStruct) name
     E.EI32L x -> addOpCode $ W.OpI32Const x
