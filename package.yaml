@@ -30,6 +30,7 @@ dependencies:
 - containers
 - dlist
 - mtl
+- lens
 
 library:
   source-dirs: src

@@ -1,3 +1,6 @@
+{-# LANGUAGE TemplateHaskell #-}
+
+
 module WasmGen.Expr where
 
 import qualified Data.DList                    as D
@@ -7,6 +10,7 @@ import           Control.Monad.State
 import qualified Parsers.Member                as Me
 import qualified Parsers.Lang                  as L
 import qualified Parsers.Expr                  as E
+import           Control.Lens
 
 data ExprGenData=ExprGenData OpCodes Locals LocalsLen LocalsMap FunctionMap StructMap ExprType
 type FunctionMap=M.Map String (Int,Me.FuncDef)
