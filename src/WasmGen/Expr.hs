@@ -57,7 +57,22 @@ exprType (E.EMember pIdent e) = do
 exprType (E.EIndex _ e) = do
     Just (L.RefType (L.TArray t)) <- exprType e
     (return . Just) t
-
+exprType (E.EAdd    e _) = exprType e
+exprType (E.ESub    e _) = exprType e
+exprType (E.EMul    e _) = exprType e
+exprType (E.EDiv    e _) = exprType e
+exprType (E.EMod    e _) = exprType e
+exprType (E.EAnd    _ _) = (return . Just) L.TBool
+exprType (E.EOr     _ _) = (return . Just) L.TBool
+exprType (E.EBitAnd e _) = exprType e
+exprType (E.EBitOr  e _) = exprType e
+exprType (E.EPow    e _) = exprType e
+exprType (E.EEq     _ _) = (return . Just) L.TBool
+exprType (E.ENe     _ _) = (return . Just) L.TBool
+exprType (E.ELt     _ _) = (return . Just) L.TBool
+exprType (E.ELte    _ _) = (return . Just) L.TBool
+exprType (E.EGt     _ _) = (return . Just) L.TBool
+exprType (E.EGte    _ _) = (return . Just) L.TBool
 
 addLocal :: W.ValueType -> ExprGen Int
 addLocal t = do
