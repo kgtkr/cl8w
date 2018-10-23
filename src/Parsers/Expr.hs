@@ -66,24 +66,18 @@ parensP :: Parser Expr
 parensP = L.parens exprP
 
 structLP :: Parser Expr
-structLP = do
-  ident  <- L.identifier
-  member <- (L.braces . L.commaSep)
-    (do
-      mIdent <- L.identifier
-      L.colon
-      mExpr <- exprP
-      return (mIdent, mExpr)
-    )
-  return $ EStructL ident member
+structLP = EStructL <$> L.identifier <*> (L.braces . L.commaSep)
+  ((,) <$> L.identifier <* L.colon <*> exprP)
 
 i32LP :: Parser Expr
-i32LP = do
-  L.whiteSpace
-  x <- many1 digit
-  (optional . string) "i32"
-  L.whiteSpace
-  return $ (EI32L . read) x
+i32LP =
+  EI32L
+    .   read
+    <$> (  L.whiteSpace
+        *> many1 digit
+        <* (optional . string) "i32"
+        <* L.whiteSpace
+        )
 
 i64LP :: Parser Expr
 i64LP =
@@ -91,22 +85,14 @@ i64LP =
 
 f32LP :: Parser Expr
 f32LP = do
-  L.whiteSpace
-  n <- many1 digit
-  char '.'
-  m <- many1 digit
-  string "f32"
-  L.whiteSpace
+  n <- L.whiteSpace *> many1 digit <* char '.'
+  m <- many1 digit <* string "f32" <* L.whiteSpace
   return $ (EF32L . read) (n ++ "." ++ m)
 
 f64LP :: Parser Expr
 f64LP = do
-  L.whiteSpace
-  n <- many1 digit
-  char '.'
-  m <- many1 digit
-  (optional . string) "f64"
-  L.whiteSpace
+  n <- L.whiteSpace *> many1 digit <* char '.'
+  m <- many1 digit <* (optional . string) "f64" <* L.whiteSpace
   return $ (EF64L . read) (n ++ "." ++ m)
 
 stringLP :: Parser Expr
@@ -127,33 +113,14 @@ varP :: Parser Expr
 varP = EVar <$> L.identifier
 
 callP :: Parser Expr
-callP = do
-  ident <- L.identifier
-  es    <- (L.parens . L.commaSep) exprP
-  return $ ECall ident es
+callP = ECall <$> L.identifier <*> (L.parens . L.commaSep) exprP
 table =
-  [ [ Postfix
-      (do
-        L.dot
-        EMember <$> L.identifier
-      )
+  [ [ Postfix (EMember <$> (L.dot *> L.identifier))
     , Postfix $ EIndex <$> L.brackets exprP
     ]
-  , [ Prefix
-      (do
-        L.reservedOp "!"
-        return ENot
-      )
-    , Prefix
-      (do
-        L.reservedOp "+"
-        return EPlus
-      )
-    , Prefix
-      (do
-        L.reservedOp "-"
-        return EMinus
-      )
+  , [ Prefix (ENot <$ L.reservedOp "!")
+    , Prefix (EPlus <$ L.reservedOp "+")
+    , Prefix (EMinus <$ L.reservedOp "-")
     ]
   , [Infix (L.reservedOp "**" >> return EPow) AssocLeft]
   , [ Infix (L.reservedOp "*" >> return EMul) AssocLeft
