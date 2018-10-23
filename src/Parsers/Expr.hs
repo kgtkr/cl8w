@@ -86,12 +86,8 @@ i32LP = do
   return $ (EI32L . read) x
 
 i64LP :: Parser Expr
-i64LP = do
-  L.whiteSpace
-  x <- many1 digit
-  string "i64"
-  L.whiteSpace
-  return $ (EI64L . read) x
+i64LP =
+  EI64L . read <$> (L.whiteSpace *> many1 digit <* string "i64" <* L.whiteSpace)
 
 f32LP :: Parser Expr
 f32LP = do
@@ -124,7 +120,7 @@ arrayLP = L.brackets $ EArrayL <$> L.typeParser <* L.semi <*> exprP
 
 boolLP :: Parser Expr
 boolLP =
-  (EBoolL True <$ L.reserved "true") <|> (EBoolL False <$ L.reserved "false")
+  EBoolL True <$ L.reserved "true" <|> EBoolL False <$ L.reserved "false"
 
 
 varP :: Parser Expr
