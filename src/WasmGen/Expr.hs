@@ -13,7 +13,7 @@ import qualified Parsers.Expr                  as E
 import           Control.Lens
 import qualified WasmGen.Lang                  as WL
 import qualified WasmGen.Member                as WM
-
+import           Control.Monad.Reader
 type OpCodes=D.DList W.OperatorCode
 type Locals=D.DList W.ValueType
 type LocalsLen=Int
@@ -28,12 +28,32 @@ data ExprGenData=ExprGenData{
     _localsLen:: LocalsLen,
     _localsMap:: LocalsMap,
     _functionMap:: WM.FunctionMap,
-    _structMap:: WM.StructMap,
-    _exprType:: ExprType
+    _structMap:: WM.StructMap
 }
 makeLenses ''ExprGenData
 
 type ExprGen = State ExprGenData
+
+exprType :: E.Expr -> (Reader ExprGenData L.Type)
+exprType (E.EStructL ident _) = return $ L.RefType $ L.TStruct ident
+exprType (E.EI32L    _      ) = return L.TI32
+exprType (E.EI64L    _      ) = return L.TI64
+exprType (E.EF32L    _      ) = return L.TF32
+exprType (E.EF64L    _      ) = return L.TF64
+exprType (E.EStringL _      ) = return $ L.RefType L.TString
+exprType (E.EArrayL t _     ) = return $ L.RefType $ L.TArray t
+exprType (E.EBoolL _        ) = return L.TBool
+exprType (E.ECharL _        ) = return L.TChar
+exprType (E.EVar   ident    ) = (^. _1) . (M.! ident) <$> view localsMap
+exprType (E.ENot   _        ) = return L.TBool
+exprType (E.EPlus  e        ) = exprType e
+exprType (E.EMinus e        ) = exprType e
+exprType (E.EMember pIdent e) = do
+    L.RefType (L.TStruct sIdent) <- exprType e
+    (^. WM.typ) . (M.! pIdent) . (M.! sIdent) <$> view structMap
+exprType (E.EIndex _ e) = do
+    L.RefType (L.TArray t) <- exprType e
+    return t
 
 addLocal :: W.ValueType -> ExprGen Int
 addLocal t = do
@@ -55,7 +75,6 @@ callGen :: WM.FunctionMap -> String -> [ExprGen ()] -> ExprGen ()
 callGen m f args = do
     let (id, Me.FuncDef _ _ re) = m M.! f
     opCallGen (W.OpCall id) args
-    exprType .= re
 
 opCallGen :: W.OperatorCode -> [ExprGen ()] -> ExprGen ()
 opCallGen op args = do
@@ -92,7 +111,6 @@ exprGen expr = case expr of
                 opCallGen storeOp [addOpCode $ W.OpGetLocal res, exprGen ex]
             )
             exprs
-        exprType .= (Just . L.RefType . L.TStruct) name
         addOpCode $ W.OpGetLocal res
     E.EI32L x -> addOpCode $ W.OpI32Const x
     E.EI64L x -> addOpCode $ W.OpI64Const x
