@@ -26,15 +26,13 @@ data ExprGenData=ExprGenData{
     _opCodes::OpCodes,
     _locals:: Locals,
     _localsLen:: LocalsLen,
-    _localsMap:: LocalsMap,
-    _functionMap:: WM.FunctionMap,
-    _structMap:: WM.StructMap
+    _localsMap:: LocalsMap
 }
 makeLenses ''ExprGenData
 
-type ExprGen = State ExprGenData
+type ExprGen = ReaderT WM.MemberData (State ExprGenData)
 
-exprType :: E.Expr -> Reader ExprGenData (Maybe L.Type)
+exprType :: E.Expr -> ExprGen (Maybe L.Type)
 exprType (E.EStructL ident _) = (return . Just) $ L.RefType $ L.TStruct ident
 exprType (E.EI32L    _      ) = (return . Just) L.TI32
 exprType (E.EI64L    _      ) = (return . Just) L.TI64
@@ -44,16 +42,16 @@ exprType (E.EStringL _      ) = (return . Just) $ L.RefType L.TString
 exprType (E.EArrayL t _     ) = (return . Just) $ L.RefType $ L.TArray t
 exprType (E.EBoolL _        ) = (return . Just) L.TBool
 exprType (E.ECharL _        ) = (return . Just) L.TChar
-exprType (E.EVar   ident    ) = Just . (^. _1) . (M.! ident) <$> view localsMap
+exprType (E.EVar   ident    ) = Just . (^. _1) . (M.! ident) <$> use localsMap
 exprType (E.ECall ident _   ) = do
-    Me.FuncDef _ _ t <- (^. _2) . (M.! ident) <$> view functionMap
+    Me.FuncDef _ _ t <- (^. _2) . (M.! ident) <$> view WM.functions
     return t
 exprType (E.ENot   _        ) = (return . Just) L.TBool
 exprType (E.EPlus  e        ) = exprType e
 exprType (E.EMinus e        ) = exprType e
 exprType (E.EMember pIdent e) = do
     Just (L.RefType (L.TStruct sIdent)) <- exprType e
-    Just . (^. WM.typ) . (M.! pIdent) . (M.! sIdent) <$> view structMap
+    Just . (^. WM.typ) . (M.! pIdent) . (M.! sIdent) <$> view WM.structs
 exprType (E.EIndex _ e) = do
     Just (L.RefType (L.TArray t)) <- exprType e
     (return . Just) t
@@ -109,11 +107,25 @@ blockGen t x = do
 mapSort :: Ord a => [a] -> M.Map a b -> [b]
 mapSort keys m = map (m M.!) keys
 
+-- 値/位置/オフセット
+storeGen :: E.Expr -> E.Expr -> Int -> ExprGen ()
+storeGen e i o = do
+    Just et <- exprType e
+    let storeOp =
+            (case WL.typeToValueType et of
+                    W.ValI32 -> W.OpI32Store
+                    W.ValI64 -> W.OpI64Store
+                    W.ValF32 -> W.OpF32Store
+                    W.ValF64 -> W.OpF64Store
+                )
+                (W.MemoryImmediate 2 o)
+    opCallGen storeOp [exprGen i, exprGen e]
+
 exprGen :: E.Expr -> ExprGen ()
 exprGen expr = case expr of
     E.EStructL name exprs -> blockGen (W.BlockType (Just W.ValI32)) $ do
-        fMap <- use functionMap
-        sDef <- (M.! name) <$> use structMap
+        fMap <- view WM.functions
+        sDef <- (M.! name) <$> view WM.structs
         res  <- addLocal W.ValI32
         callGen fMap "malloc" [addOpCode $ W.OpI32Const (WM.structSize sDef)]
         mapM_
