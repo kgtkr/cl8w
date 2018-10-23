@@ -137,44 +137,12 @@ data RefType=TString|TArray Type|TStruct Ident deriving (Show, Eq)
 
 typeParser :: Parser Type
 typeParser =
-  try
-      (do
-        reserved "i32"
-        return TI32
-      )
-    <|> try
-          (do
-            reserved "i64"
-            return TI64
-          )
-    <|> try
-          (do
-            reserved "f32"
-            return TF32
-          )
-    <|> try
-          (do
-            reserved "f64"
-            return TF64
-          )
-    <|> try
-          (do
-            reserved "string"
-            return $ RefType TString
-          )
-    <|> try
-          (do
-            t <- brackets typeParser
-            return $ RefType $ TArray t
-          )
-    <|> try
-          (do
-            reserved "bool"
-            return TBool
-          )
-    <|> try
-          (do
-            reserved "char"
-            return TChar
-          )
+  try (TI32 <$ reserved "i32")
+    <|> try (TI64 <$ reserved "i64")
+    <|> try (TF32 <$ reserved "f32")
+    <|> try (TF64 <$ reserved "f64")
+    <|> try (RefType TString <$ reserved "string")
+    <|> try (RefType . TArray <$> brackets typeParser)
+    <|> try (TBool <$ reserved "bool")
+    <|> try (TChar <$ reserved "char")
     <|> try (RefType . TStruct <$> identifier)
