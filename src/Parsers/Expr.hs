@@ -17,6 +17,7 @@ data Expr = EStructL L.Ident [(L.Ident,Expr)]
         |EBoolL Bool
         |ECharL Char
         |EVar L.Ident
+        |ECall L.Ident [Expr]
         -- 前置演算子
         |ENot Expr
         |EPlus Expr
@@ -24,7 +25,6 @@ data Expr = EStructL L.Ident [(L.Ident,Expr)]
         -- 後置演算子
         | EMember L.Ident Expr
         | EIndex Expr Expr
-        | ECall [Expr] Expr
         -- 二項演算子
         |EAdd Expr Expr
         |ESub Expr Expr
@@ -60,6 +60,7 @@ termP =
     <|> try boolLP
     <|> try varP
     <|> try parensP
+    <|> try callP
 
 parensP :: Parser Expr
 parensP = L.parens exprP
@@ -141,6 +142,11 @@ boolLP = (<|>)
 varP :: Parser Expr
 varP = EVar <$> L.identifier
 
+callP :: Parser Expr
+callP = do
+  ident <- L.identifier
+  es    <- (L.parens . L.commaSep) exprP
+  return $ ECall ident es
 table =
   [ [ Postfix
       (do
@@ -148,11 +154,6 @@ table =
         EMember <$> L.identifier
       )
     , Postfix $ EIndex <$> L.brackets exprP
-    , Postfix
-      (do
-        es <- (L.parens . L.commaSep) exprP
-        return $ ECall es
-      )
     ]
   , [ Prefix
       (do
