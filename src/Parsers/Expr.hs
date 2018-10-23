@@ -58,9 +58,9 @@ termP =
     <|> try charLP
     <|> try arrayLP
     <|> try boolLP
+    <|> try callP
     <|> try varP
     <|> try parensP
-    <|> try callP
 
 parensP :: Parser Expr
 parensP = L.parens exprP
