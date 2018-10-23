@@ -34,7 +34,7 @@ makeLenses ''ExprGenData
 
 type ExprGen = State ExprGenData
 
-exprType :: E.Expr -> (Reader ExprGenData (Maybe L.Type))
+exprType :: E.Expr -> Reader ExprGenData (Maybe L.Type)
 exprType (E.EStructL ident _) = (return . Just) $ L.RefType $ L.TStruct ident
 exprType (E.EI32L    _      ) = (return . Just) L.TI32
 exprType (E.EI64L    _      ) = (return . Just) L.TI64

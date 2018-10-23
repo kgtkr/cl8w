@@ -120,24 +120,12 @@ charLP :: Parser Expr
 charLP = ECharL <$> L.charLiteral
 
 arrayLP :: Parser Expr
-arrayLP = L.brackets
-  (do
-    t <- L.typeParser
-    L.semi
-    e <- exprP
-    return $ EArrayL t e
-  )
+arrayLP = L.brackets $ EArrayL <$> L.typeParser <* L.semi <*> exprP
 
 boolLP :: Parser Expr
-boolLP = (<|>)
-  (do
-    L.reserved "true"
-    return $ EBoolL True
-  )
-  (do
-    L.reserved "false"
-    return $ EBoolL False
-  )
+boolLP =
+  (EBoolL True <$ L.reserved "true") <|> (EBoolL False <$ L.reserved "false")
+
 
 varP :: Parser Expr
 varP = EVar <$> L.identifier
