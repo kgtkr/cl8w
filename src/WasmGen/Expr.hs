@@ -34,26 +34,30 @@ makeLenses ''ExprGenData
 
 type ExprGen = State ExprGenData
 
-exprType :: E.Expr -> (Reader ExprGenData L.Type)
-exprType (E.EStructL ident _) = return $ L.RefType $ L.TStruct ident
-exprType (E.EI32L    _      ) = return L.TI32
-exprType (E.EI64L    _      ) = return L.TI64
-exprType (E.EF32L    _      ) = return L.TF32
-exprType (E.EF64L    _      ) = return L.TF64
-exprType (E.EStringL _      ) = return $ L.RefType L.TString
-exprType (E.EArrayL t _     ) = return $ L.RefType $ L.TArray t
-exprType (E.EBoolL _        ) = return L.TBool
-exprType (E.ECharL _        ) = return L.TChar
-exprType (E.EVar   ident    ) = (^. _1) . (M.! ident) <$> view localsMap
-exprType (E.ENot   _        ) = return L.TBool
+exprType :: E.Expr -> (Reader ExprGenData (Maybe L.Type))
+exprType (E.EStructL ident _) = (return . Just) $ L.RefType $ L.TStruct ident
+exprType (E.EI32L    _      ) = (return . Just) L.TI32
+exprType (E.EI64L    _      ) = (return . Just) L.TI64
+exprType (E.EF32L    _      ) = (return . Just) L.TF32
+exprType (E.EF64L    _      ) = (return . Just) L.TF64
+exprType (E.EStringL _      ) = (return . Just) $ L.RefType L.TString
+exprType (E.EArrayL t _     ) = (return . Just) $ L.RefType $ L.TArray t
+exprType (E.EBoolL _        ) = (return . Just) L.TBool
+exprType (E.ECharL _        ) = (return . Just) L.TChar
+exprType (E.EVar   ident    ) = Just . (^. _1) . (M.! ident) <$> view localsMap
+exprType (E.ECall ident _   ) = do
+    Me.FuncDef _ _ t <- (^. _2) . (M.! ident) <$> view functionMap
+    return t
+exprType (E.ENot   _        ) = (return . Just) L.TBool
 exprType (E.EPlus  e        ) = exprType e
 exprType (E.EMinus e        ) = exprType e
 exprType (E.EMember pIdent e) = do
-    L.RefType (L.TStruct sIdent) <- exprType e
-    (^. WM.typ) . (M.! pIdent) . (M.! sIdent) <$> view structMap
+    Just (L.RefType (L.TStruct sIdent)) <- exprType e
+    Just . (^. WM.typ) . (M.! pIdent) . (M.! sIdent) <$> view structMap
 exprType (E.EIndex _ e) = do
-    L.RefType (L.TArray t) <- exprType e
-    return t
+    Just (L.RefType (L.TArray t)) <- exprType e
+    (return . Just) t
+
 
 addLocal :: W.ValueType -> ExprGen Int
 addLocal t = do
