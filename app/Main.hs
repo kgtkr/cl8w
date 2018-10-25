@@ -8,8 +8,12 @@ import           WasmGen.Member
 
 main = do
     input <- readFile "test.cl8w"
-    let Right ast = (parse membersP "test" input)
-    let wAST      = compile ast
-    let bin       = runPut $ putWasmAST wAST
-    BS.writeFile "test.wasm" bin
+    let ast = (parse membersP "test" input)
+    case ast of
+        Right ast->do
+            print ast
+            let wAST = compile ast
+            let bin  = runPut $ putWasmAST wAST
+            BS.writeFile "test.wasm" bin
+        Left e->print e
     return ()
