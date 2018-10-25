@@ -151,3 +151,19 @@ exprGen expr = case expr of
     E.EVar   x -> do
         l <- snd . (M.! x) <$> use localsMap
         addOpCode $ W.OpGetLocal l
+    E.ECall name ex -> do
+        fMap <- view WM.functions
+        callGen fMap name (fmap exprGen ex)
+    E.ENot x -> do
+        exprGen x
+        addOpCode $ W.OpI32Const 0
+        addOpCode W.OpI32Eq
+    E.EPlus  x -> exprGen x
+    E.EMinus x -> do
+        t <- exprType x
+        case t of
+            Just L.TI32 -> do
+                exprGen x
+                addOpCode $ W.OpI32Const (-1)
+                addOpCode $ W.OpI32Mul
+
