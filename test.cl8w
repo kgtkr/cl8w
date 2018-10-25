@@ -1,5 +1,5 @@
 fun gcd(a:i32,b:i32):i32={
-    if a%b==0{
+    if(a){
         return b;
     }else{
         return gcd(b,a%b);

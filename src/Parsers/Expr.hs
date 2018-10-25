@@ -49,8 +49,7 @@ exprP :: Parser Expr
 exprP = buildExpressionParser table termP
 
 termP =
-  structLP
-    <|> try f32LP
+  try f32LP
     <|> try f64LP
     <|> try i32LP
     <|> try i64LP
@@ -58,7 +57,8 @@ termP =
     <|> charLP
     <|> arrayLP
     <|> boolLP
-    <|> callP
+    <|> try callP
+    <|> try structLP
     <|> varP
     <|> parensP
 

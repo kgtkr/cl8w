@@ -43,13 +43,7 @@ data Stat =SBlock [Stat]
 
 statP :: Parser Stat
 statP =
-  blockP
-    <|> exprToStatP
-    <|> letP
-    <|> ifP
-    <|> whileP
-    <|> returnP
-    <|> try setP
+  blockP <|> exprToStatP <|> letP <|> ifP <|> whileP <|> returnP <|> try setP
 
 exprToStatP :: Parser Stat
 exprToStatP = do
@@ -79,13 +73,13 @@ letP = do
 ifP :: Parser Stat
 ifP = do
   L.reserved "if"
-  e    <- E.exprP
+  e    <- L.parens E.exprP
   s    <- statP
   elif <- many
     (do
       L.reserved "else"
       L.reserved "if"
-      ee <- E.exprP
+      ee <- L.parens E.exprP
       ss <- statP
       return (ee, ss)
     )
@@ -100,7 +94,7 @@ ifP = do
 whileP :: Parser Stat
 whileP = do
   L.reserved "while"
-  e <- E.exprP
+  e <- L.parens E.exprP
   s <- statP
   return $ SWhile e s
 
