@@ -143,7 +143,11 @@ exprGen expr = case expr of
             )
             exprs
         addOpCode $ W.OpGetLocal res
-    E.EI32L x -> addOpCode $ W.OpI32Const x
-    E.EI64L x -> addOpCode $ W.OpI64Const x
-    E.EF32L x -> addOpCode $ W.OpF32Const x
-    E.EF64L x -> addOpCode $ W.OpF64Const x
+    E.EI32L  x -> addOpCode $ W.OpI32Const x
+    E.EI64L  x -> addOpCode $ W.OpI64Const x
+    E.EF32L  x -> addOpCode $ W.OpF32Const x
+    E.EF64L  x -> addOpCode $ W.OpF64Const x
+    E.EBoolL x -> addOpCode $ W.OpI32Const (if x then 1 else 0)
+    E.EVar   x -> do
+        l <- snd . (M.! x) <$> use localsMap
+        addOpCode $ W.OpGetLocal l
