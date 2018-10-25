@@ -1,7 +1,11 @@
 fun gcd(a:i32,b:i32):i32={
-    if(a%b==0){
+    if(mod0(a,b)){
         return b;
     }
 
     return gcd(b,a%b);
+}
+
+fun mod0(a:i32,b:i32):bool={
+    return a%b==0;
 }
