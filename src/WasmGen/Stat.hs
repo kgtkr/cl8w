@@ -22,12 +22,15 @@ statGen (PS.SLet name t e) = do
     x <- GE.addNamedLocalData t name
     GE.exprGen e
     GE.addOpCode $ WA.OpSetLocal x
-statGen (PS.SIf (e, s1) [] (Just s2)) = do
+statGen (PS.SIf (e, s1) [] s2) = do
     GE.exprGen e
     GE.addOpCode $ WA.OpIf $ WA.BlockType Nothing
     statGen s1
-    GE.addOpCode $ WA.OpElse
-    statGen s2
+    case s2 of
+        Just s2 -> do
+            GE.addOpCode $ WA.OpElse
+            statGen s2
+        Nothing -> return ()
     GE.addOpCode $ WA.OpEnd
 statGen (PS.SReturn e) = do
     case e of
