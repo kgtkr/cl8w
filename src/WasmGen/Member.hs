@@ -6,24 +6,19 @@ import qualified Parsers.Lang                  as L
 import           Control.Lens
 import qualified Data.Map                      as M
 import qualified Parsers.Member                as Me
+
 import           WasmGen.Lang                  as WL
+import           WasmGen.Expr                  as WE
+import           WasmGen.Stat                  as WS
+
 import           Data.List
-import qualified WasmGen.Lang                  as WL
 
 import qualified Wasm.AST                      as WA
 
 import qualified Data.DList                    as D
 import           Data.Maybe
 import           Control.Monad.State
-data StructProps=StructProps{
-    _pos::Int,
-    _typ::L.Type,
-    _name::String
-}
-
-makeLenses ''StructProps
-
-type Struct=M.Map String StructProps
+import           Control.Monad.Reader
 
 fromASTStruct :: Me.StructMembers -> Struct
 fromASTStruct ms = M.fromList (f 0 (sortOn fst ms))
@@ -46,27 +41,15 @@ toMemberData ms = MemberData
                    )
         ms
     }
-type FunctionMap=M.Map String (Int,Me.FuncDef)
-type StructMap=M.Map String Struct
-
-data MemberData=MemberData{
-    _functions::FunctionMap,
-    _structs::StructMap
-}
-
-makeLenses ''MemberData
-
-structSize :: Struct -> Int
-structSize = sum . map (WL.sizeOf . _typ . snd) . M.toList
 
 data MemberGenData=MemberGenData{
     _defineFunctionsLen::Int,
     _externFunctionsLen::Int,
-    _typeSections::D.DList WA.TypeSection,
-    _importSections::D.DList WA.ImportSection,
-    _functionSections::D.DList WA.FunctionSection,
-    _exportSections::D.DList WA.ExportSection,
-    _codeSections::D.DList WA.CodeSection
+    _typeSections::D.DList WA.FuncType,
+    _importSections::D.DList WA.ImportEntry,
+    _functionSections::D.DList Int,
+    _exportSections::D.DList WA.ExportEntry,
+    _codeSections::D.DList WA.FunctionBody
 }
 makeLenses ''MemberGenData
 
@@ -77,8 +60,19 @@ fDefToType (Me.FuncDef _ params ret) = WA.FuncType
     (fmap (WL.typeToValueType . snd) params)
     (fmap WL.typeToValueType ret)
 
-memberGen :: Me.Member -> MemberGen ()
-memberGen (Me.MFun d@(Me.FuncDef name params ret) stat) = do
+memberGen :: MemberData -> Me.Member -> MemberGen ()
+memberGen md (Me.MFun d@(Me.FuncDef name params ret) stat) = do
+    functionIndex <- (+) <$> use defineFunctionsLen <*> use externFunctionsLen
     defineFunctionsLen += 1
-    typeSections %= (flip D.snoc) undefined
+    typeSections %= (flip D.snoc) (fDefToType d)
+    functionSections %= (flip D.snoc) functionIndex
+    exportSections
+        %= (flip D.snoc) (WA.ExportEntry name WA.ExFunction functionIndex)
+    let x      = WE.emptyExprGenData params
+    let (_, s) = runState ((runReaderT (WS.statGen stat)) md) x
+    codeSections %= (flip D.snoc)
+        (WA.FunctionBody
+            ((map (\x -> WA.LocalEntry 1 x) . D.toList . WE._locals) s)
+            ((D.toList . WE._opCodes) s)
+        )
     return ()

@@ -1,8 +1,13 @@
+{-# LANGUAGE TemplateHaskell #-}
+
+
 module WasmGen.Lang where
 
 import qualified Parsers.Lang                  as L
 import qualified Wasm.AST                      as W
 import qualified Parsers.Member                as Me
+import           Control.Lens
+import qualified Data.Map                      as M
 
 typeToValueType :: L.Type -> W.ValueType
 typeToValueType L.TI32        = W.ValI32
@@ -21,3 +26,26 @@ sizeOf L.TF64        = 8
 sizeOf L.TBool       = 4
 sizeOf L.TChar       = 4
 sizeOf (L.RefType _) = 4
+
+data StructProps=StructProps{
+    _pos::Int,
+    _typ::L.Type,
+    _name::String
+}
+
+makeLenses ''StructProps
+
+type Struct=M.Map String StructProps
+
+type FunctionMap=M.Map String (Int,Me.FuncDef)
+type StructMap=M.Map String Struct
+
+data MemberData=MemberData{
+    _functions::FunctionMap,
+    _structs::StructMap
+}
+
+makeLenses ''MemberData
+
+structSize :: Struct -> Int
+structSize = sum . map (sizeOf . _typ . snd) . M.toList
