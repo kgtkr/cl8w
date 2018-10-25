@@ -14,7 +14,7 @@ data SetIdent=SIIdent L.Ident
               deriving (Show, Eq)
 
 setIdentP :: Parser SetIdent
-setIdentP = try siIdentP <|> try siFieldP <|> try siIndexP
+setIdentP = siIdentP <|> siFieldP <|> siIndexP
 
 siIdentP :: Parser SetIdent
 siIdentP = SIIdent <$> L.identifier
@@ -42,8 +42,7 @@ data Stat =SBlock [Stat]
             deriving (Show, Eq)
 
 statP :: Parser Stat
-statP =
-  blockP <|> exprToStatP <|> letP <|> ifP <|> whileP <|> returnP <|> try setP
+statP = blockP <|> letP <|> ifP <|> whileP <|> returnP <|> exprToStatP -- <|> setP
 
 exprToStatP :: Parser Stat
 exprToStatP = do
