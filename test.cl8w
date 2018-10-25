@@ -1,0 +1,7 @@
+fun gcd(a:i32,b:i32)->i32={
+    if a%b==0{
+        return b;
+    }else{
+        return gcd(b,a%b);
+    }
+}

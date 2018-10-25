@@ -41,6 +41,9 @@ data Member=MStruct L.Ident StructMembers
 memberP :: Parser Member
 memberP = try structP <|> try funP <|> try externFunP
 
+membersP :: Parser [Member]
+membersP = many memberP
+
 structP :: Parser Member
 structP = do
   L.reserved "struct"
