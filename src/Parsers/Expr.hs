@@ -49,18 +49,18 @@ exprP :: Parser Expr
 exprP = buildExpressionParser table termP
 
 termP =
-  try structLP
+  structLP
     <|> try f32LP
     <|> try f64LP
     <|> try i32LP
     <|> try i64LP
-    <|> try stringLP
-    <|> try charLP
-    <|> try arrayLP
-    <|> try boolLP
-    <|> try callP
-    <|> try varP
-    <|> try parensP
+    <|> stringLP
+    <|> charLP
+    <|> arrayLP
+    <|> boolLP
+    <|> callP
+    <|> varP
+    <|> parensP
 
 parensP :: Parser Expr
 parensP = L.parens exprP

@@ -43,12 +43,12 @@ data Stat =SBlock [Stat]
 
 statP :: Parser Stat
 statP =
-  try blockP
-    <|> try exprToStatP
-    <|> try letP
-    <|> try ifP
-    <|> try whileP
-    <|> try returnP
+  blockP
+    <|> exprToStatP
+    <|> letP
+    <|> ifP
+    <|> whileP
+    <|> returnP
     <|> try setP
 
 exprToStatP :: Parser Stat
