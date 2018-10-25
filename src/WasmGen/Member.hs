@@ -53,12 +53,42 @@ data MemberGenData=MemberGenData{
 }
 makeLenses ''MemberGenData
 
+memberGenData = MemberGenData
+    { _defineFunctionsLen = 0
+    , _externFunctionsLen = 0
+    , _typeSections       = D.empty
+    , _importSections     = D.empty
+    , _functionSections   = D.empty
+    , _exportSections     = D.empty
+    , _codeSections       = D.empty
+    }
+
 type MemberGen=State MemberGenData
 
 fDefToType :: Me.FuncDef -> WA.FuncType
 fDefToType (Me.FuncDef _ params ret) = WA.FuncType
     (fmap (WL.typeToValueType . snd) params)
     (fmap WL.typeToValueType ret)
+
+compile :: [Me.Member] -> WA.WasmASTRoot
+compile x = WA.WasmASTRoot
+    ((Just . WA.TypeSection . D.toList . _typeSections) res)
+    Nothing
+    Nothing
+    Nothing
+    Nothing
+    Nothing
+    Nothing
+    Nothing
+    Nothing
+    Nothing
+    Nothing
+  where
+    md       = toMemberData x
+    (_, res) = runState (membersGen md x) memberGenData
+
+membersGen :: MemberData -> [Me.Member] -> MemberGen ()
+membersGen md = mapM_ (memberGen md)
 
 memberGen :: MemberData -> Me.Member -> MemberGen ()
 memberGen md (Me.MFun d@(Me.FuncDef name params ret) stat) = do
