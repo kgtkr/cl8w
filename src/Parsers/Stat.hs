@@ -76,8 +76,7 @@ ifP = do
   s    <- statP
   elif <- many
     (do
-      L.reserved "else"
-      L.reserved "if"
+      try (L.reserved "else" >> L.reserved "if")
       ee <- L.parens E.exprP
       ss <- statP
       return (ee, ss)
