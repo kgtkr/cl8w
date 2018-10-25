@@ -166,4 +166,92 @@ exprGen expr = case expr of
                 exprGen x
                 addOpCode $ W.OpI32Const (-1)
                 addOpCode $ W.OpI32Mul
+    E.EAdd a b -> do
+        ta <- exprType a
+        tb <- exprType b
+        case (ta, tb) of
+            (Just L.TI32, Just L.TI32) -> do
+                exprGen a
+                exprGen b
+                addOpCode $ W.OpI32Add
+    E.ESub a b -> do
+        ta <- exprType a
+        tb <- exprType b
+        case (ta, tb) of
+            (Just L.TI32, Just L.TI32) -> do
+                exprGen a
+                exprGen b
+                addOpCode $ W.OpI32Sub
+    E.EMul a b -> do
+        ta <- exprType a
+        tb <- exprType b
+        case (ta, tb) of
+            (Just L.TI32, Just L.TI32) -> do
+                exprGen a
+                exprGen b
+                addOpCode $ W.OpI32Mul
+    E.EDiv a b -> do
+        ta <- exprType a
+        tb <- exprType b
+        case (ta, tb) of
+            (Just L.TI32, Just L.TI32) -> do
+                exprGen a
+                exprGen b
+                addOpCode $ W.OpI32Divs
+    E.EMod a b -> do
+        ta <- exprType a
+        tb <- exprType b
+        case (ta, tb) of
+            (Just L.TI32, Just L.TI32) -> do
+                exprGen a
+                exprGen b
+                addOpCode $ W.OpI32Rems
+    E.EEq a b -> do
+        ta <- exprType a
+        tb <- exprType b
+        case (ta, tb) of
+            (Just L.TI32, Just L.TI32) -> do
+                exprGen a
+                exprGen b
+                addOpCode $ W.OpI32Eq
+    E.ENe a b -> do
+        ta <- exprType a
+        tb <- exprType b
+        case (ta, tb) of
+            (Just L.TI32, Just L.TI32) -> do
+                exprGen a
+                exprGen b
+                addOpCode $ W.OpI32Ne
+    E.EGt a b -> do
+        ta <- exprType a
+        tb <- exprType b
+        case (ta, tb) of
+            (Just L.TI32, Just L.TI32) -> do
+                exprGen a
+                exprGen b
+                addOpCode $ W.OpI32Gts
+    E.EGte a b -> do
+        ta <- exprType a
+        tb <- exprType b
+        case (ta, tb) of
+            (Just L.TI32, Just L.TI32) -> do
+                exprGen a
+                exprGen b
+                addOpCode $ W.OpI32Ges
+    E.ELt a b -> do
+        ta <- exprType a
+        tb <- exprType b
+        case (ta, tb) of
+            (Just L.TI32, Just L.TI32) -> do
+                exprGen a
+                exprGen b
+                addOpCode $ W.OpI32Lts
+    E.ELte a b -> do
+        ta <- exprType a
+        tb <- exprType b
+        case (ta, tb) of
+            (Just L.TI32, Just L.TI32) -> do
+                exprGen a
+                exprGen b
+                addOpCode $ W.OpI32Les
 
