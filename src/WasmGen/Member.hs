@@ -73,15 +73,15 @@ fDefToType (Me.FuncDef _ params ret) = WA.FuncType
 compile :: [Me.Member] -> WA.WasmASTRoot
 compile x = WA.WasmASTRoot
     ((Just . WA.TypeSection . D.toList . _typeSections) res)
+    ((Just . WA.ImportSection . D.toList . _importSections) res)
+    ((Just . WA.FunctionSection . D.toList . _functionSections) res)
     Nothing
     Nothing
     Nothing
+    ((Just . WA.ExportSection . D.toList . _exportSections) res)
     Nothing
     Nothing
-    Nothing
-    Nothing
-    Nothing
-    Nothing
+    ((Just . WA.CodeSection . D.toList . _codeSections) res)
     Nothing
   where
     md       = toMemberData x
