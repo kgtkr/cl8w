@@ -1,6 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-
-
 module WasmGen.Stat where
 
 import qualified Data.DList                    as D

@@ -30,6 +30,13 @@ data ExprGenData=ExprGenData{
 }
 makeLenses ''ExprGenData
 
+emptyExprGenData = ExprGenData
+    { _opCodes   = D.empty
+    , _locals    = D.empty
+    , _localsLen = 0
+    , _localsMap = M.empty
+    }
+
 type ExprGen = ReaderT WM.MemberData (State ExprGenData)
 
 exprType :: E.Expr -> ExprGen (Maybe L.Type)

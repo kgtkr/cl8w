@@ -10,6 +10,10 @@ import           WasmGen.Lang
 import           Data.List
 import qualified WasmGen.Lang                  as WL
 
+import qualified Wasm.AST                      as WA
+
+import qualified Data.DList                    as D
+
 data StructProps=StructProps{
     _pos::Int,
     _typ::L.Type,
@@ -39,3 +43,12 @@ makeLenses ''MemberData
 
 structSize :: Struct -> Int
 structSize = sum . map (WL.sizeOf . _typ . snd) . M.toList
+
+data MemberGen=MemberGen{
+    _typeSections::D.DList WA.TypeSection,
+    _importSections::D.DList WA.ImportSection,
+    _functionSections::D.DList WA.FunctionSection,
+    _exportSections::D.DList WA.ExportSection,
+    _codeSections::D.DList WA.CodeSection
+}
+makeLenses ''MemberGen
