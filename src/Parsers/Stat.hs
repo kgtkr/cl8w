@@ -41,25 +41,18 @@ statP :: Parser Stat
 statP = blockP <|> letP <|> ifP <|> whileP <|> returnP <|> exprToStatP -- <|> setP
 
 exprToStatP :: Parser Stat
-exprToStatP = do
-  e <- E.exprP
-  L.semi
-  return $ SExprToStat e
+exprToStatP = SExprToStat <$> E.exprP <* L.semi
 
 
 blockP :: Parser Stat
 blockP = L.braces (SBlock <$> many statP)
 
 letP :: Parser Stat
-letP = do
-  L.reserved "let"
-  ident <- L.identifier
-  L.colon
-  t <- L.typeParser
-  L.reservedOp "="
-  e <- E.exprP
-  L.semi
-  return $ SLet ident t e
+letP =
+  SLet
+    <$> (L.reserved "let" *> L.identifier)
+    <*> (L.colon *> L.typeParser)
+    <*> (L.reservedOp "=" *> E.exprP <* L.semi)
 
 ifP :: Parser Stat
 ifP =
