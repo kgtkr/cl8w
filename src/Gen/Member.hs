@@ -27,38 +27,41 @@ fromASTStruct ms = M.fromList (f 0 (sortOn fst ms))
 
 toMemberData :: [PM.Member] -> MemberData
 toMemberData ms = MemberData
-    { _structs   = undefined
-    , _functions = ( M.fromList
-                   . map (\(i, d@(PM.FuncDef name _ _)) -> (name, (i, d)))
-                   . zip [0 ..]
-                   . mapMaybe
-                         (\case
-                             PM.MFun       d _ -> Just d
-                             PM.MExternFun d _ -> Just d
-                         )
-                   )
+    { _memberDataStructs   = undefined
+    , _memberDataFunctions = ( M.fromList
+                             . map
+                                   (\(i, d@(PM.FuncDef name _ _)) ->
+                                       (name, (i, d))
+                                   )
+                             . zip [0 ..]
+                             . mapMaybe
+                                   (\case
+                                       PM.MFun       d _ -> Just d
+                                       PM.MExternFun d _ -> Just d
+                                   )
+                             )
         ms
     }
 
 data MemberGenData=MemberGenData{
-    _defineFunctionsLen::Int,
-    _externFunctionsLen::Int,
-    _typeSections::D.DList WA.FuncType,
-    _importSections::D.DList WA.ImportEntry,
-    _functionSections::D.DList Int,
-    _exportSections::D.DList WA.ExportEntry,
-    _codeSections::D.DList WA.FunctionBody
+    _memberGenDataDefineFunctionsLen::Int,
+    _memberGenDataExternFunctionsLen::Int,
+    _memberGenDataTypeSections::D.DList WA.FuncType,
+    _memberGenDataImportSections::D.DList WA.ImportEntry,
+    _memberGenDataFunctionSections::D.DList Int,
+    _memberGenDataExportSections::D.DList WA.ExportEntry,
+    _memberGenDataCodeSections::D.DList WA.FunctionBody
 }
-makeLenses ''MemberGenData
+makeFields ''MemberGenData
 
 memberGenData = MemberGenData
-    { _defineFunctionsLen = 0
-    , _externFunctionsLen = 0
-    , _typeSections       = D.empty
-    , _importSections     = D.empty
-    , _functionSections   = D.empty
-    , _exportSections     = D.empty
-    , _codeSections       = D.empty
+    { _memberGenDataDefineFunctionsLen = 0
+    , _memberGenDataExternFunctionsLen = 0
+    , _memberGenDataTypeSections       = D.empty
+    , _memberGenDataImportSections     = D.empty
+    , _memberGenDataFunctionSections   = D.empty
+    , _memberGenDataExportSections     = D.empty
+    , _memberGenDataCodeSections       = D.empty
     }
 
 type MemberGen=State MemberGenData
@@ -70,14 +73,16 @@ fDefToType (PM.FuncDef _ params ret) = WA.FuncType
 
 compile :: [PM.Member] -> WA.WasmASTRoot
 compile x = WA.wasmASTRootDefault
-    { WA._typeSection = (Just . WA.TypeSection . D.toList . _typeSections) res
-    , WA._importSection = (Just . WA.ImportSection . D.toList . _importSections)
-                              res
-    , WA._functionSection =
-        (Just . WA.FunctionSection . D.toList . _functionSections) res
-    , WA._exportSection = (Just . WA.ExportSection . D.toList . _exportSections)
-                              res
-    , WA._codeSection = (Just . WA.CodeSection . D.toList . _codeSections) res
+    { WA._wasmASTRootTypeSection     =
+        (Just . WA.TypeSection . D.toList . (^. typeSections)) res
+    , WA._wasmASTRootImportSection   =
+        (Just . WA.ImportSection . D.toList . (^. importSections)) res
+    , WA._wasmASTRootFunctionSection =
+        (Just . WA.FunctionSection . D.toList . (^. functionSections)) res
+    , WA._wasmASTRootExportSection   =
+        (Just . WA.ExportSection . D.toList . (^. exportSections)) res
+    , WA._wasmASTRootCodeSection     =
+        (Just . WA.CodeSection . D.toList . (^. codeSections)) res
     }
   where
     md  = toMemberData x
@@ -97,7 +102,7 @@ memberGen md (PM.MFun d@(PM.FuncDef name params ret) stat) = do
     let s = execState (runReaderT (GS.statGen stat) md) x
     codeSections
         %= (`D.snoc` WA.FunctionBody
-               ((map (WA.LocalEntry 1) . D.toList . GO._locals) s)
-               ((D.toList . GO._opCodes) s)
+               ((map (WA.LocalEntry 1) . D.toList . (^. GO.locals)) s)
+               ((D.toList . (^. GO.opCodes)) s)
            )
     return ()

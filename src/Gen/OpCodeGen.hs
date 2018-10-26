@@ -18,19 +18,19 @@ type LocalsMap=M.Map String LocalData
 type LocalData=(PL.Type,Int)
 
 data OpCodeGenData=OpCodeGenData{
-    _opCodes::OpCodes,
-    _locals:: Locals,
-    _localsLen:: LocalsLen,
-    _localsMap:: LocalsMap
+    _opCodeGenDataOpCodes::OpCodes,
+    _opCodeGenDataLocals:: Locals,
+    _opCodeGenDataLocalsLen:: LocalsLen,
+    _opCodeGenDataLocalsMap:: LocalsMap
 }
-makeLenses ''OpCodeGenData
+makeFields ''OpCodeGenData
 
 emptyOpCodeGenData :: [(PL.Ident, PL.Type)] -> OpCodeGenData
 emptyOpCodeGenData lo = OpCodeGenData
-    { _opCodes   = D.empty
-    , _locals    = D.empty
-    , _localsLen = length lo
-    , _localsMap = M.fromList
+    { _opCodeGenDataOpCodes   = D.empty
+    , _opCodeGenDataLocals    = D.empty
+    , _opCodeGenDataLocalsLen = length lo
+    , _opCodeGenDataLocalsMap = M.fromList
         $ (map (\(i, (name, t)) -> (name, (t, i))) . zip [0 ..]) lo
     }
 

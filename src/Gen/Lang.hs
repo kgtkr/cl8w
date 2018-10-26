@@ -25,12 +25,12 @@ sizeOf PL.TChar       = 4
 sizeOf (PL.RefType _) = 4
 
 data StructProps=StructProps{
-    _pos::Int,
-    _typ::PL.Type,
-    _name::String
+    _structPropsPos::Int,
+    _structPropsTyp::PL.Type,
+    _structPropsName::String
 }
 
-makeLenses ''StructProps
+makeFields ''StructProps
 
 type Struct=M.Map String StructProps
 
@@ -38,11 +38,11 @@ type FunctionMap=M.Map String (Int,PM.FuncDef)
 type StructMap=M.Map String Struct
 
 data MemberData=MemberData{
-    _functions::FunctionMap,
-    _structs::StructMap
+    _memberDataFunctions::FunctionMap,
+    _memberDataStructs::StructMap
 }
 
-makeLenses ''MemberData
+makeFields ''MemberData
 
 structSize :: Struct -> Int
-structSize = sum . map (sizeOf . _typ . snd) . M.toList
+structSize = sum . map (sizeOf . (^. typ) . snd) . M.toList

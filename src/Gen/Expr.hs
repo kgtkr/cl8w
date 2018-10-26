@@ -116,13 +116,13 @@ exprGen (PE.EStructL name exprs) =
             (\(ident, ex) -> do
                 let prop = sDef M.! ident
                 let storeOp =
-                        (case WL.typeToValueType (WL._typ prop) of
+                        (case WL.typeToValueType (prop ^. WL.typ) of
                                 WA.ValI32 -> WA.OpI32Store
                                 WA.ValI64 -> WA.OpI64Store
                                 WA.ValF32 -> WA.OpF32Store
                                 WA.ValF64 -> WA.OpF64Store
                             )
-                            (WA.MemoryImmediate 2 (WL._pos prop))
+                            (WA.MemoryImmediate 2 (prop ^. WL.pos))
                 opCallGen storeOp [addOpCode $ WA.OpGetLocal res, exprGen ex]
             )
             exprs

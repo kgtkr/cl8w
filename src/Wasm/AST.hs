@@ -240,32 +240,32 @@ data OperatorCode =
     |OpF64ReinterpretI64
 
 data WasmASTRoot = WasmASTRoot{
-    _typeSection::Maybe TypeSection,
-    _importSection::Maybe ImportSection,
-    _functionSection::Maybe FunctionSection,
-    _tableSection::Maybe TableSection,
-    _memorySection:: Maybe MemorySection,
-    _globalSection::Maybe GlobalSection,
-    _exportSection:: Maybe ExportSection,
-    _startSection::   Maybe StartSection,
-    _elementSection:: Maybe ElementSection,
-    _codeSection::  Maybe CodeSection,
-    _dataSection::Maybe DataSection
+    _wasmASTRootTypeSection::Maybe TypeSection,
+    _wasmASTRootImportSection::Maybe ImportSection,
+    _wasmASTRootFunctionSection::Maybe FunctionSection,
+    _wasmASTRootTableSection::Maybe TableSection,
+    _wasmASTRootMemorySection:: Maybe MemorySection,
+    _wasmASTRootGlobalSection::Maybe GlobalSection,
+    _wasmASTRootExportSection:: Maybe ExportSection,
+    _wasmASTRootStartSection::   Maybe StartSection,
+    _wasmASTRootElementSection:: Maybe ElementSection,
+    _wasmASTRootCodeSection::  Maybe CodeSection,
+    _wasmASTRootDataSection::Maybe DataSection
 }
 
-makeLenses ''WasmASTRoot
+makeFields ''WasmASTRoot
 
 wasmASTRootDefault :: WasmASTRoot
 wasmASTRootDefault = WasmASTRoot
-    { _typeSection     = Nothing
-    , _importSection   = Nothing
-    , _functionSection = Nothing
-    , _tableSection    = Nothing
-    , _memorySection   = Nothing
-    , _globalSection   = Nothing
-    , _exportSection   = Nothing
-    , _startSection    = Nothing
-    , _elementSection  = Nothing
-    , _codeSection     = Nothing
-    , _dataSection     = Nothing
+    { _wasmASTRootTypeSection     = Nothing
+    , _wasmASTRootImportSection   = Nothing
+    , _wasmASTRootFunctionSection = Nothing
+    , _wasmASTRootTableSection    = Nothing
+    , _wasmASTRootMemorySection   = Nothing
+    , _wasmASTRootGlobalSection   = Nothing
+    , _wasmASTRootExportSection   = Nothing
+    , _wasmASTRootStartSection    = Nothing
+    , _wasmASTRootElementSection  = Nothing
+    , _wasmASTRootCodeSection     = Nothing
+    , _wasmASTRootDataSection     = Nothing
     }
