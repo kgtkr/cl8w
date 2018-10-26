@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module Wasm.AST where
 import qualified Data.ByteString               as BS
 import           Data.Int

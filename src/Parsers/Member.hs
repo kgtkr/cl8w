@@ -7,8 +7,15 @@ import qualified Text.ParserCombinators.Parsec.Token
 import           Text.ParserCombinators.Parsec.Expr
 import qualified Parsers.Stat                  as S
 import qualified Parsers.Lang                  as L
+import           Control.Lens
 
-data FuncDef = FuncDef L.Ident [(L.Ident,L.Type)] (Maybe L.Type) deriving (Show, Eq)
+data FuncDef = FuncDef {
+  _funcDefName::L.Ident ,
+  _funcDefParams::[(L.Ident,L.Type)],
+  _funcDefResult:: Maybe L.Type
+} deriving (Show, Eq)
+
+makeFields ''FuncDef
 
 funcDefP :: Parser FuncDef
 funcDefP = do

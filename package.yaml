@@ -30,7 +30,7 @@ dependencies:
 - containers
 - dlist
 - mtl
-- lens
+- lens >= 4.16.1
 
 library:
   source-dirs: src
@@ -56,3 +56,9 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - cl8w
+default-extensions:
+  - TemplateHaskell
+  - FlexibleInstances
+  - MultiParamTypeClasses
+  - FunctionalDependencies
+  - LambdaCase

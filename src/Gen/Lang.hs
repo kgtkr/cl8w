@@ -1,6 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-
-
 module Gen.Lang where
 
 import qualified Parsers.Lang                  as PL
