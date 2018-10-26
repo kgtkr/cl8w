@@ -4,22 +4,22 @@
 module Gen.Expr where
 
 import qualified Data.DList                    as D
-import qualified Wasm.AST                      as W
+import qualified Wasm.AST                      as WA
 import qualified Data.Map                      as M
 import           Control.Monad.State
-import qualified Parsers.Member                as Me
-import qualified Parsers.Lang                  as L
-import qualified Parsers.Expr                  as E
+import qualified Parsers.Member                as PM
+import qualified Parsers.Lang                  as PL
+import qualified Parsers.Expr                  as PE
 import           Control.Lens
 import qualified Gen.Lang                      as WL
 import           Control.Monad.Reader
-type OpCodes=D.DList W.OperatorCode
-type Locals=D.DList W.ValueType
+type OpCodes=D.DList WA.OperatorCode
+type Locals=D.DList WA.ValueType
 type LocalsLen=Int
 type LocalsMap=M.Map String LocalData
-type LocalData=(L.Type,Int)
+type LocalData=(PL.Type,Int)
 
-type ExprType=Maybe L.Type
+type ExprType=Maybe PL.Type
 
 data ExprGenData=ExprGenData{
     _opCodes::OpCodes,
@@ -29,7 +29,7 @@ data ExprGenData=ExprGenData{
 }
 makeLenses ''ExprGenData
 
-emptyExprGenData :: [(L.Ident, L.Type)] -> ExprGenData
+emptyExprGenData :: [(PL.Ident, PL.Type)] -> ExprGenData
 emptyExprGenData lo = ExprGenData
     { _opCodes   = D.empty
     , _locals    = D.empty
@@ -40,226 +40,227 @@ emptyExprGenData lo = ExprGenData
 
 type ExprGen = ReaderT WL.MemberData (State ExprGenData)
 
-exprType :: E.Expr -> ExprGen (Maybe L.Type)
-exprType (E.EStructL ident _) = (return . Just) $ L.RefType $ L.TStruct ident
-exprType (E.EI32L    _      ) = (return . Just) L.TI32
-exprType (E.EI64L    _      ) = (return . Just) L.TI64
-exprType (E.EF32L    _      ) = (return . Just) L.TF32
-exprType (E.EF64L    _      ) = (return . Just) L.TF64
-exprType (E.EStringL _      ) = (return . Just) $ L.RefType L.TString
-exprType (E.EArrayL t _     ) = (return . Just) $ L.RefType $ L.TArray t
-exprType (E.EBoolL _        ) = (return . Just) L.TBool
-exprType (E.ECharL _        ) = (return . Just) L.TChar
-exprType (E.EVar   ident    ) = Just . (^. _1) . (M.! ident) <$> use localsMap
-exprType (E.ECall ident _   ) = do
-    Me.FuncDef _ _ t <- (^. _2) . (M.! ident) <$> view WL.functions
+exprType :: PE.Expr -> ExprGen (Maybe PL.Type)
+exprType (PE.EStructL ident _) =
+    (return . Just) $ PL.RefType $ PL.TStruct ident
+exprType (PE.EI32L    _   ) = (return . Just) PL.TI32
+exprType (PE.EI64L    _   ) = (return . Just) PL.TI64
+exprType (PE.EF32L    _   ) = (return . Just) PL.TF32
+exprType (PE.EF64L    _   ) = (return . Just) PL.TF64
+exprType (PE.EStringL _   ) = (return . Just) $ PL.RefType PL.TString
+exprType (PE.EArrayL t _  ) = (return . Just) $ PL.RefType $ PL.TArray t
+exprType (PE.EBoolL _     ) = (return . Just) PL.TBool
+exprType (PE.ECharL _     ) = (return . Just) PL.TChar
+exprType (PE.EVar   ident ) = Just . (^. _1) . (M.! ident) <$> use localsMap
+exprType (PE.ECall ident _) = do
+    PM.FuncDef _ _ t <- (^. _2) . (M.! ident) <$> view WL.functions
     return t
-exprType (E.ENot   _        ) = (return . Just) L.TBool
-exprType (E.EPlus  e        ) = exprType e
-exprType (E.EMinus e        ) = exprType e
-exprType (E.EMember pIdent e) = do
-    Just (L.RefType (L.TStruct sIdent)) <- exprType e
+exprType (PE.ENot   _        ) = (return . Just) PL.TBool
+exprType (PE.EPlus  e        ) = exprType e
+exprType (PE.EMinus e        ) = exprType e
+exprType (PE.EMember pIdent e) = do
+    Just (PL.RefType (PL.TStruct sIdent)) <- exprType e
     Just . (^. WL.typ) . (M.! pIdent) . (M.! sIdent) <$> view WL.structs
-exprType (E.EIndex _ e) = do
-    Just (L.RefType (L.TArray t)) <- exprType e
+exprType (PE.EIndex _ e) = do
+    Just (PL.RefType (PL.TArray t)) <- exprType e
     (return . Just) t
-exprType (E.EAdd    e _) = exprType e
-exprType (E.ESub    e _) = exprType e
-exprType (E.EMul    e _) = exprType e
-exprType (E.EDiv    e _) = exprType e
-exprType (E.EMod    e _) = exprType e
-exprType (E.EAnd    _ _) = (return . Just) L.TBool
-exprType (E.EOr     _ _) = (return . Just) L.TBool
-exprType (E.EBitAnd e _) = exprType e
-exprType (E.EBitOr  e _) = exprType e
-exprType (E.EPow    e _) = exprType e
-exprType (E.EEq     _ _) = (return . Just) L.TBool
-exprType (E.ENe     _ _) = (return . Just) L.TBool
-exprType (E.ELt     _ _) = (return . Just) L.TBool
-exprType (E.ELte    _ _) = (return . Just) L.TBool
-exprType (E.EGt     _ _) = (return . Just) L.TBool
-exprType (E.EGte    _ _) = (return . Just) L.TBool
+exprType (PE.EAdd    e _) = exprType e
+exprType (PE.ESub    e _) = exprType e
+exprType (PE.EMul    e _) = exprType e
+exprType (PE.EDiv    e _) = exprType e
+exprType (PE.EMod    e _) = exprType e
+exprType (PE.EAnd    _ _) = (return . Just) PL.TBool
+exprType (PE.EOr     _ _) = (return . Just) PL.TBool
+exprType (PE.EBitAnd e _) = exprType e
+exprType (PE.EBitOr  e _) = exprType e
+exprType (PE.EPow    e _) = exprType e
+exprType (PE.EEq     _ _) = (return . Just) PL.TBool
+exprType (PE.ENe     _ _) = (return . Just) PL.TBool
+exprType (PE.ELt     _ _) = (return . Just) PL.TBool
+exprType (PE.ELte    _ _) = (return . Just) PL.TBool
+exprType (PE.EGt     _ _) = (return . Just) PL.TBool
+exprType (PE.EGte    _ _) = (return . Just) PL.TBool
 
-addLocal :: W.ValueType -> ExprGen Int
+addLocal :: WA.ValueType -> ExprGen Int
 addLocal t = do
     len <- use localsLen
     localsLen += 1
     locals %= (flip D.snoc) t
     return len
 
-addNamedLocalData :: L.Type -> L.Ident -> ExprGen Int
+addNamedLocalData :: PL.Type -> PL.Ident -> ExprGen Int
 addNamedLocalData t name = do
     id <- (addLocal . WL.typeToValueType) t
     localsMap %= (M.insert name (t, id))
     return id
 
-addOpCode :: W.OperatorCode -> ExprGen ()
+addOpCode :: WA.OperatorCode -> ExprGen ()
 addOpCode x = opCodes %= (flip D.snoc) x
 
 callGen :: WL.FunctionMap -> String -> [ExprGen ()] -> ExprGen ()
 callGen m f args = do
-    let (id, Me.FuncDef _ _ re) = m M.! f
-    opCallGen (W.OpCall id) args
+    let (id, PM.FuncDef _ _ re) = m M.! f
+    opCallGen (WA.OpCall id) args
 
-opCallGen :: W.OperatorCode -> [ExprGen ()] -> ExprGen ()
+opCallGen :: WA.OperatorCode -> [ExprGen ()] -> ExprGen ()
 opCallGen op args = do
     sequence_ args
     addOpCode op
 
-blockGen :: W.BlockType -> ExprGen () -> ExprGen ()
+blockGen :: WA.BlockType -> ExprGen () -> ExprGen ()
 blockGen t x = do
-    addOpCode $ W.OpBlock t
+    addOpCode $ WA.OpBlock t
     x
-    addOpCode $ W.OpEnd
+    addOpCode $ WA.OpEnd
 
 mapSort :: Ord a => [a] -> M.Map a b -> [b]
 mapSort keys m = map (m M.!) keys
 
 -- 値/位置/オフセット
-storeGen :: E.Expr -> E.Expr -> Int -> ExprGen ()
+storeGen :: PE.Expr -> PE.Expr -> Int -> ExprGen ()
 storeGen e i o = do
     Just et <- exprType e
     let storeOp =
             (case WL.typeToValueType et of
-                    W.ValI32 -> W.OpI32Store
-                    W.ValI64 -> W.OpI64Store
-                    W.ValF32 -> W.OpF32Store
-                    W.ValF64 -> W.OpF64Store
+                    WA.ValI32 -> WA.OpI32Store
+                    WA.ValI64 -> WA.OpI64Store
+                    WA.ValF32 -> WA.OpF32Store
+                    WA.ValF64 -> WA.OpF64Store
                 )
-                (W.MemoryImmediate 2 o)
+                (WA.MemoryImmediate 2 o)
     opCallGen storeOp [exprGen i, exprGen e]
 
-exprGen :: E.Expr -> ExprGen ()
+exprGen :: PE.Expr -> ExprGen ()
 exprGen expr = case expr of
-    E.EStructL name exprs -> blockGen (W.BlockType (Just W.ValI32)) $ do
+    PE.EStructL name exprs -> blockGen (WA.BlockType (Just WA.ValI32)) $ do
         fMap <- view WL.functions
         sDef <- (M.! name) <$> view WL.structs
-        res  <- addLocal W.ValI32
-        callGen fMap "malloc" [addOpCode $ W.OpI32Const (WL.structSize sDef)]
+        res  <- addLocal WA.ValI32
+        callGen fMap "malloc" [addOpCode $ WA.OpI32Const (WL.structSize sDef)]
         mapM_
             (\(ident, ex) -> do
                 let prop = sDef M.! ident
                 let storeOp =
                         (case WL.typeToValueType (WL._typ prop) of
-                                W.ValI32 -> W.OpI32Store
-                                W.ValI64 -> W.OpI64Store
-                                W.ValF32 -> W.OpF32Store
-                                W.ValF64 -> W.OpF64Store
+                                WA.ValI32 -> WA.OpI32Store
+                                WA.ValI64 -> WA.OpI64Store
+                                WA.ValF32 -> WA.OpF32Store
+                                WA.ValF64 -> WA.OpF64Store
                             )
-                            (W.MemoryImmediate 2 (WL._pos prop))
-                opCallGen storeOp [addOpCode $ W.OpGetLocal res, exprGen ex]
+                            (WA.MemoryImmediate 2 (WL._pos prop))
+                opCallGen storeOp [addOpCode $ WA.OpGetLocal res, exprGen ex]
             )
             exprs
-        addOpCode $ W.OpGetLocal res
-    E.EI32L  x -> addOpCode $ W.OpI32Const x
-    E.EI64L  x -> addOpCode $ W.OpI64Const x
-    E.EF32L  x -> addOpCode $ W.OpF32Const x
-    E.EF64L  x -> addOpCode $ W.OpF64Const x
-    E.EBoolL x -> addOpCode $ W.OpI32Const (if x then 1 else 0)
-    E.EVar   x -> do
+        addOpCode $ WA.OpGetLocal res
+    PE.EI32L  x -> addOpCode $ WA.OpI32Const x
+    PE.EI64L  x -> addOpCode $ WA.OpI64Const x
+    PE.EF32L  x -> addOpCode $ WA.OpF32Const x
+    PE.EF64L  x -> addOpCode $ WA.OpF64Const x
+    PE.EBoolL x -> addOpCode $ WA.OpI32Const (if x then 1 else 0)
+    PE.EVar   x -> do
         l <- snd . (M.! x) <$> use localsMap
-        addOpCode $ W.OpGetLocal l
-    E.ECall name ex -> do
+        addOpCode $ WA.OpGetLocal l
+    PE.ECall name ex -> do
         fMap <- view WL.functions
         callGen fMap name (fmap exprGen ex)
-    E.ENot x -> do
+    PE.ENot x -> do
         exprGen x
-        addOpCode $ W.OpI32Const 0
-        addOpCode W.OpI32Eq
-    E.EPlus  x -> exprGen x
-    E.EMinus x -> do
+        addOpCode $ WA.OpI32Const 0
+        addOpCode WA.OpI32Eq
+    PE.EPlus  x -> exprGen x
+    PE.EMinus x -> do
         t <- exprType x
         case t of
-            Just L.TI32 -> do
+            Just PL.TI32 -> do
                 exprGen x
-                addOpCode $ W.OpI32Const (-1)
-                addOpCode $ W.OpI32Mul
-    E.EAdd a b -> do
+                addOpCode $ WA.OpI32Const (-1)
+                addOpCode $ WA.OpI32Mul
+    PE.EAdd a b -> do
         ta <- exprType a
         tb <- exprType b
         case (ta, tb) of
-            (Just L.TI32, Just L.TI32) -> do
+            (Just PL.TI32, Just PL.TI32) -> do
                 exprGen a
                 exprGen b
-                addOpCode $ W.OpI32Add
-    E.ESub a b -> do
+                addOpCode $ WA.OpI32Add
+    PE.ESub a b -> do
         ta <- exprType a
         tb <- exprType b
         case (ta, tb) of
-            (Just L.TI32, Just L.TI32) -> do
+            (Just PL.TI32, Just PL.TI32) -> do
                 exprGen a
                 exprGen b
-                addOpCode $ W.OpI32Sub
-    E.EMul a b -> do
+                addOpCode $ WA.OpI32Sub
+    PE.EMul a b -> do
         ta <- exprType a
         tb <- exprType b
         case (ta, tb) of
-            (Just L.TI32, Just L.TI32) -> do
+            (Just PL.TI32, Just PL.TI32) -> do
                 exprGen a
                 exprGen b
-                addOpCode $ W.OpI32Mul
-    E.EDiv a b -> do
+                addOpCode $ WA.OpI32Mul
+    PE.EDiv a b -> do
         ta <- exprType a
         tb <- exprType b
         case (ta, tb) of
-            (Just L.TI32, Just L.TI32) -> do
+            (Just PL.TI32, Just PL.TI32) -> do
                 exprGen a
                 exprGen b
-                addOpCode $ W.OpI32Divs
-    E.EMod a b -> do
+                addOpCode $ WA.OpI32Divs
+    PE.EMod a b -> do
         ta <- exprType a
         tb <- exprType b
         case (ta, tb) of
-            (Just L.TI32, Just L.TI32) -> do
+            (Just PL.TI32, Just PL.TI32) -> do
                 exprGen a
                 exprGen b
-                addOpCode $ W.OpI32Rems
-    E.EEq a b -> do
+                addOpCode $ WA.OpI32Rems
+    PE.EEq a b -> do
         ta <- exprType a
         tb <- exprType b
         case (ta, tb) of
-            (Just L.TI32, Just L.TI32) -> do
+            (Just PL.TI32, Just PL.TI32) -> do
                 exprGen a
                 exprGen b
-                addOpCode $ W.OpI32Eq
-    E.ENe a b -> do
+                addOpCode $ WA.OpI32Eq
+    PE.ENe a b -> do
         ta <- exprType a
         tb <- exprType b
         case (ta, tb) of
-            (Just L.TI32, Just L.TI32) -> do
+            (Just PL.TI32, Just PL.TI32) -> do
                 exprGen a
                 exprGen b
-                addOpCode $ W.OpI32Ne
-    E.EGt a b -> do
+                addOpCode $ WA.OpI32Ne
+    PE.EGt a b -> do
         ta <- exprType a
         tb <- exprType b
         case (ta, tb) of
-            (Just L.TI32, Just L.TI32) -> do
+            (Just PL.TI32, Just PL.TI32) -> do
                 exprGen a
                 exprGen b
-                addOpCode $ W.OpI32Gts
-    E.EGte a b -> do
+                addOpCode $ WA.OpI32Gts
+    PE.EGte a b -> do
         ta <- exprType a
         tb <- exprType b
         case (ta, tb) of
-            (Just L.TI32, Just L.TI32) -> do
+            (Just PL.TI32, Just PL.TI32) -> do
                 exprGen a
                 exprGen b
-                addOpCode $ W.OpI32Ges
-    E.ELt a b -> do
+                addOpCode $ WA.OpI32Ges
+    PE.ELt a b -> do
         ta <- exprType a
         tb <- exprType b
         case (ta, tb) of
-            (Just L.TI32, Just L.TI32) -> do
+            (Just PL.TI32, Just PL.TI32) -> do
                 exprGen a
                 exprGen b
-                addOpCode $ W.OpI32Lts
-    E.ELte a b -> do
+                addOpCode $ WA.OpI32Lts
+    PE.ELte a b -> do
         ta <- exprType a
         tb <- exprType b
         case (ta, tb) of
-            (Just L.TI32, Just L.TI32) -> do
+            (Just PL.TI32, Just PL.TI32) -> do
                 exprGen a
                 exprGen b
-                addOpCode $ W.OpI32Les
+                addOpCode $ WA.OpI32Les
 
