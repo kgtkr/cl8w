@@ -48,11 +48,7 @@ exprToStatP = do
 
 
 blockP :: Parser Stat
-blockP = L.braces
-  (do
-    ss <- many statP
-    return $ SBlock ss
-  )
+blockP = L.braces (SBlock <$> many statP)
 
 letP :: Parser Stat
 letP = do
@@ -66,24 +62,15 @@ letP = do
   return $ SLet ident t e
 
 ifP :: Parser Stat
-ifP = do
-  L.reserved "if"
-  e    <- L.parens E.exprP
-  s    <- statP
-  elif <- many
-    (do
-      try (L.reserved "else" >> L.reserved "if")
-      ee <- L.parens E.exprP
-      ss <- statP
-      return (ee, ss)
-    )
-  el <- optionMaybe
-    (do
-      L.reserved "else"
-      statP
-    )
-
-  return $ SIf (e, s) elif el
+ifP =
+  SIf
+    <$> ((,) <$> (L.reserved "if" *> L.parens E.exprP) <*> statP)
+    <*> many
+          (   (,)
+          <$> (try (L.reserved "else" >> L.reserved "if") *> L.parens E.exprP)
+          <*> statP
+          )
+    <*> optionMaybe (L.reserved "else" *> statP)
 
 whileP :: Parser Stat
 whileP = SWhile <$> (L.reserved "while" *> L.parens E.exprP) <*> statP
