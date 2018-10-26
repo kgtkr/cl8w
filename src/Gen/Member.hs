@@ -2,14 +2,13 @@
 
 module Gen.Member where
 
-import qualified Parsers.Lang                  as L
 import           Control.Lens
 import qualified Data.Map                      as M
-import qualified Parsers.Member                as Me
+import qualified Parsers.Member                as PM
 
-import           Gen.Lang                      as WL
-import           Gen.Expr                      as WE
-import           Gen.Stat                      as WS
+import           Gen.Lang                      as GL
+import           Gen.Expr                      as GE
+import           Gen.Stat                      as GS
 
 import           Data.List
 
@@ -20,23 +19,23 @@ import           Data.Maybe
 import           Control.Monad.State
 import           Control.Monad.Reader
 
-fromASTStruct :: Me.StructMembers -> Struct
+fromASTStruct :: PM.StructMembers -> Struct
 fromASTStruct ms = M.fromList (f 0 (sortOn fst ms))
   where
     f pos ((ident, t) : xs) =
-        (ident, StructProps pos t ident) : (f (pos + WL.sizeOf t) xs)
+        (ident, StructProps pos t ident) : (f (pos + GL.sizeOf t) xs)
     f _ [] = []
 
-toMemberData :: [Me.Member] -> MemberData
+toMemberData :: [PM.Member] -> MemberData
 toMemberData ms = MemberData
     { _structs   = undefined
     , _functions = ( M.fromList
-                   . map (\(i, d@(Me.FuncDef name _ _)) -> (name, (i, d)))
+                   . map (\(i, d@(PM.FuncDef name _ _)) -> (name, (i, d)))
                    . zip [0 ..]
                    . mapMaybe
                          (\m -> case m of
-                             Me.MFun       d _ -> Just d
-                             Me.MExternFun d _ -> Just d
+                             PM.MFun       d _ -> Just d
+                             PM.MExternFun d _ -> Just d
                          )
                    )
         ms
@@ -65,12 +64,12 @@ memberGenData = MemberGenData
 
 type MemberGen=State MemberGenData
 
-fDefToType :: Me.FuncDef -> WA.FuncType
-fDefToType (Me.FuncDef _ params ret) = WA.FuncType
-    (fmap (WL.typeToValueType . snd) params)
-    (fmap WL.typeToValueType ret)
+fDefToType :: PM.FuncDef -> WA.FuncType
+fDefToType (PM.FuncDef _ params ret) = WA.FuncType
+    (fmap (GL.typeToValueType . snd) params)
+    (fmap GL.typeToValueType ret)
 
-compile :: [Me.Member] -> WA.WasmASTRoot
+compile :: [PM.Member] -> WA.WasmASTRoot
 compile x = WA.WasmASTRoot
     ((Just . WA.TypeSection . D.toList . _typeSections) res)
     ((Just . WA.ImportSection . D.toList . _importSections) res)
@@ -87,22 +86,22 @@ compile x = WA.WasmASTRoot
     md       = toMemberData x
     (_, res) = runState (membersGen md x) memberGenData
 
-membersGen :: MemberData -> [Me.Member] -> MemberGen ()
+membersGen :: MemberData -> [PM.Member] -> MemberGen ()
 membersGen md = mapM_ (memberGen md)
 
-memberGen :: MemberData -> Me.Member -> MemberGen ()
-memberGen md (Me.MFun d@(Me.FuncDef name params ret) stat) = do
+memberGen :: MemberData -> PM.Member -> MemberGen ()
+memberGen md (PM.MFun d@(PM.FuncDef name params ret) stat) = do
     functionIndex <- (+) <$> use defineFunctionsLen <*> use externFunctionsLen
     defineFunctionsLen += 1
     typeSections %= (flip D.snoc) (fDefToType d)
     functionSections %= (flip D.snoc) functionIndex
     exportSections
         %= (flip D.snoc) (WA.ExportEntry name WA.ExFunction functionIndex)
-    let x      = WE.emptyExprGenData params
-    let (_, s) = runState ((runReaderT (WS.statGen stat)) md) x
+    let x      = GE.emptyExprGenData params
+    let (_, s) = runState ((runReaderT (GS.statGen stat)) md) x
     codeSections %= (flip D.snoc)
         (WA.FunctionBody
-            ((map (\x -> WA.LocalEntry 1 x) . D.toList . WE._locals) s)
-            ((D.toList . WE._opCodes) s)
+            ((map (\x -> WA.LocalEntry 1 x) . D.toList . GE._locals) s)
+            ((D.toList . GE._opCodes) s)
         )
     return ()

@@ -3,33 +3,33 @@
 
 module Gen.Lang where
 
-import qualified Parsers.Lang                  as L
-import qualified Wasm.AST                      as W
-import qualified Parsers.Member                as Me
+import qualified Parsers.Lang                  as PL
+import qualified Wasm.AST                      as WA
+import qualified Parsers.Member                as PM
 import           Control.Lens
 import qualified Data.Map                      as M
 
-typeToValueType :: L.Type -> W.ValueType
-typeToValueType L.TI32        = W.ValI32
-typeToValueType L.TI64        = W.ValI64
-typeToValueType L.TF32        = W.ValF32
-typeToValueType L.TF64        = W.ValF64
-typeToValueType L.TBool       = W.ValI32
-typeToValueType L.TChar       = W.ValI32
-typeToValueType (L.RefType _) = W.ValI32
+typeToValueType :: PL.Type -> WA.ValueType
+typeToValueType PL.TI32        = WA.ValI32
+typeToValueType PL.TI64        = WA.ValI64
+typeToValueType PL.TF32        = WA.ValF32
+typeToValueType PL.TF64        = WA.ValF64
+typeToValueType PL.TBool       = WA.ValI32
+typeToValueType PL.TChar       = WA.ValI32
+typeToValueType (PL.RefType _) = WA.ValI32
 
-sizeOf :: L.Type -> Int
-sizeOf L.TI32        = 4
-sizeOf L.TI64        = 8
-sizeOf L.TF32        = 4
-sizeOf L.TF64        = 8
-sizeOf L.TBool       = 4
-sizeOf L.TChar       = 4
-sizeOf (L.RefType _) = 4
+sizeOf :: PL.Type -> Int
+sizeOf PL.TI32        = 4
+sizeOf PL.TI64        = 8
+sizeOf PL.TF32        = 4
+sizeOf PL.TF64        = 8
+sizeOf PL.TBool       = 4
+sizeOf PL.TChar       = 4
+sizeOf (PL.RefType _) = 4
 
 data StructProps=StructProps{
     _pos::Int,
-    _typ::L.Type,
+    _typ::PL.Type,
     _name::String
 }
 
@@ -37,7 +37,7 @@ makeLenses ''StructProps
 
 type Struct=M.Map String StructProps
 
-type FunctionMap=M.Map String (Int,Me.FuncDef)
+type FunctionMap=M.Map String (Int,PM.FuncDef)
 type StructMap=M.Map String Struct
 
 data MemberData=MemberData{
