@@ -46,22 +46,22 @@ toMemberData ms = MemberData
 data MemberGenData=MemberGenData{
     _memberGenDataDefineFunctionsLen::Int,
     _memberGenDataExternFunctionsLen::Int,
-    _memberGenDataTypeSections::D.DList WA.FuncType,
-    _memberGenDataImportSections::D.DList WA.ImportEntry,
-    _memberGenDataFunctionSections::D.DList Int,
-    _memberGenDataExportSections::D.DList WA.ExportEntry,
-    _memberGenDataCodeSections::D.DList WA.FunctionBody
+    _memberGenDataTypeSection::D.DList WA.FuncType,
+    _memberGenDataImportSection::D.DList WA.ImportEntry,
+    _memberGenDataFunctionSection::D.DList Int,
+    _memberGenDataExportSection::D.DList WA.ExportEntry,
+    _memberGenDataCodeSection::D.DList WA.FunctionBody
 }
 makeFields ''MemberGenData
 
 memberGenData = MemberGenData
     { _memberGenDataDefineFunctionsLen = 0
     , _memberGenDataExternFunctionsLen = 0
-    , _memberGenDataTypeSections       = D.empty
-    , _memberGenDataImportSections     = D.empty
-    , _memberGenDataFunctionSections   = D.empty
-    , _memberGenDataExportSections     = D.empty
-    , _memberGenDataCodeSections       = D.empty
+    , _memberGenDataTypeSection        = D.empty
+    , _memberGenDataImportSection      = D.empty
+    , _memberGenDataFunctionSection    = D.empty
+    , _memberGenDataExportSection      = D.empty
+    , _memberGenDataCodeSection        = D.empty
     }
 
 type MemberGen=State MemberGenData
@@ -74,15 +74,15 @@ fDefToType (PM.FuncDef _ params ret) = WA.FuncType
 compile :: [PM.Member] -> WA.WasmASTRoot
 compile x = WA.wasmASTRootDefault
     { WA._wasmASTRootTypeSection     =
-        (Just . WA.TypeSection . D.toList . (^. typeSections)) res
+        (Just . WA.TypeSection . D.toList . (^. typeSection)) res
     , WA._wasmASTRootImportSection   =
-        (Just . WA.ImportSection . D.toList . (^. importSections)) res
+        (Just . WA.ImportSection . D.toList . (^. importSection)) res
     , WA._wasmASTRootFunctionSection =
-        (Just . WA.FunctionSection . D.toList . (^. functionSections)) res
+        (Just . WA.FunctionSection . D.toList . (^. functionSection)) res
     , WA._wasmASTRootExportSection   =
-        (Just . WA.ExportSection . D.toList . (^. exportSections)) res
+        (Just . WA.ExportSection . D.toList . (^. exportSection)) res
     , WA._wasmASTRootCodeSection     =
-        (Just . WA.CodeSection . D.toList . (^. codeSections)) res
+        (Just . WA.CodeSection . D.toList . (^. codeSection)) res
     }
   where
     md  = toMemberData x
@@ -95,12 +95,12 @@ memberGen :: MemberData -> PM.Member -> MemberGen ()
 memberGen md (PM.MFun d@(PM.FuncDef name params ret) stat) = do
     functionIndex <- (+) <$> use defineFunctionsLen <*> use externFunctionsLen
     defineFunctionsLen += 1
-    typeSections %= (`D.snoc` fDefToType d)
-    functionSections %= (`D.snoc` functionIndex)
-    exportSections %= (`D.snoc` WA.ExportEntry name WA.ExFunction functionIndex)
+    typeSection %= (`D.snoc` fDefToType d)
+    functionSection %= (`D.snoc` functionIndex)
+    exportSection %= (`D.snoc` WA.ExportEntry name WA.ExFunction functionIndex)
     let x = GO.emptyOpCodeGenData params
     let s = execState (runReaderT (GS.statGen stat) md) x
-    codeSections
+    codeSection
         %= (`D.snoc` WA.FunctionBody
                ((map (WA.LocalEntry 1) . D.toList . (^. GO.locals)) s)
                ((D.toList . (^. GO.opCodes)) s)
