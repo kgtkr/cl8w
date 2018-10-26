@@ -29,12 +29,10 @@ statGen (PS.SIf (e, s1) [] s2) = do
     statGen s1
     case s2 of
         Just s2 -> do
-            GE.addOpCode $ WA.OpElse
+            GE.addOpCode WA.OpElse
             statGen s2
         Nothing -> return ()
     GE.addOpCode $ WA.OpEnd
 statGen (PS.SReturn e) = do
-    case e of
-        Just e  -> GE.exprGen e
-        Nothing -> return ()
+    forM_ e GE.exprGen
     GE.addOpCode $ WA.OpReturn

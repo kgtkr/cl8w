@@ -1,6 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-
-
 module Gen.Expr where
 
 import qualified Data.DList                    as D
