@@ -68,7 +68,7 @@ fDefToType fd = WA.FuncType
     (fmap (GL.typeToValueType . snd) (fd ^. PM.params))
     (fmap GL.typeToValueType (fd ^. PM.result))
 
-compile :: [PM.Member] -> WA.WasmASTRoot
+compile :: PM.Module -> WA.WasmASTRoot
 compile x = WA.wasmASTRootDefault
     { WA._wasmASTRootTypeSection     =
         (Just . WA.TypeSection . D.toList . (^. typeSection)) res

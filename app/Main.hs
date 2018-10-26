@@ -8,12 +8,12 @@ import           Gen.Member
 
 main = do
     input <- readFile "test.cl8w"
-    let ast = (parse membersP "test" input)
+    let ast = (parse moduleP "test" input)
     case ast of
-        Right ast->do
+        Right ast -> do
             print ast
             let wAST = compile ast
             let bin  = runPut $ putWasmAST wAST
             BS.writeFile "test.wasm" bin
-        Left e->print e
+        Left e -> print e
     return ()

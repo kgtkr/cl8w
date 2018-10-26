@@ -45,11 +45,13 @@ data Member=MStruct L.Ident StructMembers
             |MExternFun FuncDef String
             deriving (Show, Eq)
 
+type Module=[Member]
+
 memberP :: Parser Member
 memberP = structP <|> funP <|> externFunP
 
-membersP :: Parser [Member]
-membersP = many memberP
+moduleP :: Parser Module
+moduleP = many memberP
 
 structP :: Parser Member
 structP = do
