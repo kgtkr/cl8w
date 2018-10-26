@@ -109,8 +109,8 @@ storeGen e i o = do
     opCallGen storeOp [exprGen i, exprGen e]
 
 exprGen :: PE.Expr -> GO.OpCodeGen ()
-exprGen expr = case expr of
-    PE.EStructL name exprs -> blockGen (WA.BlockType (Just WA.ValI32)) $ do
+exprGen (PE.EStructL name exprs) =
+    blockGen (WA.BlockType (Just WA.ValI32)) $ do
         fMap <- view WL.functions
         sDef <- (M.! name) <$> view WL.structs
         res  <- addLocal WA.ValI32
@@ -130,115 +130,115 @@ exprGen expr = case expr of
             )
             exprs
         addOpCode $ WA.OpGetLocal res
-    PE.EI32L  x -> addOpCode $ WA.OpI32Const x
-    PE.EI64L  x -> addOpCode $ WA.OpI64Const x
-    PE.EF32L  x -> addOpCode $ WA.OpF32Const x
-    PE.EF64L  x -> addOpCode $ WA.OpF64Const x
-    PE.EBoolL x -> addOpCode $ WA.OpI32Const (if x then 1 else 0)
-    PE.EVar   x -> do
-        l <- snd . (M.! x) <$> use GO.localsMap
-        addOpCode $ WA.OpGetLocal l
-    PE.ECall name ex -> do
-        fMap <- view WL.functions
-        callGen fMap name (fmap exprGen ex)
-    PE.ENot x -> do
-        exprGen x
-        addOpCode $ WA.OpI32Const 0
-        addOpCode WA.OpI32Eq
-    PE.EPlus  x -> exprGen x
-    PE.EMinus x -> do
-        t <- exprType x
-        case t of
-            Just PL.TI32 -> do
-                exprGen x
-                addOpCode $ WA.OpI32Const (-1)
-                addOpCode $ WA.OpI32Mul
-    PE.EAdd a b -> do
-        ta <- exprType a
-        tb <- exprType b
-        case (ta, tb) of
-            (Just PL.TI32, Just PL.TI32) -> do
-                exprGen a
-                exprGen b
-                addOpCode $ WA.OpI32Add
-    PE.ESub a b -> do
-        ta <- exprType a
-        tb <- exprType b
-        case (ta, tb) of
-            (Just PL.TI32, Just PL.TI32) -> do
-                exprGen a
-                exprGen b
-                addOpCode $ WA.OpI32Sub
-    PE.EMul a b -> do
-        ta <- exprType a
-        tb <- exprType b
-        case (ta, tb) of
-            (Just PL.TI32, Just PL.TI32) -> do
-                exprGen a
-                exprGen b
-                addOpCode $ WA.OpI32Mul
-    PE.EDiv a b -> do
-        ta <- exprType a
-        tb <- exprType b
-        case (ta, tb) of
-            (Just PL.TI32, Just PL.TI32) -> do
-                exprGen a
-                exprGen b
-                addOpCode $ WA.OpI32Divs
-    PE.EMod a b -> do
-        ta <- exprType a
-        tb <- exprType b
-        case (ta, tb) of
-            (Just PL.TI32, Just PL.TI32) -> do
-                exprGen a
-                exprGen b
-                addOpCode $ WA.OpI32Rems
-    PE.EEq a b -> do
-        ta <- exprType a
-        tb <- exprType b
-        case (ta, tb) of
-            (Just PL.TI32, Just PL.TI32) -> do
-                exprGen a
-                exprGen b
-                addOpCode $ WA.OpI32Eq
-    PE.ENe a b -> do
-        ta <- exprType a
-        tb <- exprType b
-        case (ta, tb) of
-            (Just PL.TI32, Just PL.TI32) -> do
-                exprGen a
-                exprGen b
-                addOpCode $ WA.OpI32Ne
-    PE.EGt a b -> do
-        ta <- exprType a
-        tb <- exprType b
-        case (ta, tb) of
-            (Just PL.TI32, Just PL.TI32) -> do
-                exprGen a
-                exprGen b
-                addOpCode $ WA.OpI32Gts
-    PE.EGte a b -> do
-        ta <- exprType a
-        tb <- exprType b
-        case (ta, tb) of
-            (Just PL.TI32, Just PL.TI32) -> do
-                exprGen a
-                exprGen b
-                addOpCode $ WA.OpI32Ges
-    PE.ELt a b -> do
-        ta <- exprType a
-        tb <- exprType b
-        case (ta, tb) of
-            (Just PL.TI32, Just PL.TI32) -> do
-                exprGen a
-                exprGen b
-                addOpCode $ WA.OpI32Lts
-    PE.ELte a b -> do
-        ta <- exprType a
-        tb <- exprType b
-        case (ta, tb) of
-            (Just PL.TI32, Just PL.TI32) -> do
-                exprGen a
-                exprGen b
-                addOpCode $ WA.OpI32Les
+exprGen (PE.EI32L  x) = addOpCode $ WA.OpI32Const x
+exprGen (PE.EI64L  x) = addOpCode $ WA.OpI64Const x
+exprGen (PE.EF32L  x) = addOpCode $ WA.OpF32Const x
+exprGen (PE.EF64L  x) = addOpCode $ WA.OpF64Const x
+exprGen (PE.EBoolL x) = addOpCode $ WA.OpI32Const (if x then 1 else 0)
+exprGen (PE.EVar   x) = do
+    l <- snd . (M.! x) <$> use GO.localsMap
+    addOpCode $ WA.OpGetLocal l
+exprGen (PE.ECall name ex) = do
+    fMap <- view WL.functions
+    callGen fMap name (fmap exprGen ex)
+exprGen (PE.ENot x) = do
+    exprGen x
+    addOpCode $ WA.OpI32Const 0
+    addOpCode WA.OpI32Eq
+exprGen (PE.EPlus  x) = exprGen x
+exprGen (PE.EMinus x) = do
+    t <- exprType x
+    case t of
+        Just PL.TI32 -> do
+            exprGen x
+            addOpCode $ WA.OpI32Const (-1)
+            addOpCode $ WA.OpI32Mul
+exprGen (PE.EAdd a b) = do
+    ta <- exprType a
+    tb <- exprType b
+    case (ta, tb) of
+        (Just PL.TI32, Just PL.TI32) -> do
+            exprGen a
+            exprGen b
+            addOpCode $ WA.OpI32Add
+exprGen (PE.ESub a b) = do
+    ta <- exprType a
+    tb <- exprType b
+    case (ta, tb) of
+        (Just PL.TI32, Just PL.TI32) -> do
+            exprGen a
+            exprGen b
+            addOpCode $ WA.OpI32Sub
+exprGen (PE.EMul a b) = do
+    ta <- exprType a
+    tb <- exprType b
+    case (ta, tb) of
+        (Just PL.TI32, Just PL.TI32) -> do
+            exprGen a
+            exprGen b
+            addOpCode $ WA.OpI32Mul
+exprGen (PE.EDiv a b) = do
+    ta <- exprType a
+    tb <- exprType b
+    case (ta, tb) of
+        (Just PL.TI32, Just PL.TI32) -> do
+            exprGen a
+            exprGen b
+            addOpCode $ WA.OpI32Divs
+exprGen (PE.EMod a b) = do
+    ta <- exprType a
+    tb <- exprType b
+    case (ta, tb) of
+        (Just PL.TI32, Just PL.TI32) -> do
+            exprGen a
+            exprGen b
+            addOpCode $ WA.OpI32Rems
+exprGen (PE.EEq a b) = do
+    ta <- exprType a
+    tb <- exprType b
+    case (ta, tb) of
+        (Just PL.TI32, Just PL.TI32) -> do
+            exprGen a
+            exprGen b
+            addOpCode $ WA.OpI32Eq
+exprGen (PE.ENe a b) = do
+    ta <- exprType a
+    tb <- exprType b
+    case (ta, tb) of
+        (Just PL.TI32, Just PL.TI32) -> do
+            exprGen a
+            exprGen b
+            addOpCode $ WA.OpI32Ne
+exprGen (PE.EGt a b) = do
+    ta <- exprType a
+    tb <- exprType b
+    case (ta, tb) of
+        (Just PL.TI32, Just PL.TI32) -> do
+            exprGen a
+            exprGen b
+            addOpCode $ WA.OpI32Gts
+exprGen (PE.EGte a b) = do
+    ta <- exprType a
+    tb <- exprType b
+    case (ta, tb) of
+        (Just PL.TI32, Just PL.TI32) -> do
+            exprGen a
+            exprGen b
+            addOpCode $ WA.OpI32Ges
+exprGen (PE.ELt a b) = do
+    ta <- exprType a
+    tb <- exprType b
+    case (ta, tb) of
+        (Just PL.TI32, Just PL.TI32) -> do
+            exprGen a
+            exprGen b
+            addOpCode $ WA.OpI32Lts
+exprGen (PE.ELte a b) = do
+    ta <- exprType a
+    tb <- exprType b
+    case (ta, tb) of
+        (Just PL.TI32, Just PL.TI32) -> do
+            exprGen a
+            exprGen b
+            addOpCode $ WA.OpI32Les
 
