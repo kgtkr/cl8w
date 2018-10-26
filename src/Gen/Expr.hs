@@ -69,7 +69,7 @@ addLocal t = do
 addNamedLocalData :: PL.Type -> PL.Ident -> GO.OpCodeGen Int
 addNamedLocalData t name = do
     id <- (addLocal . WL.typeToValueType) t
-    GO.localsMap %= (M.insert name (t, id))
+    GO.localsMap %= M.insert name (t, id)
     return id
 
 addOpCode :: WA.OperatorCode -> GO.OpCodeGen ()

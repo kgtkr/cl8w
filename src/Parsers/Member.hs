@@ -60,17 +60,11 @@ structP = do
   return $ MStruct ident m
 
 funP :: Parser Member
-funP = do
-  L.reserved "fun"
-  d <- funcDefP
-  L.reservedOp "="
-  s <- S.statP
-  return $ MFun d s
+funP =
+  MFun <$> (L.reserved "fun" *> funcDefP) <*> (L.reservedOp "=" *> S.statP)
 
 externFunP :: Parser Member
-externFunP = do
-  L.reserved "extern"
-  L.reserved "fun"
-  s <- L.stringLiteral
-  d <- funcDefP
-  return $ MExternFun d s
+externFunP =
+  flip MExternFun
+    <$> (L.reserved "extern" *> L.reserved "fun" *> L.stringLiteral)
+    <*> funcDefP
