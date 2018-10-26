@@ -20,11 +20,7 @@ siIdentP :: Parser SetIdent
 siIdentP = SIIdent <$> L.identifier
 
 siFieldP :: Parser SetIdent
-siFieldP = do
-  si <- setIdentP
-  L.dot
-  ident <- L.identifier
-  return $ SIField si ident
+siFieldP = SIField <$> setIdentP <*> (L.dot *> L.identifier)
 
 siIndexP :: Parser SetIdent
 siIndexP = do
@@ -90,23 +86,10 @@ ifP = do
   return $ SIf (e, s) elif el
 
 whileP :: Parser Stat
-whileP = do
-  L.reserved "while"
-  e <- L.parens E.exprP
-  s <- statP
-  return $ SWhile e s
+whileP = SWhile <$> (L.reserved "while" *> L.parens E.exprP) <*> statP
 
 returnP :: Parser Stat
-returnP = do
-  L.reserved "return"
-  e <- optionMaybe E.exprP
-  L.semi
-  return $ SReturn e
+returnP = SReturn <$> (L.reserved "return" *> optionMaybe E.exprP <* L.semi)
 
 setP :: Parser Stat
-setP = do
-  si <- setIdentP
-  L.reservedOp "="
-  e <- E.exprP
-  L.semi
-  return $ SSet si e
+setP = SSet <$> setIdentP <*> (L.reservedOp "=" *> E.exprP <* L.semi)
