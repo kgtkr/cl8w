@@ -7,7 +7,7 @@ import           Data.Tuple                     ( swap )
 import           Data.Maybe                     ( mapMaybe )
 import qualified Data.DList                    as D
 import           Control.Monad.Writer
-
+import           Control.Lens
 type MemberMap=(FunctionMap,StructMap)
 
 type StructMap=M.Map String PM.StructMembers
@@ -18,9 +18,9 @@ memberMap m =
   , (M.fromList . mapMaybe stMap) m
   )
  where
-  fnMap (PM.MFun (PM.FuncDef name _ _) _) = Just name
-  fnMap (PM.MExternFun (PM.FuncDef name _ _) _) = Just name
-  fnMap _ = Nothing
+  fnMap (PM.MFun       fd _) = Just $ fd ^. PM.name
+  fnMap (PM.MExternFun fd _) = Just $ fd ^. PM.name
+  fnMap _                    = Nothing
   stMap (PM.MStruct a b) = Just (a, b)
   stMap _                = Nothing
 

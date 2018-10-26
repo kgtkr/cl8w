@@ -29,15 +29,12 @@ toMemberData :: [PM.Member] -> MemberData
 toMemberData ms = MemberData
     { _memberDataStructs   = undefined
     , _memberDataFunctions = ( M.fromList
-                             . map
-                                   (\(i, d@(PM.FuncDef name _ _)) ->
-                                       (name, (i, d))
-                                   )
+                             . map (\(i, fd) -> (fd ^. PM.name, (i, fd)))
                              . zip [0 ..]
                              . mapMaybe
                                    (\case
-                                       PM.MFun       d _ -> Just d
-                                       PM.MExternFun d _ -> Just d
+                                       PM.MFun       fd _ -> Just fd
+                                       PM.MExternFun fd _ -> Just fd
                                    )
                              )
         ms
@@ -67,9 +64,9 @@ memberGenData = MemberGenData
 type MemberGen=State MemberGenData
 
 fDefToType :: PM.FuncDef -> WA.FuncType
-fDefToType (PM.FuncDef _ params ret) = WA.FuncType
-    (fmap (GL.typeToValueType . snd) params)
-    (fmap GL.typeToValueType ret)
+fDefToType fd = WA.FuncType
+    (fmap (GL.typeToValueType . snd) (fd ^. PM.params))
+    (fmap GL.typeToValueType (fd ^. PM.result))
 
 compile :: [PM.Member] -> WA.WasmASTRoot
 compile x = WA.wasmASTRootDefault
@@ -92,13 +89,14 @@ membersGen :: MemberData -> [PM.Member] -> MemberGen ()
 membersGen md = mapM_ (memberGen md)
 
 memberGen :: MemberData -> PM.Member -> MemberGen ()
-memberGen md (PM.MFun d@(PM.FuncDef name params ret) stat) = do
+memberGen md (PM.MFun fd stat) = do
     functionIndex <- (+) <$> use defineFunctionsLen <*> use externFunctionsLen
     defineFunctionsLen += 1
-    typeSection %= (`D.snoc` fDefToType d)
+    typeSection %= (`D.snoc` fDefToType fd)
     functionSection %= (`D.snoc` functionIndex)
-    exportSection %= (`D.snoc` WA.ExportEntry name WA.ExFunction functionIndex)
-    let x = GO.emptyOpCodeGenData params
+    exportSection
+        %= (`D.snoc` WA.ExportEntry (fd ^. PM.name) WA.ExFunction functionIndex)
+    let x = GO.emptyOpCodeGenData (fd ^. PM.params)
     let s = execState (runReaderT (GS.statGen stat) md) x
     codeSection
         %= (`D.snoc` WA.FunctionBody

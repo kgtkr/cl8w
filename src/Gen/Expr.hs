@@ -28,8 +28,8 @@ exprType (PE.EBoolL _     ) = (return . Just) PL.TBool
 exprType (PE.ECharL _     ) = (return . Just) PL.TChar
 exprType (PE.EVar   ident ) = Just . (^. _1) . (M.! ident) <$> use GO.localsMap
 exprType (PE.ECall ident _) = do
-    PM.FuncDef _ _ t <- (^. _2) . (M.! ident) <$> view WL.functions
-    return t
+    fd <- (^. _2) . (M.! ident) <$> view WL.functions
+    return $ fd ^. PM.result
 exprType (PE.ENot   _        ) = (return . Just) PL.TBool
 exprType (PE.EPlus  e        ) = exprType e
 exprType (PE.EMinus e        ) = exprType e
@@ -74,7 +74,7 @@ addOpCode x = GO.opCodes %= (`D.snoc` x)
 
 callGen :: WL.FunctionMap -> String -> [GO.OpCodeGen ()] -> GO.OpCodeGen ()
 callGen m f args = do
-    let (id, PM.FuncDef _ _ re) = m M.! f
+    let (id, _) = m M.! f
     opCallGen (WA.OpCall id) args
 
 opCallGen :: WA.OperatorCode -> [GO.OpCodeGen ()] -> GO.OpCodeGen ()
