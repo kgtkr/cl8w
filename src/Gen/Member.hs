@@ -83,7 +83,7 @@ compile x = WA.wasmASTRootDefault
     }
   where
     md       = toMemberData x
-    (_, res) = runState (membersGen md x) memberGenData
+    res = execState (membersGen md x) memberGenData
 
 membersGen :: MemberData -> [PM.Member] -> MemberGen ()
 membersGen md = mapM_ (memberGen md)
@@ -96,11 +96,11 @@ memberGen md (PM.MFun d@(PM.FuncDef name params ret) stat) = do
     functionSections %= (flip D.snoc) functionIndex
     exportSections
         %= (flip D.snoc) (WA.ExportEntry name WA.ExFunction functionIndex)
-    let x      = GO.emptyOpCodeGenData params
-    let (_, s) = runState ((runReaderT (GS.statGen stat)) md) x
-    codeSections %= (flip D.snoc)
-        (WA.FunctionBody
-            ((map (\x -> WA.LocalEntry 1 x) . D.toList . GO._locals) s)
-            ((D.toList . GO._opCodes) s)
+    let x = GO.emptyOpCodeGenData params
+    let s = execState (runReaderT (GS.statGen stat) md) x
+    codeSections %= flip
+        D.snoc
+        (WA.FunctionBody ((map (WA.LocalEntry 1) . D.toList . GO._locals) s)
+                         ((D.toList . GO._opCodes) s)
         )
     return ()
