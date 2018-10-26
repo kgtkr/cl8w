@@ -1,4 +1,4 @@
-module WasmGen.Gen where
+module Gen.Gen where
 
 import qualified Wasm.AST                      as W
 import qualified Parsers.Expr                  as E
@@ -17,14 +17,14 @@ type StructMap=M.Map String Me.StructMembers
 
 memberMap :: [Me.Member] -> MemberMap
 memberMap m =
-    ( (M.fromList . map swap . zip [0 ..] . mapMaybe fnMap) m
-    , (M.fromList . mapMaybe stMap) m
-    )
-  where
-    fnMap (Me.MFun (Me.FuncDef name _ _) _) = Just name
-    fnMap (Me.MExternFun (Me.FuncDef name _ _) _) = Just name
-    fnMap _ = Nothing
-    stMap (Me.MStruct a b) = Just (a, b)
-    stMap _                = Nothing
+  ( (M.fromList . map swap . zip [0 ..] . mapMaybe fnMap) m
+  , (M.fromList . mapMaybe stMap) m
+  )
+ where
+  fnMap (Me.MFun (Me.FuncDef name _ _) _) = Just name
+  fnMap (Me.MExternFun (Me.FuncDef name _ _) _) = Just name
+  fnMap _ = Nothing
+  stMap (Me.MStruct a b) = Just (a, b)
+  stMap _                = Nothing
 
 type FunctionMap=M.Map String Int

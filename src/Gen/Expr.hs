@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 
-module WasmGen.Expr where
+module Gen.Expr where
 
 import qualified Data.DList                    as D
 import qualified Wasm.AST                      as W
@@ -11,7 +11,7 @@ import qualified Parsers.Member                as Me
 import qualified Parsers.Lang                  as L
 import qualified Parsers.Expr                  as E
 import           Control.Lens
-import qualified WasmGen.Lang                  as WL
+import qualified Gen.Lang                      as WL
 import           Control.Monad.Reader
 type OpCodes=D.DList W.OperatorCode
 type Locals=D.DList W.ValueType

@@ -1,15 +1,15 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module WasmGen.Member where
+module Gen.Member where
 
 import qualified Parsers.Lang                  as L
 import           Control.Lens
 import qualified Data.Map                      as M
 import qualified Parsers.Member                as Me
 
-import           WasmGen.Lang                  as WL
-import           WasmGen.Expr                  as WE
-import           WasmGen.Stat                  as WS
+import           Gen.Lang                      as WL
+import           Gen.Expr                      as WE
+import           Gen.Stat                      as WS
 
 import           Data.List
 

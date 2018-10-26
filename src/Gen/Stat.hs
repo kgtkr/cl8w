@@ -1,7 +1,7 @@
-module WasmGen.Stat where
+module Gen.Stat where
 
 import qualified Data.DList                    as D
-import qualified WasmGen.Expr                  as GE
+import qualified Gen.Expr                      as GE
 import           Control.Monad.Reader
 import           Control.Monad.State
 import qualified Parsers.Expr                  as PE

@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 
-module WasmGen.Lang where
+module Gen.Lang where
 
 import qualified Parsers.Lang                  as L
 import qualified Wasm.AST                      as W

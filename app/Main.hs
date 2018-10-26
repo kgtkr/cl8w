@@ -4,7 +4,7 @@ import           Data.Serialize
 import qualified Data.ByteString               as BS
 import           Parsers.Member
 import           Text.ParserCombinators.Parsec
-import           WasmGen.Member
+import           Gen.Member
 
 main = do
     input <- readFile "test.cl8w"
