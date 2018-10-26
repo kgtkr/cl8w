@@ -18,6 +18,7 @@ import qualified Data.DList                    as D
 import           Data.Maybe
 import           Control.Monad.State
 import           Control.Monad.Reader
+import qualified Gen.OpCodeGen                 as GO
 
 fromASTStruct :: PM.StructMembers -> Struct
 fromASTStruct ms = M.fromList (f 0 (sortOn fst ms))
@@ -95,11 +96,11 @@ memberGen md (PM.MFun d@(PM.FuncDef name params ret) stat) = do
     functionSections %= (flip D.snoc) functionIndex
     exportSections
         %= (flip D.snoc) (WA.ExportEntry name WA.ExFunction functionIndex)
-    let x      = GE.emptyExprGenData params
+    let x      = GO.emptyOpCodeGenData params
     let (_, s) = runState ((runReaderT (GS.statGen stat)) md) x
     codeSections %= (flip D.snoc)
         (WA.FunctionBody
-            ((map (\x -> WA.LocalEntry 1 x) . D.toList . GE._locals) s)
-            ((D.toList . GE._opCodes) s)
+            ((map (\x -> WA.LocalEntry 1 x) . D.toList . GO._locals) s)
+            ((D.toList . GO._opCodes) s)
         )
     return ()

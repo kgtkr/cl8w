@@ -13,34 +13,12 @@ import qualified Parsers.Expr                  as PE
 import           Control.Lens
 import qualified Gen.Lang                      as WL
 import           Control.Monad.Reader
-type OpCodes=D.DList WA.OperatorCode
-type Locals=D.DList WA.ValueType
-type LocalsLen=Int
-type LocalsMap=M.Map String LocalData
-type LocalData=(PL.Type,Int)
+import qualified Gen.OpCodeGen                 as GO
+
 
 type ExprType=Maybe PL.Type
 
-data ExprGenData=ExprGenData{
-    _opCodes::OpCodes,
-    _locals:: Locals,
-    _localsLen:: LocalsLen,
-    _localsMap:: LocalsMap
-}
-makeLenses ''ExprGenData
-
-emptyExprGenData :: [(PL.Ident, PL.Type)] -> ExprGenData
-emptyExprGenData lo = ExprGenData
-    { _opCodes   = D.empty
-    , _locals    = D.empty
-    , _localsLen = length lo
-    , _localsMap = M.fromList
-        $ (map (\(i, (name, t)) -> (name, (t, i))) . zip [0 ..]) lo
-    }
-
-type ExprGen = ReaderT WL.MemberData (State ExprGenData)
-
-exprType :: PE.Expr -> ExprGen (Maybe PL.Type)
+exprType :: PE.Expr -> GO.OpCodeGen (Maybe PL.Type)
 exprType (PE.EStructL ident _) =
     (return . Just) $ PL.RefType $ PL.TStruct ident
 exprType (PE.EI32L    _   ) = (return . Just) PL.TI32
@@ -51,7 +29,7 @@ exprType (PE.EStringL _   ) = (return . Just) $ PL.RefType PL.TString
 exprType (PE.EArrayL t _  ) = (return . Just) $ PL.RefType $ PL.TArray t
 exprType (PE.EBoolL _     ) = (return . Just) PL.TBool
 exprType (PE.ECharL _     ) = (return . Just) PL.TChar
-exprType (PE.EVar   ident ) = Just . (^. _1) . (M.! ident) <$> use localsMap
+exprType (PE.EVar   ident ) = Just . (^. _1) . (M.! ident) <$> use GO.localsMap
 exprType (PE.ECall ident _) = do
     PM.FuncDef _ _ t <- (^. _2) . (M.! ident) <$> view WL.functions
     return t
@@ -81,33 +59,33 @@ exprType (PE.ELte    _ _) = (return . Just) PL.TBool
 exprType (PE.EGt     _ _) = (return . Just) PL.TBool
 exprType (PE.EGte    _ _) = (return . Just) PL.TBool
 
-addLocal :: WA.ValueType -> ExprGen Int
+addLocal :: WA.ValueType -> GO.OpCodeGen Int
 addLocal t = do
-    len <- use localsLen
-    localsLen += 1
-    locals %= (flip D.snoc) t
+    len <- use GO.localsLen
+    GO.localsLen += 1
+    GO.locals %= (flip D.snoc) t
     return len
 
-addNamedLocalData :: PL.Type -> PL.Ident -> ExprGen Int
+addNamedLocalData :: PL.Type -> PL.Ident -> GO.OpCodeGen Int
 addNamedLocalData t name = do
     id <- (addLocal . WL.typeToValueType) t
-    localsMap %= (M.insert name (t, id))
+    GO.localsMap %= (M.insert name (t, id))
     return id
 
-addOpCode :: WA.OperatorCode -> ExprGen ()
-addOpCode x = opCodes %= (flip D.snoc) x
+addOpCode :: WA.OperatorCode -> GO.OpCodeGen ()
+addOpCode x = GO.opCodes %= (flip D.snoc) x
 
-callGen :: WL.FunctionMap -> String -> [ExprGen ()] -> ExprGen ()
+callGen :: WL.FunctionMap -> String -> [GO.OpCodeGen ()] -> GO.OpCodeGen ()
 callGen m f args = do
     let (id, PM.FuncDef _ _ re) = m M.! f
     opCallGen (WA.OpCall id) args
 
-opCallGen :: WA.OperatorCode -> [ExprGen ()] -> ExprGen ()
+opCallGen :: WA.OperatorCode -> [GO.OpCodeGen ()] -> GO.OpCodeGen ()
 opCallGen op args = do
     sequence_ args
     addOpCode op
 
-blockGen :: WA.BlockType -> ExprGen () -> ExprGen ()
+blockGen :: WA.BlockType -> GO.OpCodeGen () -> GO.OpCodeGen ()
 blockGen t x = do
     addOpCode $ WA.OpBlock t
     x
@@ -117,7 +95,7 @@ mapSort :: Ord a => [a] -> M.Map a b -> [b]
 mapSort keys m = map (m M.!) keys
 
 -- 値/位置/オフセット
-storeGen :: PE.Expr -> PE.Expr -> Int -> ExprGen ()
+storeGen :: PE.Expr -> PE.Expr -> Int -> GO.OpCodeGen ()
 storeGen e i o = do
     Just et <- exprType e
     let storeOp =
@@ -130,7 +108,7 @@ storeGen e i o = do
                 (WA.MemoryImmediate 2 o)
     opCallGen storeOp [exprGen i, exprGen e]
 
-exprGen :: PE.Expr -> ExprGen ()
+exprGen :: PE.Expr -> GO.OpCodeGen ()
 exprGen expr = case expr of
     PE.EStructL name exprs -> blockGen (WA.BlockType (Just WA.ValI32)) $ do
         fMap <- view WL.functions
@@ -158,7 +136,7 @@ exprGen expr = case expr of
     PE.EF64L  x -> addOpCode $ WA.OpF64Const x
     PE.EBoolL x -> addOpCode $ WA.OpI32Const (if x then 1 else 0)
     PE.EVar   x -> do
-        l <- snd . (M.! x) <$> use localsMap
+        l <- snd . (M.! x) <$> use GO.localsMap
         addOpCode $ WA.OpGetLocal l
     PE.ECall name ex -> do
         fMap <- view WL.functions

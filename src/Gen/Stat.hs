@@ -8,8 +8,9 @@ import qualified Parsers.Expr                  as PE
 import qualified Parsers.Stat                  as PS
 import qualified Data.Map                      as M
 import qualified Wasm.AST                      as WA
+import qualified Gen.OpCodeGen                 as GO
 
-statGen :: PS.Stat -> GE.ExprGen ()
+statGen :: PS.Stat -> GO.OpCodeGen ()
 statGen (PS.SBlock      s) = mapM_ statGen s
 statGen (PS.SExprToStat e) = do
     t <- GE.exprType e
