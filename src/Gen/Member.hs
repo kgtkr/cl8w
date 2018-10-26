@@ -70,18 +70,16 @@ fDefToType (PM.FuncDef _ params ret) = WA.FuncType
     (fmap GL.typeToValueType ret)
 
 compile :: [PM.Member] -> WA.WasmASTRoot
-compile x = WA.WasmASTRoot
-    ((Just . WA.TypeSection . D.toList . _typeSections) res)
-    ((Just . WA.ImportSection . D.toList . _importSections) res)
-    ((Just . WA.FunctionSection . D.toList . _functionSections) res)
-    Nothing
-    Nothing
-    Nothing
-    ((Just . WA.ExportSection . D.toList . _exportSections) res)
-    Nothing
-    Nothing
-    ((Just . WA.CodeSection . D.toList . _codeSections) res)
-    Nothing
+compile x = WA.wasmASTRootDefault
+    { WA._typeSection = (Just . WA.TypeSection . D.toList . _typeSections) res
+    , WA._importSection = (Just . WA.ImportSection . D.toList . _importSections)
+                              res
+    , WA._functionSection =
+        (Just . WA.FunctionSection . D.toList . _functionSections) res
+    , WA._exportSection = (Just . WA.ExportSection . D.toList . _exportSections)
+                              res
+    , WA._codeSection = (Just . WA.CodeSection . D.toList . _codeSections) res
+    }
   where
     md       = toMemberData x
     (_, res) = runState (membersGen md x) memberGenData

@@ -1,6 +1,6 @@
 module Wasm.Binary where
 
-import           Wasm.AST
+import qualified Wasm.AST                      as WA
 import           Data.Int
 import           Data.Word
 import qualified Data.Bytes.Signed             as S
@@ -11,6 +11,7 @@ import qualified Data.Bytes.Put                as P
 import           Data.Bytes.Serial              ( serialize )
 import qualified Data.ByteString               as BS
 import qualified Data.ByteString.UTF8          as BSU
+import           Control.Lens
 
 putUint8 :: Putter Int
 putUint8 = putWord8 . fromIntegral
@@ -75,21 +76,21 @@ putMaybe :: (WasmAST a) => Maybe a -> Put
 putMaybe Nothing  = return ()
 putMaybe (Just x) = putWasmAST x
 
-instance WasmAST ValueType where
-    putWasmAST ValI32 = putVarint7 0x7f
-    putWasmAST ValI64 = putVarint7 0x7e
-    putWasmAST ValF32 = putVarint7 0x7d
-    putWasmAST ValF64 = putVarint7 0x7c
+instance WasmAST WA.ValueType where
+    putWasmAST WA.ValI32 = putVarint7 0x7f
+    putWasmAST WA.ValI64 = putVarint7 0x7e
+    putWasmAST WA.ValF32 = putVarint7 0x7d
+    putWasmAST WA.ValF64 = putVarint7 0x7c
 
-instance WasmAST BlockType where
-    putWasmAST (BlockType (Just x)) = putWasmAST x
-    putWasmAST (BlockType Nothing)  = putVarint7 0x40
+instance WasmAST WA.BlockType where
+    putWasmAST (WA.BlockType (Just x)) = putWasmAST x
+    putWasmAST (WA.BlockType Nothing)  = putVarint7 0x40
 
-instance WasmAST ElemType where
-    putWasmAST ElAnyFunc = putVarint7 0x7c
+instance WasmAST WA.ElemType where
+    putWasmAST WA.ElAnyFunc = putVarint7 0x7c
 
-instance WasmAST FuncType where
-    putWasmAST (FuncType p r) = do
+instance WasmAST WA.FuncType where
+    putWasmAST (WA.FuncType p r) = do
         putVarint7 0x60
         putArrayAST p
         case r of
@@ -98,419 +99,419 @@ instance WasmAST FuncType where
                 putWasmAST r
             Nothing->putVaruint1 False
 
-instance WasmAST LanguageType where
-    putWasmAST (LangValueType x)=putWasmAST x
-    putWasmAST (LangElemType x)=putWasmAST x
-    putWasmAST (LangFuncType x)=putWasmAST x
-    putWasmAST (LangBlockType x)=putWasmAST x
+instance WasmAST WA.LanguageType where
+    putWasmAST (WA.LangValueType x)=putWasmAST x
+    putWasmAST (WA.LangElemType x)=putWasmAST x
+    putWasmAST (WA.LangFuncType x)=putWasmAST x
+    putWasmAST (WA.LangBlockType x)=putWasmAST x
 
-instance WasmAST GlobalType where
-    putWasmAST (GlobalType x y)=do
+instance WasmAST WA.GlobalType where
+    putWasmAST (WA.GlobalType x y)=do
         putWasmAST x
         putVaruint1 y
 
-instance WasmAST TableType where
-    putWasmAST (TableType x y)=do
+instance WasmAST WA.TableType where
+    putWasmAST (WA.TableType x y)=do
         putWasmAST x
         putWasmAST y
 
-instance WasmAST MemoryType where
-    putWasmAST (MemoryType x)=putWasmAST x
+instance WasmAST WA.MemoryType where
+    putWasmAST (WA.MemoryType x)=putWasmAST x
 
-instance WasmAST ResizableLimits where
-    putWasmAST (ResizableLimits x (Just y))=do
+instance WasmAST WA.ResizableLimits where
+    putWasmAST (WA.ResizableLimits x (Just y))=do
         putVaruint1 True
         putVaruint32 x
         putVaruint32 y
-    putWasmAST (ResizableLimits x Nothing)=do
+    putWasmAST (WA.ResizableLimits x Nothing)=do
         putVaruint1 False
         putVaruint32 x
 
-instance WasmAST ExternalKind where
-    putWasmAST ExFunction=putUint8 0
-    putWasmAST ExTable=putUint8 1
-    putWasmAST ExMemory=putUint8 2
-    putWasmAST ExGlobal=putUint8 3
+instance WasmAST WA.ExternalKind where
+    putWasmAST WA.ExFunction=putUint8 0
+    putWasmAST WA.ExTable=putUint8 1
+    putWasmAST WA.ExMemory=putUint8 2
+    putWasmAST WA.ExGlobal=putUint8 3
 
-instance WasmAST InitExpr where
-    putWasmAST (InitI32 x)=putWasmAST (OpI32Const x)
-    putWasmAST (InitI64 x)=putWasmAST (OpI64Const x)
-    putWasmAST (InitF32 x)=putWasmAST (OpF32Const x)
-    putWasmAST (InitF64 x)=putWasmAST (OpF64Const x)
-    putWasmAST (InitGlobal x)=putWasmAST (OpGetGlobal x)
-instance WasmAST TypeSection where
-    putWasmAST (TypeSection x)=putSction 1 (putArrayAST x)
-instance WasmAST ExternalKindImport where
-    putWasmAST (ExImFunction x)=do
+instance WasmAST WA.InitExpr where
+    putWasmAST (WA.InitI32 x)=putWasmAST (WA.OpI32Const x)
+    putWasmAST (WA.InitI64 x)=putWasmAST (WA.OpI64Const x)
+    putWasmAST (WA.InitF32 x)=putWasmAST (WA.OpF32Const x)
+    putWasmAST (WA.InitF64 x)=putWasmAST (WA.OpF64Const x)
+    putWasmAST (WA.InitGlobal x)=putWasmAST (WA.OpGetGlobal x)
+instance WasmAST WA.TypeSection where
+    putWasmAST (WA.TypeSection x)=putSction 1 (putArrayAST x)
+instance WasmAST WA.ExternalKindImport where
+    putWasmAST (WA.ExImFunction x)=do
         putUint8 0
         putVaruint32 x
 
-    putWasmAST (ExImExTable x)=do
+    putWasmAST (WA.ExImExTable x)=do
         putUint8 1
         putWasmAST x
 
-    putWasmAST (ExImExMemory x)=do
+    putWasmAST (WA.ExImExMemory x)=do
         putUint8 2
         putWasmAST x
 
-    putWasmAST (ExImExGlobal x)=do
+    putWasmAST (WA.ExImExGlobal x)=do
         putUint8 3
         putWasmAST x
 
-instance WasmAST ImportEntry where
-    putWasmAST (ImportEntry x y z)=do
+instance WasmAST WA.ImportEntry where
+    putWasmAST (WA.ImportEntry x y z)=do
         putString x
         putString y
         putWasmAST z
 
-instance WasmAST ImportSection where
-    putWasmAST (ImportSection x)=putSction 2 (putArrayAST x)
+instance WasmAST WA.ImportSection where
+    putWasmAST (WA.ImportSection x)=putSction 2 (putArrayAST x)
 
-instance WasmAST FunctionSection where
-    putWasmAST (FunctionSection x)=putSction 3 (putArray putVaruint32 x)
+instance WasmAST WA.FunctionSection where
+    putWasmAST (WA.FunctionSection x)=putSction 3 (putArray putVaruint32 x)
 
-instance WasmAST TableSection where
-    putWasmAST (TableSection x)=putSction 4 (putArrayAST x)
+instance WasmAST WA.TableSection where
+    putWasmAST (WA.TableSection x)=putSction 4 (putArrayAST x)
 
-instance WasmAST MemorySection where
-    putWasmAST (MemorySection x)=putSction 5 (putArrayAST x)
+instance WasmAST WA.MemorySection where
+    putWasmAST (WA.MemorySection x)=putSction 5 (putArrayAST x)
 
-instance WasmAST GlobalSection where
-    putWasmAST (GlobalSection x)=putSction 6 (putArrayAST x)
+instance WasmAST WA.GlobalSection where
+    putWasmAST (WA.GlobalSection x)=putSction 6 (putArrayAST x)
 
-instance WasmAST GlobalVariable where
-    putWasmAST (GlobalVariable x y)=do
+instance WasmAST WA.GlobalVariable where
+    putWasmAST (WA.GlobalVariable x y)=do
         putWasmAST x
         putWasmAST y
 
-instance WasmAST ExportSection where
-    putWasmAST (ExportSection x)=putSction 7 (putArrayAST x)
+instance WasmAST WA.ExportSection where
+    putWasmAST (WA.ExportSection x)=putSction 7 (putArrayAST x)
 
-instance WasmAST ExportEntry where
-    putWasmAST (ExportEntry x y z)=do
+instance WasmAST WA.ExportEntry where
+    putWasmAST (WA.ExportEntry x y z)=do
         putString x
         putWasmAST y
         putVaruint32 z
 
-instance WasmAST StartSection where
-    putWasmAST (StartSection x)=putSction 8 (putVaruint32 x)
+instance WasmAST WA.StartSection where
+    putWasmAST (WA.StartSection x)=putSction 8 (putVaruint32 x)
 
-instance WasmAST ElementSection where
-    putWasmAST (ElementSection x)=putSction 9 (putArrayAST x)
+instance WasmAST WA.ElementSection where
+    putWasmAST (WA.ElementSection x)=putSction 9 (putArrayAST x)
 
-instance WasmAST ElemSegment where
-    putWasmAST (ElemSegment x y)=do
+instance WasmAST WA.ElemSegment where
+    putWasmAST (WA.ElemSegment x y)=do
         putVaruint32 0
         putWasmAST x
         putArray putVaruint32 y
 
-instance WasmAST CodeSection where
-    putWasmAST (CodeSection x)=putSction 10 (putArrayAST x)
+instance WasmAST WA.CodeSection where
+    putWasmAST (WA.CodeSection x)=putSction 10 (putArrayAST x)
 
-instance WasmAST FunctionBody where
-    putWasmAST (FunctionBody x y)=do
+instance WasmAST WA.FunctionBody where
+    putWasmAST (WA.FunctionBody x y)=do
         let body=runPut $ do
                     putArrayAST x
                     mapM_ putWasmAST y
-                    putWasmAST OpEnd
+                    putWasmAST WA.OpEnd
         putBytes body
 
 
-instance WasmAST LocalEntry where
-    putWasmAST (LocalEntry x y)=do
+instance WasmAST WA.LocalEntry where
+    putWasmAST (WA.LocalEntry x y)=do
         putVaruint32 x
         putWasmAST y
 
-instance WasmAST DataSection where
-    putWasmAST (DataSection x)=putSction 11 (putArrayAST x)
+instance WasmAST WA.DataSection where
+    putWasmAST (WA.DataSection x)=putSction 11 (putArrayAST x)
 
-instance WasmAST DataSegment where
-    putWasmAST (DataSegment x y)=do
+instance WasmAST WA.DataSegment where
+    putWasmAST (WA.DataSegment x y)=do
         putVaruint32 0
         putWasmAST x
         putBytes y
 
-instance WasmAST MemoryImmediate where
-    putWasmAST (MemoryImmediate x y)=do
+instance WasmAST WA.MemoryImmediate where
+    putWasmAST (WA.MemoryImmediate x y)=do
         putVaruint32 x
         putVaruint32 y
 
 putOpcode :: Putter Int
 putOpcode = putUint8
 
-instance WasmAST OperatorCode where
-    putWasmAST OpUnreachable=putOpcode 0x00
-    putWasmAST OpNop=putOpcode 0x01
-    putWasmAST (OpBlock x)=do
+instance WasmAST WA.OperatorCode where
+    putWasmAST WA.OpUnreachable=putOpcode 0x00
+    putWasmAST WA.OpNop=putOpcode 0x01
+    putWasmAST (WA.OpBlock x)=do
         putOpcode 0x02
         putWasmAST x
-    putWasmAST (OpLoop x)=do
+    putWasmAST (WA.OpLoop x)=do
         putOpcode 0x03
         putWasmAST x
-    putWasmAST (OpIf x)=do
+    putWasmAST (WA.OpIf x)=do
         putOpcode 0x04
         putWasmAST x
-    putWasmAST OpElse=putOpcode 0x05
-    putWasmAST OpEnd=putOpcode 0x0b
-    putWasmAST (OpBr x)=do
+    putWasmAST WA.OpElse=putOpcode 0x05
+    putWasmAST WA.OpEnd=putOpcode 0x0b
+    putWasmAST (WA.OpBr x)=do
         putOpcode 0x0c
         putVaruint32 x
-    putWasmAST (OpBrIf x)=do
+    putWasmAST (WA.OpBrIf x)=do
         putOpcode 0x0d
         putVaruint32 x
-    putWasmAST (OpBrTable x y)=do
+    putWasmAST (WA.OpBrTable x y)=do
         putOpcode 0x0e
         putArray putVaruint32 x
         putVaruint32 y
-    putWasmAST OpReturn=putOpcode 0x0f
-    putWasmAST (OpCall x)=do
+    putWasmAST WA.OpReturn=putOpcode 0x0f
+    putWasmAST (WA.OpCall x)=do
         putOpcode 0x10
         putVaruint32 x
-    putWasmAST (OpCallIndirect x)=do
+    putWasmAST (WA.OpCallIndirect x)=do
         putOpcode 0x11
         putVaruint32 x
         putVaruint1 False
-    putWasmAST OpDrop=putOpcode 0x1a
-    putWasmAST OpSelect=putOpcode 0x1b
-    putWasmAST (OpGetLocal x)=do
+    putWasmAST WA.OpDrop=putOpcode 0x1a
+    putWasmAST WA.OpSelect=putOpcode 0x1b
+    putWasmAST (WA.OpGetLocal x)=do
         putOpcode 0x20
         putVaruint32 x
-    putWasmAST (OpSetLocal x)=do
+    putWasmAST (WA.OpSetLocal x)=do
         putOpcode 0x21
         putVaruint32 x
-    putWasmAST (OpTeeLocal x)=do
+    putWasmAST (WA.OpTeeLocal x)=do
         putOpcode 0x22
         putVaruint32 x
-    putWasmAST (OpGetGlobal x)=do
+    putWasmAST (WA.OpGetGlobal x)=do
         putOpcode 0x23
         putVaruint32 x
-    putWasmAST (OpSetGlobal x)=do
+    putWasmAST (WA.OpSetGlobal x)=do
         putOpcode 0x24
         putVaruint32 x
-    putWasmAST (OpI32Load x)=do
+    putWasmAST (WA.OpI32Load x)=do
         putOpcode 0x28
         putWasmAST x
-    putWasmAST (OpI64Load x)=do
+    putWasmAST (WA.OpI64Load x)=do
         putOpcode 0x29
         putWasmAST x
-    putWasmAST (OpF32Load x)=do
+    putWasmAST (WA.OpF32Load x)=do
         putOpcode 0x2a
         putWasmAST x
-    putWasmAST (OpF64Load x)=do
+    putWasmAST (WA.OpF64Load x)=do
         putOpcode 0x2b
         putWasmAST x
-    putWasmAST (OpI32Load8s x)=do
+    putWasmAST (WA.OpI32Load8s x)=do
         putOpcode 0x2c
         putWasmAST x
-    putWasmAST (OpI32Load8u x)=do
+    putWasmAST (WA.OpI32Load8u x)=do
         putOpcode 0x2d
         putWasmAST x
-    putWasmAST (OpI32Load16s x)=do
+    putWasmAST (WA.OpI32Load16s x)=do
         putOpcode 0x2e
         putWasmAST x
-    putWasmAST (OpI32Load16u x)=do
+    putWasmAST (WA.OpI32Load16u x)=do
         putOpcode 0x2f
         putWasmAST x
-    putWasmAST (OpI64Load8s x)=do
+    putWasmAST (WA.OpI64Load8s x)=do
         putOpcode 0x30
         putWasmAST x
-    putWasmAST (OpI64Load8u x)=do
+    putWasmAST (WA.OpI64Load8u x)=do
         putOpcode 0x31
         putWasmAST x
-    putWasmAST (OpI64Load16s x)=do
+    putWasmAST (WA.OpI64Load16s x)=do
         putOpcode 0x32
         putWasmAST x
-    putWasmAST (OpI64Load16u x)=do
+    putWasmAST (WA.OpI64Load16u x)=do
         putOpcode 0x33
         putWasmAST x
-    putWasmAST (OpI64Load32s x)=do
+    putWasmAST (WA.OpI64Load32s x)=do
         putOpcode 0x34
         putWasmAST x
-    putWasmAST (OpI64Load32u x)=do
+    putWasmAST (WA.OpI64Load32u x)=do
         putOpcode 0x35
         putWasmAST x
-    putWasmAST (OpI32Store x)=do
+    putWasmAST (WA.OpI32Store x)=do
         putOpcode 0x36
         putWasmAST x
-    putWasmAST (OpI64Store x)=do
+    putWasmAST (WA.OpI64Store x)=do
         putOpcode 0x37
         putWasmAST x
-    putWasmAST (OpF32Store x)=do
+    putWasmAST (WA.OpF32Store x)=do
         putOpcode 0x38
         putWasmAST x
-    putWasmAST (OpF64Store x)=do
+    putWasmAST (WA.OpF64Store x)=do
         putOpcode 0x39
         putWasmAST x
-    putWasmAST (OpI32Store8 x)=do
+    putWasmAST (WA.OpI32Store8 x)=do
         putOpcode 0x3a
         putWasmAST x
-    putWasmAST (OpI32Store16 x)=do
+    putWasmAST (WA.OpI32Store16 x)=do
         putOpcode 0x3b
         putWasmAST x
-    putWasmAST (OpI64Store8 x)=do
+    putWasmAST (WA.OpI64Store8 x)=do
         putOpcode 0x3c
         putWasmAST x
-    putWasmAST (OpI64Store16 x)=do
+    putWasmAST (WA.OpI64Store16 x)=do
         putOpcode 0x3d
         putWasmAST x
-    putWasmAST (OpI64Store32 x)=do
+    putWasmAST (WA.OpI64Store32 x)=do
         putOpcode 0x3e
         putWasmAST x
-    putWasmAST OpCurrentMemory=do
+    putWasmAST WA.OpCurrentMemory=do
         putOpcode 0x3f
         putVaruint1 False
-    putWasmAST OpGrowMemory=do
+    putWasmAST WA.OpGrowMemory=do
         putOpcode 0x40
         putVaruint1 False
-    putWasmAST (OpI32Const x)=do
+    putWasmAST (WA.OpI32Const x)=do
         putOpcode 0x41
         putVarint32 x
-    putWasmAST (OpI64Const x)=do
+    putWasmAST (WA.OpI64Const x)=do
         putOpcode 0x42
         putVarint64 x
-    putWasmAST (OpF32Const x)=do
+    putWasmAST (WA.OpF32Const x)=do
         putOpcode 0x43
         putFloat32 x
-    putWasmAST (OpF64Const x)=do
+    putWasmAST (WA.OpF64Const x)=do
         putOpcode 0x44
         putFloat64 x
-    putWasmAST OpI32Eqz=putOpcode 0x45
-    putWasmAST OpI32Eq=putOpcode 0x46
-    putWasmAST OpI32Ne=putOpcode 0x47
-    putWasmAST OpI32Lts=putOpcode 0x48
-    putWasmAST OpI32Ltu=putOpcode 0x49
-    putWasmAST OpI32Gts=putOpcode 0x4a
-    putWasmAST OpI32Gtu=putOpcode 0x4b
-    putWasmAST OpI32Les=putOpcode 0x4c
-    putWasmAST OpI32Leu=putOpcode 0x4d
-    putWasmAST OpI32Ges=putOpcode 0x4e
-    putWasmAST OpI32Geu=putOpcode 0x4f
-    putWasmAST OpI64Eqz=putOpcode 0x50
-    putWasmAST OpI64Eq=putOpcode 0x51
-    putWasmAST OpI64Ne=putOpcode 0x52
-    putWasmAST OpI64Lts=putOpcode 0x53
-    putWasmAST OpI64Ltu=putOpcode 0x54
-    putWasmAST OpI64Gts=putOpcode 0x55
-    putWasmAST OpI64Gtu=putOpcode 0x56
-    putWasmAST OpI64Les=putOpcode 0x57
-    putWasmAST OpI64Leu=putOpcode 0x58
-    putWasmAST OpI64Ges=putOpcode 0x59
-    putWasmAST OpI64Geu=putOpcode 0x5a
-    putWasmAST OpF32Eq=putOpcode 0x5b
-    putWasmAST OpF32Ne=putOpcode 0x5c
-    putWasmAST OpF32Lt=putOpcode 0x5d
-    putWasmAST OpF32Gt=putOpcode 0x5e
-    putWasmAST OpF32Le=putOpcode 0x5f
-    putWasmAST OpF32Ge=putOpcode 0x60
-    putWasmAST OpF64Eq=putOpcode 0x61
-    putWasmAST OpF64Ne=putOpcode 0x62
-    putWasmAST OpF64Lt=putOpcode 0x63
-    putWasmAST OpF64Gt=putOpcode 0x64
-    putWasmAST OpF64Le=putOpcode 0x65
-    putWasmAST OpF64Ge=putOpcode 0x66
-    putWasmAST OpI32Clz=putOpcode 0x67
-    putWasmAST OpI32Ctz=putOpcode 0x68
-    putWasmAST OpI32Popcnt=putOpcode 0x69
-    putWasmAST OpI32Add=putOpcode 0x6a
-    putWasmAST OpI32Sub=putOpcode 0x6b
-    putWasmAST OpI32Mul=putOpcode 0x6c
-    putWasmAST OpI32Divs=putOpcode 0x6d
-    putWasmAST OpI32Divu=putOpcode 0x6e
-    putWasmAST OpI32Rems=putOpcode 0x6f
-    putWasmAST OpI32Remu=putOpcode 0x70
-    putWasmAST OpI32And=putOpcode 0x71
-    putWasmAST OpI32Or=putOpcode 0x72
-    putWasmAST OpI32Xor=putOpcode 0x73
-    putWasmAST OpI32Shl=putOpcode 0x74
-    putWasmAST OpI32Shrs=putOpcode 0x75
-    putWasmAST OpI32Shru=putOpcode 0x76
-    putWasmAST OpI32Rotl=putOpcode 0x77
-    putWasmAST OpI32Rotr=putOpcode 0x78
-    putWasmAST OpI64Clz=putOpcode 0x79
-    putWasmAST OpI64Ctz=putOpcode 0x7a
-    putWasmAST OpI64Popcnt=putOpcode 0x7b
-    putWasmAST OpI64Add=putOpcode 0x7c
-    putWasmAST OpI64Sub=putOpcode 0x7d
-    putWasmAST OpI64Mul=putOpcode 0x7e
-    putWasmAST OpI64Divs=putOpcode 0x7f
-    putWasmAST OpI64Divu=putOpcode 0x80
-    putWasmAST OpI64Rems=putOpcode 0x81
-    putWasmAST OpI64Remu=putOpcode 0x82
-    putWasmAST OpI64And=putOpcode 0x83
-    putWasmAST OpI64Or=putOpcode 0x84
-    putWasmAST OpI64Xor=putOpcode 0x85
-    putWasmAST OpI64Shl=putOpcode 0x86
-    putWasmAST OpI64Shrs=putOpcode 0x87
-    putWasmAST OpI64Shru=putOpcode 0x88
-    putWasmAST OpI64Rotl=putOpcode 0x89
-    putWasmAST OpI64Rotr=putOpcode 0x8a
-    putWasmAST OpF32Abs=putOpcode 0x8b
-    putWasmAST OpF32Neg=putOpcode 0x8c
-    putWasmAST OpF32Ceil=putOpcode 0x8d
-    putWasmAST OpF32Floor=putOpcode 0x8e
-    putWasmAST OpF32Trunc=putOpcode 0x8f
-    putWasmAST OpF32Nearest=putOpcode 0x90
-    putWasmAST OpF32Sqrt=putOpcode 0x91
-    putWasmAST OpF32Add=putOpcode 0x92
-    putWasmAST OpF32Sub=putOpcode 0x93
-    putWasmAST OpF32Mul=putOpcode 0x94
-    putWasmAST OpF32Div=putOpcode 0x95
-    putWasmAST OpF32Min=putOpcode 0x96
-    putWasmAST OpF32Max=putOpcode 0x97
-    putWasmAST OpF32Copysign=putOpcode 0x98
-    putWasmAST OpF64Abs=putOpcode 0x99
-    putWasmAST OpF64Neg=putOpcode 0x9a
-    putWasmAST OpF64Ceil=putOpcode 0x9b
-    putWasmAST OpF64Floor=putOpcode 0x9c
-    putWasmAST OpF64Trunc=putOpcode 0x9d
-    putWasmAST OpF64Nearest=putOpcode 0x9e
-    putWasmAST OpF64Sqrt=putOpcode 0x9f
-    putWasmAST OpF64Add=putOpcode 0xa0
-    putWasmAST OpF64Sub=putOpcode 0xa1
-    putWasmAST OpF64Mul=putOpcode 0xa2
-    putWasmAST OpF64Div=putOpcode 0xa3
-    putWasmAST OpF64Min=putOpcode 0xa4
-    putWasmAST OpF64Max=putOpcode 0xa5
-    putWasmAST OpF64Copysign=putOpcode 0xa6
-    putWasmAST OpI32WrapI64=putOpcode 0xa7
-    putWasmAST OpI32TruncsF32=putOpcode 0xa8
-    putWasmAST OpI32TrancuF32=putOpcode 0xa9
-    putWasmAST OpI32TrancsF64=putOpcode 0xaa
-    putWasmAST OpI32TrancuF64=putOpcode 0xab
-    putWasmAST OpI64ExtendsI32=putOpcode 0xac
-    putWasmAST OpI64ExtenduI32=putOpcode 0xad
-    putWasmAST OpI64TruncsF32=putOpcode 0xae
-    putWasmAST OpI64TrancuF32=putOpcode 0xaf
-    putWasmAST OpI64TrancsF64=putOpcode 0xb0
-    putWasmAST OpI64TrancuF64=putOpcode 0xb1
-    putWasmAST OpF32ConvertsI32=putOpcode 0xb2
-    putWasmAST OpF32ConvertuI32=putOpcode 0xb3
-    putWasmAST OpF32ConvertsI64=putOpcode 0xb4
-    putWasmAST OpF32ConvertuI64=putOpcode 0xb5
-    putWasmAST OpF32DemoteF64=putOpcode 0xb6
-    putWasmAST OpF64ConvertsI32=putOpcode 0xb7
-    putWasmAST OpF64ConvertuI32=putOpcode 0xb8
-    putWasmAST OpF64ConvertsI64=putOpcode 0xb9
-    putWasmAST OpF64ConvertuI64=putOpcode 0xba
-    putWasmAST OpF64PromoteF32=putOpcode 0xbb
-    putWasmAST OpI32ReinterpretF32=putOpcode 0xbc
-    putWasmAST OpI64ReinterpretF64=putOpcode 0xbd
-    putWasmAST OpF32ReinterpretI32=putOpcode 0xbe
-    putWasmAST OpF64ReinterpretI64=putOpcode 0xbf
+    putWasmAST WA.OpI32Eqz=putOpcode 0x45
+    putWasmAST WA.OpI32Eq=putOpcode 0x46
+    putWasmAST WA.OpI32Ne=putOpcode 0x47
+    putWasmAST WA.OpI32Lts=putOpcode 0x48
+    putWasmAST WA.OpI32Ltu=putOpcode 0x49
+    putWasmAST WA.OpI32Gts=putOpcode 0x4a
+    putWasmAST WA.OpI32Gtu=putOpcode 0x4b
+    putWasmAST WA.OpI32Les=putOpcode 0x4c
+    putWasmAST WA.OpI32Leu=putOpcode 0x4d
+    putWasmAST WA.OpI32Ges=putOpcode 0x4e
+    putWasmAST WA.OpI32Geu=putOpcode 0x4f
+    putWasmAST WA.OpI64Eqz=putOpcode 0x50
+    putWasmAST WA.OpI64Eq=putOpcode 0x51
+    putWasmAST WA.OpI64Ne=putOpcode 0x52
+    putWasmAST WA.OpI64Lts=putOpcode 0x53
+    putWasmAST WA.OpI64Ltu=putOpcode 0x54
+    putWasmAST WA.OpI64Gts=putOpcode 0x55
+    putWasmAST WA.OpI64Gtu=putOpcode 0x56
+    putWasmAST WA.OpI64Les=putOpcode 0x57
+    putWasmAST WA.OpI64Leu=putOpcode 0x58
+    putWasmAST WA.OpI64Ges=putOpcode 0x59
+    putWasmAST WA.OpI64Geu=putOpcode 0x5a
+    putWasmAST WA.OpF32Eq=putOpcode 0x5b
+    putWasmAST WA.OpF32Ne=putOpcode 0x5c
+    putWasmAST WA.OpF32Lt=putOpcode 0x5d
+    putWasmAST WA.OpF32Gt=putOpcode 0x5e
+    putWasmAST WA.OpF32Le=putOpcode 0x5f
+    putWasmAST WA.OpF32Ge=putOpcode 0x60
+    putWasmAST WA.OpF64Eq=putOpcode 0x61
+    putWasmAST WA.OpF64Ne=putOpcode 0x62
+    putWasmAST WA.OpF64Lt=putOpcode 0x63
+    putWasmAST WA.OpF64Gt=putOpcode 0x64
+    putWasmAST WA.OpF64Le=putOpcode 0x65
+    putWasmAST WA.OpF64Ge=putOpcode 0x66
+    putWasmAST WA.OpI32Clz=putOpcode 0x67
+    putWasmAST WA.OpI32Ctz=putOpcode 0x68
+    putWasmAST WA.OpI32Popcnt=putOpcode 0x69
+    putWasmAST WA.OpI32Add=putOpcode 0x6a
+    putWasmAST WA.OpI32Sub=putOpcode 0x6b
+    putWasmAST WA.OpI32Mul=putOpcode 0x6c
+    putWasmAST WA.OpI32Divs=putOpcode 0x6d
+    putWasmAST WA.OpI32Divu=putOpcode 0x6e
+    putWasmAST WA.OpI32Rems=putOpcode 0x6f
+    putWasmAST WA.OpI32Remu=putOpcode 0x70
+    putWasmAST WA.OpI32And=putOpcode 0x71
+    putWasmAST WA.OpI32Or=putOpcode 0x72
+    putWasmAST WA.OpI32Xor=putOpcode 0x73
+    putWasmAST WA.OpI32Shl=putOpcode 0x74
+    putWasmAST WA.OpI32Shrs=putOpcode 0x75
+    putWasmAST WA.OpI32Shru=putOpcode 0x76
+    putWasmAST WA.OpI32Rotl=putOpcode 0x77
+    putWasmAST WA.OpI32Rotr=putOpcode 0x78
+    putWasmAST WA.OpI64Clz=putOpcode 0x79
+    putWasmAST WA.OpI64Ctz=putOpcode 0x7a
+    putWasmAST WA.OpI64Popcnt=putOpcode 0x7b
+    putWasmAST WA.OpI64Add=putOpcode 0x7c
+    putWasmAST WA.OpI64Sub=putOpcode 0x7d
+    putWasmAST WA.OpI64Mul=putOpcode 0x7e
+    putWasmAST WA.OpI64Divs=putOpcode 0x7f
+    putWasmAST WA.OpI64Divu=putOpcode 0x80
+    putWasmAST WA.OpI64Rems=putOpcode 0x81
+    putWasmAST WA.OpI64Remu=putOpcode 0x82
+    putWasmAST WA.OpI64And=putOpcode 0x83
+    putWasmAST WA.OpI64Or=putOpcode 0x84
+    putWasmAST WA.OpI64Xor=putOpcode 0x85
+    putWasmAST WA.OpI64Shl=putOpcode 0x86
+    putWasmAST WA.OpI64Shrs=putOpcode 0x87
+    putWasmAST WA.OpI64Shru=putOpcode 0x88
+    putWasmAST WA.OpI64Rotl=putOpcode 0x89
+    putWasmAST WA.OpI64Rotr=putOpcode 0x8a
+    putWasmAST WA.OpF32Abs=putOpcode 0x8b
+    putWasmAST WA.OpF32Neg=putOpcode 0x8c
+    putWasmAST WA.OpF32Ceil=putOpcode 0x8d
+    putWasmAST WA.OpF32Floor=putOpcode 0x8e
+    putWasmAST WA.OpF32Trunc=putOpcode 0x8f
+    putWasmAST WA.OpF32Nearest=putOpcode 0x90
+    putWasmAST WA.OpF32Sqrt=putOpcode 0x91
+    putWasmAST WA.OpF32Add=putOpcode 0x92
+    putWasmAST WA.OpF32Sub=putOpcode 0x93
+    putWasmAST WA.OpF32Mul=putOpcode 0x94
+    putWasmAST WA.OpF32Div=putOpcode 0x95
+    putWasmAST WA.OpF32Min=putOpcode 0x96
+    putWasmAST WA.OpF32Max=putOpcode 0x97
+    putWasmAST WA.OpF32Copysign=putOpcode 0x98
+    putWasmAST WA.OpF64Abs=putOpcode 0x99
+    putWasmAST WA.OpF64Neg=putOpcode 0x9a
+    putWasmAST WA.OpF64Ceil=putOpcode 0x9b
+    putWasmAST WA.OpF64Floor=putOpcode 0x9c
+    putWasmAST WA.OpF64Trunc=putOpcode 0x9d
+    putWasmAST WA.OpF64Nearest=putOpcode 0x9e
+    putWasmAST WA.OpF64Sqrt=putOpcode 0x9f
+    putWasmAST WA.OpF64Add=putOpcode 0xa0
+    putWasmAST WA.OpF64Sub=putOpcode 0xa1
+    putWasmAST WA.OpF64Mul=putOpcode 0xa2
+    putWasmAST WA.OpF64Div=putOpcode 0xa3
+    putWasmAST WA.OpF64Min=putOpcode 0xa4
+    putWasmAST WA.OpF64Max=putOpcode 0xa5
+    putWasmAST WA.OpF64Copysign=putOpcode 0xa6
+    putWasmAST WA.OpI32WrapI64=putOpcode 0xa7
+    putWasmAST WA.OpI32TruncsF32=putOpcode 0xa8
+    putWasmAST WA.OpI32TrancuF32=putOpcode 0xa9
+    putWasmAST WA.OpI32TrancsF64=putOpcode 0xaa
+    putWasmAST WA.OpI32TrancuF64=putOpcode 0xab
+    putWasmAST WA.OpI64ExtendsI32=putOpcode 0xac
+    putWasmAST WA.OpI64ExtenduI32=putOpcode 0xad
+    putWasmAST WA.OpI64TruncsF32=putOpcode 0xae
+    putWasmAST WA.OpI64TrancuF32=putOpcode 0xaf
+    putWasmAST WA.OpI64TrancsF64=putOpcode 0xb0
+    putWasmAST WA.OpI64TrancuF64=putOpcode 0xb1
+    putWasmAST WA.OpF32ConvertsI32=putOpcode 0xb2
+    putWasmAST WA.OpF32ConvertuI32=putOpcode 0xb3
+    putWasmAST WA.OpF32ConvertsI64=putOpcode 0xb4
+    putWasmAST WA.OpF32ConvertuI64=putOpcode 0xb5
+    putWasmAST WA.OpF32DemoteF64=putOpcode 0xb6
+    putWasmAST WA.OpF64ConvertsI32=putOpcode 0xb7
+    putWasmAST WA.OpF64ConvertuI32=putOpcode 0xb8
+    putWasmAST WA.OpF64ConvertsI64=putOpcode 0xb9
+    putWasmAST WA.OpF64ConvertuI64=putOpcode 0xba
+    putWasmAST WA.OpF64PromoteF32=putOpcode 0xbb
+    putWasmAST WA.OpI32ReinterpretF32=putOpcode 0xbc
+    putWasmAST WA.OpI64ReinterpretF64=putOpcode 0xbd
+    putWasmAST WA.OpF32ReinterpretI32=putOpcode 0xbe
+    putWasmAST WA.OpF64ReinterpretI64=putOpcode 0xbf
 
-instance WasmAST WasmASTRoot where
-    putWasmAST (WasmASTRoot a b c d e f g h i j k)=do
+instance WasmAST WA.WasmASTRoot where
+    putWasmAST ast=do
         putUint32 0x6d736100
         putUint32 0x1
-        putMaybe a
-        putMaybe b
-        putMaybe c
-        putMaybe d
-        putMaybe e
-        putMaybe f
-        putMaybe g
-        putMaybe h
-        putMaybe i
-        putMaybe j
-        putMaybe k
+        putMaybe $ ast ^. WA.typeSection
+        putMaybe $ ast ^. WA.importSection
+        putMaybe $ ast ^. WA.functionSection
+        putMaybe $ ast ^. WA.tableSection
+        putMaybe $ ast ^. WA.memorySection
+        putMaybe $ ast ^. WA.globalSection
+        putMaybe $ ast ^. WA.exportSection
+        putMaybe $ ast ^. WA.startSection
+        putMaybe $ ast ^. WA.elementSection
+        putMaybe $ ast ^. WA.codeSection
+        putMaybe $ ast ^. WA.dataSection
 

@@ -1,6 +1,9 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Wasm.AST where
 import qualified Data.ByteString               as BS
 import           Data.Int
+import           Control.Lens
 
 data ValueType = ValI32|ValI64|ValF32|ValF64
 
@@ -238,15 +241,33 @@ data OperatorCode =
     |OpF32ReinterpretI32
     |OpF64ReinterpretI64
 
-data WasmASTRoot = WasmASTRoot
-                (Maybe TypeSection)
-                (Maybe ImportSection)
-                (Maybe FunctionSection)
-                (Maybe TableSection)
-                (Maybe MemorySection)
-                (Maybe GlobalSection)
-                (Maybe ExportSection)
-                (Maybe StartSection)
-                (Maybe ElementSection)
-                (Maybe CodeSection)
-                (Maybe DataSection)
+data WasmASTRoot = WasmASTRoot{
+    _typeSection::Maybe TypeSection,
+    _importSection::Maybe ImportSection,
+    _functionSection::Maybe FunctionSection,
+    _tableSection::Maybe TableSection,
+    _memorySection:: Maybe MemorySection,
+    _globalSection::Maybe GlobalSection,
+    _exportSection:: Maybe ExportSection,
+    _startSection::   Maybe StartSection,
+    _elementSection:: Maybe ElementSection,
+    _codeSection::  Maybe CodeSection,
+    _dataSection::Maybe DataSection
+}
+
+makeLenses ''WasmASTRoot
+
+wasmASTRootDefault :: WasmASTRoot
+wasmASTRootDefault = WasmASTRoot
+    { _typeSection     = Nothing
+    , _importSection   = Nothing
+    , _functionSection = Nothing
+    , _tableSection    = Nothing
+    , _memorySection   = Nothing
+    , _globalSection   = Nothing
+    , _exportSection   = Nothing
+    , _startSection    = Nothing
+    , _elementSection  = Nothing
+    , _codeSection     = Nothing
+    , _dataSection     = Nothing
+    }
