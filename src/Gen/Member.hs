@@ -82,7 +82,7 @@ compile x = WA.wasmASTRootDefault
     , WA._codeSection = (Just . WA.CodeSection . D.toList . _codeSections) res
     }
   where
-    md       = toMemberData x
+    md  = toMemberData x
     res = execState (membersGen md x) memberGenData
 
 membersGen :: MemberData -> [PM.Member] -> MemberGen ()
@@ -92,15 +92,14 @@ memberGen :: MemberData -> PM.Member -> MemberGen ()
 memberGen md (PM.MFun d@(PM.FuncDef name params ret) stat) = do
     functionIndex <- (+) <$> use defineFunctionsLen <*> use externFunctionsLen
     defineFunctionsLen += 1
-    typeSections %= (flip D.snoc) (fDefToType d)
-    functionSections %= (flip D.snoc) functionIndex
-    exportSections
-        %= (flip D.snoc) (WA.ExportEntry name WA.ExFunction functionIndex)
+    typeSections %= (`D.snoc` fDefToType d)
+    functionSections %= (`D.snoc` functionIndex)
+    exportSections %= (`D.snoc` WA.ExportEntry name WA.ExFunction functionIndex)
     let x = GO.emptyOpCodeGenData params
     let s = execState (runReaderT (GS.statGen stat) md) x
-    codeSections %= flip
-        D.snoc
-        (WA.FunctionBody ((map (WA.LocalEntry 1) . D.toList . GO._locals) s)
-                         ((D.toList . GO._opCodes) s)
-        )
+    codeSections
+        %= (`D.snoc` WA.FunctionBody
+               ((map (WA.LocalEntry 1) . D.toList . GO._locals) s)
+               ((D.toList . GO._opCodes) s)
+           )
     return ()

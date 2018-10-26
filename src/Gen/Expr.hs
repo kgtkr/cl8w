@@ -60,7 +60,7 @@ addLocal :: WA.ValueType -> GO.OpCodeGen Int
 addLocal t = do
     len <- use GO.localsLen
     GO.localsLen += 1
-    GO.locals %= (flip D.snoc) t
+    GO.locals %= (`D.snoc` t)
     return len
 
 addNamedLocalData :: PL.Type -> PL.Ident -> GO.OpCodeGen Int
@@ -70,7 +70,7 @@ addNamedLocalData t name = do
     return id
 
 addOpCode :: WA.OperatorCode -> GO.OpCodeGen ()
-addOpCode x = GO.opCodes %= (flip D.snoc) x
+addOpCode x = GO.opCodes %= (`D.snoc` x)
 
 callGen :: WL.FunctionMap -> String -> [GO.OpCodeGen ()] -> GO.OpCodeGen ()
 callGen m f args = do
