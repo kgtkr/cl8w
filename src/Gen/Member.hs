@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Gen.Member where
 
@@ -34,7 +35,7 @@ toMemberData ms = MemberData
                    . map (\(i, d@(PM.FuncDef name _ _)) -> (name, (i, d)))
                    . zip [0 ..]
                    . mapMaybe
-                         (\m -> case m of
+                         (\case
                              PM.MFun       d _ -> Just d
                              PM.MExternFun d _ -> Just d
                          )
