@@ -119,4 +119,14 @@ memberGen md (PM.MFun fd stat) = do
                ((D.toList . opCodeF . (^. GO.opCodes)) s)
            )
     return ()
-memberGen _ (PM.MStruct _ _) = return ()
+memberGen _  (PM.MStruct _ _              ) = return ()
+memberGen md (PM.MExternFun fd name1 name2) = do
+    functionIndex <- (+) <$> use defineFunctionsLen <*> use externFunctionsLen
+    externFunctionsLen += 1
+    typeSection %= (`D.snoc` fDefToType fd)
+    importSection
+        %= (`D.snoc` (WA.ImportEntry name1 name2 (WA.ExImFunction functionIndex)
+                     )
+           )
+
+    return ()

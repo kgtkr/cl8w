@@ -1,3 +1,5 @@
+extern fun "memory" "malloc" malloc(x:i32):i32
+
 fun gcd(a:i32,b:i32):i32=if(a%b==0) b else gcd(b,a%b)
 
 struct Vec2{

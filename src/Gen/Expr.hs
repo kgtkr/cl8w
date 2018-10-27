@@ -122,6 +122,7 @@ exprGen (PE.EStructL name exprs) =
         sDef <- (M.! name) <$> view GL.structs
         res  <- addLocal WA.ValI32
         callGen fMap "malloc" [addOpCode $ WA.OpI32Const (GL.structSize sDef)]
+        addOpCode $ WA.OpSetLocal res
         mapM_
             (\(ident, ex) -> do
                 let prop = sDef M.! ident
