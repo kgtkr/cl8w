@@ -28,17 +28,30 @@ fromASTStruct ms = M.fromList (f 0 (sortOn fst ms))
 toMemberData :: [PM.Member] -> MemberData
 toMemberData ms = MemberData
     { _memberDataStructs   = undefined
-    , _memberDataFunctions = ( M.fromList
-                             . map (\(i, fd) -> (fd ^. PM.name, (i, fd)))
-                             . zip [0 ..]
-                             . mapMaybe
-                                   (\case
-                                       PM.MFun       fd _ -> Just fd
-                                       PM.MExternFun fd _ -> Just fd
-                                   )
-                             )
-        ms
+    , _memberDataFunctions = M.fromList
+        (fdToMap 0 externFunDefs ++ fdToMap (length externFunDefs) funDefs)
     }
+  where
+    fdToMap initID =
+        map (\(i, fd) -> (fd ^. PM.name, (i, fd))) . zip [initID ..]
+    funDefs = mapMaybe
+        (\case
+            PM.MFun fd _ -> Just fd
+            _            -> Nothing
+        )
+        ms
+    externFunDefs = mapMaybe
+        (\case
+            PM.MExternFun fd _ -> Just fd
+            _                  -> Nothing
+        )
+        ms
+    structs = mapMaybe
+        (\case
+            PM.MStruct name member -> Just (name, member)
+            _                      -> Nothing
+        )
+        ms
 
 data MemberGenData=MemberGenData{
     _memberGenDataDefineFunctionsLen::Int,
