@@ -83,7 +83,19 @@ compile x = WA.wasmASTRootDefault
     { WA._wasmASTRootTypeSection     =
         (Just . WA.TypeSection . D.toList . (^. typeSection)) res
     , WA._wasmASTRootImportSection   =
-        (Just . WA.ImportSection . D.toList . (^. importSection)) res
+        ( Just
+            . WA.ImportSection
+            . ((WA.ImportEntry
+                   "resource"
+                   "memory"
+                   (WA.ExImExMemory (WA.MemoryType (WA.ResizableLimits 1 Nothing))
+                   )
+               ) :
+              )
+            . D.toList
+            . (^. importSection)
+            )
+            res
     , WA._wasmASTRootFunctionSection =
         (Just . WA.FunctionSection . D.toList . (^. functionSection)) res
     , WA._wasmASTRootExportSection   =
