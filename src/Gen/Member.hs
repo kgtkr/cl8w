@@ -15,7 +15,6 @@ import           Data.Maybe
 import           Control.Monad.State
 import           Control.Monad.Reader
 import qualified Gen.OpCodeGen                 as GO
-
 fromASTStruct :: PM.StructMembers -> Struct
 fromASTStruct ms = M.fromList (f 0 (sortOn fst ms))
   where

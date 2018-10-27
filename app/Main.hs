@@ -11,7 +11,7 @@ main = do
     let ast = (parse moduleP "test" input)
     case ast of
         Right ast -> do
-            print ast
+            -- print ast
             let wAST = compile ast
             let bin  = runPut $ putWasmAST wAST
             BS.writeFile "test.wasm" bin

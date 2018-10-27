@@ -11,7 +11,6 @@ import           Control.Lens
 import qualified Gen.Lang                      as GL
 import           Control.Monad.Reader
 import qualified Gen.OpCodeGen                 as GO
-
 type ExprType=Maybe PL.Type
 
 exprType :: PE.Expr -> GO.OpCodeGen (Maybe PL.Type)
@@ -95,9 +94,6 @@ blockGen t x = do
     x
     addOpCode $ WA.OpEnd
 
-mapSort :: Ord a => [a] -> M.Map a b -> [b]
-mapSort keys m = map (m M.!) keys
-
 -- 値/位置/オフセット
 storeGen :: PE.Expr -> PE.Expr -> Int -> GO.OpCodeGen ()
 storeGen e i o = do
@@ -123,7 +119,7 @@ exprGen :: PE.Expr -> GO.OpCodeGen ()
 exprGen (PE.EStructL name exprs) =
     blockGen (WA.BlockType (Just WA.ValI32)) $ do
         fMap <- view GL.functions
-        sDef <- ((M.! name) <$> view GL.structs)
+        sDef <- (M.! name) <$> view GL.structs
         res  <- addLocal WA.ValI32
         callGen fMap "malloc" [addOpCode $ WA.OpI32Const (GL.structSize sDef)]
         mapM_

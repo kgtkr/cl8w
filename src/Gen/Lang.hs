@@ -28,7 +28,7 @@ data StructProp=StructProp{
     _structPropPos::Int,
     _structPropTyp::PL.Type,
     _structPropName::String
-}
+} deriving(Show)
 
 makeFields ''StructProp
 
@@ -40,7 +40,7 @@ type StructMap=M.Map String Struct
 data MemberData=MemberData{
     _memberDataFunctions::FunctionMap,
     _memberDataStructs::StructMap
-}
+} deriving(Show)
 
 makeFields ''MemberData
 
