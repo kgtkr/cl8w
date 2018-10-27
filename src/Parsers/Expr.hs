@@ -49,7 +49,7 @@ data Expr = EStructL L.Ident [(L.Ident,Expr)]
         |EGt Expr Expr
         |EGte Expr Expr
         |EBlock [Expr] (Maybe Expr)
-        |ELet L.Ident L.Type Expr
+        |ELet L.Ident Expr
         |EIf (Expr,Expr) [(Expr,Expr)] (Maybe Expr)
         |EWhile Expr Expr
         |EReturn (Maybe Expr)
@@ -77,10 +77,7 @@ blockP =
 
 letP :: Parser Expr
 letP =
-  ELet
-    <$> (L.reserved "let" *> L.identifier)
-    <*> (L.colon *> L.typeParser)
-    <*> (L.reservedOp "=" *> exprP)
+  ELet <$> (L.reserved "let" *> L.identifier) <*> (L.reservedOp "=" *> exprP)
 
 ifP :: Parser Expr
 ifP =

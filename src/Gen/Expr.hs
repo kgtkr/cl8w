@@ -56,11 +56,11 @@ exprType (PE.EGte    _ _) = (return . Just) PL.TBool
 exprType (PE.EBlock  _ e) = case e of
     Just e  -> exprType e
     Nothing -> return Nothing
-exprType (PE.ELet _      _ _) = return Nothing
-exprType (PE.EIf  (_, e) _ _) = exprType e
-exprType (PE.EWhile _ _     ) = return Nothing
-exprType (PE.EReturn _      ) = return Nothing
-exprType (PE.ESet _ _       ) = return Nothing
+exprType (PE.ELet _ _      ) = return Nothing
+exprType (PE.EIf (_, e) _ _) = exprType e
+exprType (PE.EWhile _ _    ) = return Nothing
+exprType (PE.EReturn _     ) = return Nothing
+exprType (PE.ESet _ _      ) = return Nothing
 
 addLocal :: WA.ValueType -> GO.OpCodeGen Int
 addLocal t = do
@@ -269,8 +269,9 @@ exprGen (PE.EBlock ss e) = do
     case e of
         Just e  -> exprGen e
         Nothing -> return ()
-exprGen (PE.ELet name t e) = do
-    x <- addNamedLocalData t name
+exprGen (PE.ELet name e) = do
+    Just t <- exprType e
+    x      <- addNamedLocalData t name
     exprGen e
     addOpCode $ WA.OpSetLocal x
 exprGen (PE.EIf (e, s1) [] s2) = do
