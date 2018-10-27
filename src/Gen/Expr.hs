@@ -78,8 +78,9 @@ addNamedLocalData t name = do
 addOpCode :: WA.OperatorCode -> GO.OpCodeGen ()
 addOpCode x = GO.opCodes %= (`D.snoc` x)
 
-callGen :: GL.FunctionMap -> String -> [GO.OpCodeGen ()] -> GO.OpCodeGen ()
-callGen m f args = do
+callGen :: String -> [GO.OpCodeGen ()] -> GO.OpCodeGen ()
+callGen f args = do
+    m <- view GL.functions
     let (id, _) = m M.! f
     opCallGen (WA.OpCall id) args
 
@@ -116,40 +117,41 @@ dropExprGen e = do
             addOpCode WA.OpDrop
         Nothing -> exprGen e
 exprGen :: PE.Expr -> GO.OpCodeGen ()
-exprGen (PE.EStructL name exprs) =
-    blockGen (WA.BlockType (Just WA.ValI32)) $ do
-        fMap <- view GL.functions
-        sDef <- (M.! name) <$> view GL.structs
-        res  <- addLocal WA.ValI32
-        callGen fMap "malloc" [addOpCode $ WA.OpI32Const (GL.structSize sDef)]
-        addOpCode $ WA.OpSetLocal res
-        mapM_
-            (\(ident, ex) -> do
-                let prop = sDef M.! ident
-                let storeOp =
-                        (case GL.typeToValueType (prop ^. GL.typ) of
-                                WA.ValI32 -> WA.OpI32Store
-                                WA.ValI64 -> WA.OpI64Store
-                                WA.ValF32 -> WA.OpF32Store
-                                WA.ValF64 -> WA.OpF64Store
-                            )
-                            (WA.MemoryImmediate 2 (prop ^. GL.pos))
-                opCallGen storeOp [addOpCode $ WA.OpGetLocal res, exprGen ex]
-            )
-            exprs
-        addOpCode $ WA.OpGetLocal res
-exprGen (PE.EI32L  x) = addOpCode $ WA.OpI32Const x
-exprGen (PE.EI64L  x) = addOpCode $ WA.OpI64Const x
-exprGen (PE.EF32L  x) = addOpCode $ WA.OpF32Const x
-exprGen (PE.EF64L  x) = addOpCode $ WA.OpF64Const x
+exprGen (PE.EStructL name exprs) = do
+    sDef <- (M.! name) <$> view GL.structs
+    res  <- addLocal WA.ValI32
+    callGen "malloc" [addOpCode $ WA.OpI32Const (GL.structSize sDef)]
+    addOpCode $ WA.OpSetLocal res
+    mapM_
+        (\(ident, ex) -> do
+            let prop = sDef M.! ident
+            let storeOp =
+                    (case GL.typeToValueType (prop ^. GL.typ) of
+                            WA.ValI32 -> WA.OpI32Store
+                            WA.ValI64 -> WA.OpI64Store
+                            WA.ValF32 -> WA.OpF32Store
+                            WA.ValF64 -> WA.OpF64Store
+                        )
+                        (WA.MemoryImmediate 2 (prop ^. GL.pos))
+            opCallGen storeOp [addOpCode $ WA.OpGetLocal res, exprGen ex]
+        )
+        exprs
+    addOpCode $ WA.OpGetLocal res
+exprGen (PE.EI32L x    ) = addOpCode $ WA.OpI32Const x
+exprGen (PE.EI64L x    ) = addOpCode $ WA.OpI64Const x
+exprGen (PE.EF32L x    ) = addOpCode $ WA.OpF32Const x
+exprGen (PE.EF64L x    ) = addOpCode $ WA.OpF64Const x
+exprGen (PE.EArrayL t x) = do
+    let size = GL.sizeOf t
+    callGen
+        "malloc"
+        [addOpCode $ WA.OpI32Const size, exprGen x, addOpCode WA.OpI32Mul]
 exprGen (PE.EBoolL x) = addOpCode $ WA.OpI32Const (if x then 1 else 0)
 exprGen (PE.EVar   x) = do
     l <- snd . (M.! x) <$> use GO.localsMap
     addOpCode $ WA.OpGetLocal l
-exprGen (PE.ECall name ex) = do
-    fMap <- view GL.functions
-    callGen fMap name (fmap exprGen ex)
-exprGen (PE.ENot x) = do
+exprGen (PE.ECall name ex) = callGen name (fmap exprGen ex)
+exprGen (PE.ENot x       ) = do
     exprGen x
     addOpCode $ WA.OpI32Const 0
     addOpCode WA.OpI32Eq

@@ -88,7 +88,8 @@ compile x = WA.wasmASTRootDefault
             . ((WA.ImportEntry
                    "resource"
                    "memory"
-                   (WA.ExImExMemory (WA.MemoryType (WA.ResizableLimits 1 Nothing))
+                   (WA.ExImExMemory
+                       (WA.MemoryType (WA.ResizableLimits 10 Nothing))
                    )
                ) :
               )
