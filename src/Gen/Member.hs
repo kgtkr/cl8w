@@ -27,7 +27,7 @@ fromASTStruct ms = M.fromList (f 0 (sortOn fst ms))
 
 toMemberData :: [PM.Member] -> MemberData
 toMemberData ms = MemberData
-    { _memberDataStructs   = undefined
+    { _memberDataStructs   = (M.fromList . map (over _2 fromASTStruct)) structs
     , _memberDataFunctions = M.fromList
         (fdToMap 0 externFunDefs ++ fdToMap (length externFunDefs) funDefs)
     }
