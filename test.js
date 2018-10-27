@@ -13,7 +13,10 @@ const instance = new WebAssembly.Instance(mod, {
     config: {
       start: 1
     }
-  }).exports
-
+  },
+  ).exports,
+  io: {
+    print: x => console.log(x)
+  }
 });
-console.log(instance.exports.gcd(24, 36));
+instance.exports.main()

@@ -1,11 +1,13 @@
 extern fun "memory" "malloc" malloc(x:i32):i32
+extern fun "io" "print" print(x:i32)
 
-fun gcd(a:i32,b:i32):i32=if(a%b==0) b else gcd(b,a%b)
-
-struct Vec2{
-    x:i32,
-    y:i32
+struct Hoge{
+    a:i32,
+    b:i32
 }
 
-fun vec2(x:i32,y:i32):Vec2=Vec2{x:1,y:1}
+fun main()={
+    let x:Hoge=Hoge{a:1,b:2};
+    print(x.a+x.b);
+}
 

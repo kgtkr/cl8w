@@ -161,6 +161,21 @@ exprGen (PE.EMinus x) = do
             exprGen x
             addOpCode $ WA.OpI32Const (-1)
             addOpCode $ WA.OpI32Mul
+exprGen (PE.EMember ident e) = do
+    Just (PL.RefType (PL.TStruct sName)) <- exprType e
+    prop <- (M.! ident) . (M.! sName) <$> view GL.structs
+    exprGen e
+    let loadOp =
+            (case GL.typeToValueType (prop ^. GL.typ) of
+                    WA.ValI32 -> WA.OpI32Load
+                    WA.ValI64 -> WA.OpI64Load
+                    WA.ValF32 -> WA.OpF32Load
+                    WA.ValF64 -> WA.OpF64Load
+                )
+                (WA.MemoryImmediate 2 (prop ^. GL.pos))
+    addOpCode loadOp
+
+    return ()
 exprGen (PE.EAdd a b) = do
     ta <- exprType a
     tb <- exprType b
