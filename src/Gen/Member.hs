@@ -6,8 +6,6 @@ import qualified Parsers.Member                as PM
 
 import           Gen.Lang                      as GL
 import           Gen.Expr                      as GE
-import           Gen.Stat                      as GS
-
 import           Data.List
 
 import qualified Wasm.AST                      as WA
@@ -110,7 +108,7 @@ memberGen md (PM.MFun fd stat) = do
     exportSection
         %= (`D.snoc` WA.ExportEntry (fd ^. PM.name) WA.ExFunction functionIndex)
     let x = GO.emptyOpCodeGenData (fd ^. PM.params)
-    let s = execState (runReaderT (GS.statGen stat) md) x
+    let s = execState (runReaderT (GE.exprGen stat) md) x
     let opCodeF = case fd ^. PM.result of
             Just _  -> (`D.snoc` WA.OpUnreachable)
             Nothing -> id

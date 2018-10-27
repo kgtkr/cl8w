@@ -5,9 +5,9 @@ import           Text.ParserCombinators.Parsec.Language
 import qualified Text.ParserCombinators.Parsec.Token
                                                as P
 import           Text.ParserCombinators.Parsec.Expr
-import qualified Parsers.Stat                  as S
 import qualified Parsers.Lang                  as L
 import           Control.Lens
+import qualified Parsers.Expr                  as E
 
 data FuncDef = FuncDef {
   _funcDefName::L.Ident ,
@@ -41,7 +41,7 @@ type StructMember=(L.Ident,L.Type)
 type StructMembers=[StructMember]
 
 data Member=MStruct L.Ident StructMembers
-            |MFun FuncDef S.Stat
+            |MFun FuncDef E.Expr
             |MExternFun FuncDef String
             deriving (Show, Eq)
 
@@ -70,7 +70,7 @@ structP = do
 
 funP :: Parser Member
 funP =
-  MFun <$> (L.reserved "fun" *> funcDefP) <*> (L.reservedOp "=" *> S.statP)
+  MFun <$> (L.reserved "fun" *> funcDefP) <*> (L.reservedOp "=" *> E.exprP)
 
 externFunP :: Parser Member
 externFunP =

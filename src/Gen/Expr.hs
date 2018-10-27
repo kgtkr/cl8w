@@ -55,6 +55,14 @@ exprType (PE.ELt     _ _) = (return . Just) PL.TBool
 exprType (PE.ELte    _ _) = (return . Just) PL.TBool
 exprType (PE.EGt     _ _) = (return . Just) PL.TBool
 exprType (PE.EGte    _ _) = (return . Just) PL.TBool
+exprType (PE.EBlock  _ e) = case e of
+    Just e  -> exprType e
+    Nothing -> return Nothing
+exprType (PE.ELet _      _ _) = return Nothing
+exprType (PE.EIf  (_, e) _ _) = exprType e
+exprType (PE.EWhile _ _     ) = return Nothing
+exprType (PE.EReturn _      ) = return Nothing
+exprType (PE.ESet _ _       ) = return Nothing
 
 addLocal :: WA.ValueType -> GO.OpCodeGen Int
 addLocal t = do
@@ -104,6 +112,14 @@ storeGen e i o = do
                 )
                 (WA.MemoryImmediate 2 o)
     opCallGen storeOp [exprGen i, exprGen e]
+dropExprGen :: PE.Expr -> GO.OpCodeGen ()
+dropExprGen e = do
+    t <- exprType e
+    case t of
+        Just _ -> do
+            exprGen e
+            addOpCode WA.OpDrop
+        Nothing -> exprGen e
 
 exprGen :: PE.Expr -> GO.OpCodeGen ()
 exprGen (PE.EStructL name exprs) =
@@ -238,4 +254,25 @@ exprGen (PE.ELte a b) = do
             exprGen a
             exprGen b
             addOpCode $ WA.OpI32Les
-
+exprGen (PE.EBlock ss e) = do
+    mapM_ dropExprGen ss
+    case e of
+        Just e  -> exprGen e
+        Nothing -> return ()
+exprGen (PE.ELet name t e) = do
+    x <- addNamedLocalData t name
+    exprGen e
+    addOpCode $ WA.OpSetLocal x
+exprGen (PE.EIf (e, s1) [] s2) = do
+    exprGen e
+    addOpCode $ WA.OpIf $ WA.BlockType Nothing
+    exprGen s1
+    case s2 of
+        Just s2 -> do
+            addOpCode WA.OpElse
+            exprGen s2
+        Nothing -> return ()
+    addOpCode $ WA.OpEnd
+exprGen (PE.EReturn e) = do
+    forM_ e exprGen
+    addOpCode $ WA.OpReturn

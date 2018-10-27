@@ -7,6 +7,11 @@ import qualified Text.ParserCombinators.Parsec.Token
 import           Text.ParserCombinators.Parsec.Expr
 import qualified Parsers.Lang                  as L
 
+data SetIdent=SIIdent L.Ident
+              |SIField SetIdent L.Ident
+              |SIIndex SetIdent Expr
+              deriving (Show, Eq)
+
 data Expr = EStructL L.Ident [(L.Ident,Expr)]
         |EI32L Int
         |EI64L Int
@@ -43,7 +48,59 @@ data Expr = EStructL L.Ident [(L.Ident,Expr)]
         |ELte Expr Expr
         |EGt Expr Expr
         |EGte Expr Expr
+        |EBlock [Expr] (Maybe Expr)
+        |ELet L.Ident L.Type Expr
+        |EIf (Expr,Expr) [(Expr,Expr)] (Maybe Expr)
+        |EWhile Expr Expr
+        |EReturn (Maybe Expr)
+        |ESet SetIdent Expr
       deriving (Show, Eq)
+
+setIdentP :: Parser SetIdent
+setIdentP = siIdentP <|> siFieldP <|> siIndexP
+
+siIdentP :: Parser SetIdent
+siIdentP = SIIdent <$> L.identifier
+
+siFieldP :: Parser SetIdent
+siFieldP = SIField <$> setIdentP <*> (L.dot *> L.identifier)
+
+siIndexP :: Parser SetIdent
+siIndexP = do
+  si <- setIdentP
+  e  <- L.brackets exprP
+  return $ SIIndex si e
+
+blockP :: Parser Expr
+blockP = L.braces (EBlock <$> (many exprP <* L.semi) <*> optionMaybe exprP)
+
+letP :: Parser Expr
+letP =
+  ELet
+    <$> (L.reserved "let" *> L.identifier)
+    <*> (L.colon *> L.typeParser)
+    <*> (L.reservedOp "=" *> exprP)
+
+ifP :: Parser Expr
+ifP =
+  EIf
+    <$> ((,) <$> (L.reserved "if" *> L.parens exprP) <*> exprP)
+    <*> many
+          (   (,)
+          <$> (try (L.reserved "else" >> L.reserved "if") *> L.parens exprP)
+          <*> exprP
+          )
+    <*> optionMaybe (L.reserved "else" *> exprP)
+
+whileP :: Parser Expr
+whileP = EWhile <$> (L.reserved "while" *> L.parens exprP) <*> exprP
+
+returnP :: Parser Expr
+returnP = EReturn <$> (L.reserved "return" *> optionMaybe exprP)
+
+setP :: Parser Expr
+setP = ESet <$> setIdentP <*> (L.reservedOp "=" *> exprP)
+
 
 exprP :: Parser Expr
 exprP = buildExpressionParser table termP
@@ -61,6 +118,12 @@ termP =
     <|> try structLP
     <|> varP
     <|> parensP
+    <|> blockP
+    <|> letP
+    <|> ifP
+    <|> whileP
+    <|> returnP
+    -- <|> setP
 
 parensP :: Parser Expr
 parensP = L.parens exprP
