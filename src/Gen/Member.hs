@@ -107,11 +107,12 @@ memberGen md (PM.MFun fd stat) = do
     functionSection %= (`D.snoc` functionIndex)
     exportSection
         %= (`D.snoc` WA.ExportEntry (fd ^. PM.name) WA.ExFunction functionIndex)
-    let x = GO.emptyOpCodeGenData (fd ^. PM.params)
-    let s = execState (runReaderT (GE.exprGen stat) md) x
-    let opCodeF = case fd ^. PM.result of
-            Just _  -> (`D.snoc` WA.OpUnreachable)
-            Nothing -> id
+    let x  = GO.emptyOpCodeGenData (fd ^. PM.params)
+    let et = evalState (runReaderT (GE.exprType stat) md) x
+    let s  = execState (runReaderT (GE.exprGen stat) md) x
+    let opCodeF = case (fd ^. PM.result, et) of
+            (Just _, Nothing) -> (`D.snoc` WA.OpUnreachable)
+            _                 -> id
 
     codeSection
         %= (`D.snoc` WA.FunctionBody

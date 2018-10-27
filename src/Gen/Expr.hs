@@ -8,7 +8,7 @@ import qualified Parsers.Member                as PM
 import qualified Parsers.Lang                  as PL
 import qualified Parsers.Expr                  as PE
 import           Control.Lens
-import qualified Gen.Lang                      as WL
+import qualified Gen.Lang                      as GL
 import           Control.Monad.Reader
 import qualified Gen.OpCodeGen                 as GO
 
@@ -28,14 +28,14 @@ exprType (PE.EBoolL _     ) = (return . Just) PL.TBool
 exprType (PE.ECharL _     ) = (return . Just) PL.TChar
 exprType (PE.EVar   ident ) = Just . (^. _1) . (M.! ident) <$> use GO.localsMap
 exprType (PE.ECall ident _) = do
-    fd <- (^. _2) . (M.! ident) <$> view WL.functions
+    fd <- (^. _2) . (M.! ident) <$> view GL.functions
     return $ fd ^. PM.result
 exprType (PE.ENot   _        ) = (return . Just) PL.TBool
 exprType (PE.EPlus  e        ) = exprType e
 exprType (PE.EMinus e        ) = exprType e
 exprType (PE.EMember pIdent e) = do
     Just (PL.RefType (PL.TStruct sIdent)) <- exprType e
-    Just . (^. WL.typ) . (M.! pIdent) . (M.! sIdent) <$> view WL.structs
+    Just . (^. GL.typ) . (M.! pIdent) . (M.! sIdent) <$> view GL.structs
 exprType (PE.EIndex _ e) = do
     Just (PL.RefType (PL.TArray t)) <- exprType e
     (return . Just) t
@@ -73,14 +73,14 @@ addLocal t = do
 
 addNamedLocalData :: PL.Type -> PL.Ident -> GO.OpCodeGen Int
 addNamedLocalData t name = do
-    id <- (addLocal . WL.typeToValueType) t
+    id <- (addLocal . GL.typeToValueType) t
     GO.localsMap %= M.insert name (t, id)
     return id
 
 addOpCode :: WA.OperatorCode -> GO.OpCodeGen ()
 addOpCode x = GO.opCodes %= (`D.snoc` x)
 
-callGen :: WL.FunctionMap -> String -> [GO.OpCodeGen ()] -> GO.OpCodeGen ()
+callGen :: GL.FunctionMap -> String -> [GO.OpCodeGen ()] -> GO.OpCodeGen ()
 callGen m f args = do
     let (id, _) = m M.! f
     opCallGen (WA.OpCall id) args
@@ -104,7 +104,7 @@ storeGen :: PE.Expr -> PE.Expr -> Int -> GO.OpCodeGen ()
 storeGen e i o = do
     Just et <- exprType e
     let storeOp =
-            (case WL.typeToValueType et of
+            (case GL.typeToValueType et of
                     WA.ValI32 -> WA.OpI32Store
                     WA.ValI64 -> WA.OpI64Store
                     WA.ValF32 -> WA.OpF32Store
@@ -124,21 +124,21 @@ dropExprGen e = do
 exprGen :: PE.Expr -> GO.OpCodeGen ()
 exprGen (PE.EStructL name exprs) =
     blockGen (WA.BlockType (Just WA.ValI32)) $ do
-        fMap <- view WL.functions
-        sDef <- (M.! name) <$> view WL.structs
+        fMap <- view GL.functions
+        sDef <- (M.! name) <$> view GL.structs
         res  <- addLocal WA.ValI32
-        callGen fMap "malloc" [addOpCode $ WA.OpI32Const (WL.structSize sDef)]
+        callGen fMap "malloc" [addOpCode $ WA.OpI32Const (GL.structSize sDef)]
         mapM_
             (\(ident, ex) -> do
                 let prop = sDef M.! ident
                 let storeOp =
-                        (case WL.typeToValueType (prop ^. WL.typ) of
+                        (case GL.typeToValueType (prop ^. GL.typ) of
                                 WA.ValI32 -> WA.OpI32Store
                                 WA.ValI64 -> WA.OpI64Store
                                 WA.ValF32 -> WA.OpF32Store
                                 WA.ValF64 -> WA.OpF64Store
                             )
-                            (WA.MemoryImmediate 2 (prop ^. WL.pos))
+                            (WA.MemoryImmediate 2 (prop ^. GL.pos))
                 opCallGen storeOp [addOpCode $ WA.OpGetLocal res, exprGen ex]
             )
             exprs
@@ -152,7 +152,7 @@ exprGen (PE.EVar   x) = do
     l <- snd . (M.! x) <$> use GO.localsMap
     addOpCode $ WA.OpGetLocal l
 exprGen (PE.ECall name ex) = do
-    fMap <- view WL.functions
+    fMap <- view GL.functions
     callGen fMap name (fmap exprGen ex)
 exprGen (PE.ENot x) = do
     exprGen x
@@ -264,8 +264,9 @@ exprGen (PE.ELet name t e) = do
     exprGen e
     addOpCode $ WA.OpSetLocal x
 exprGen (PE.EIf (e, s1) [] s2) = do
+    t <- exprType s1
     exprGen e
-    addOpCode $ WA.OpIf $ WA.BlockType Nothing
+    addOpCode $ WA.OpIf $ WA.BlockType (GL.typeToValueType <$> t)
     exprGen s1
     case s2 of
         Just s2 -> do

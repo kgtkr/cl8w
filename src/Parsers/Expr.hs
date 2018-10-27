@@ -72,7 +72,8 @@ siIndexP = do
   return $ SIIndex si e
 
 blockP :: Parser Expr
-blockP = L.braces (EBlock <$> (many exprP <* L.semi) <*> optionMaybe exprP)
+blockP =
+  L.braces (EBlock <$> ((many . try) (exprP <* L.semi)) <*> optionMaybe exprP)
 
 letP :: Parser Expr
 letP =
