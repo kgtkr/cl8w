@@ -34,9 +34,6 @@ makeFields ''StructProp
 
 type Struct=M.Map String StructProp
 
-astToStruct :: PM.StructMembers -> Struct
-astToStruct = undefined
-
 type FunctionMap=M.Map String (Int,PM.FuncDef)
 type StructMap=M.Map String Struct
 
