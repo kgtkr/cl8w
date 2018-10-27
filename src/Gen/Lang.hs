@@ -24,15 +24,18 @@ sizeOf PL.TBool       = 4
 sizeOf PL.TChar       = 4
 sizeOf (PL.RefType _) = 4
 
-data StructProps=StructProps{
-    _structPropsPos::Int,
-    _structPropsTyp::PL.Type,
-    _structPropsName::String
+data StructProp=StructProp{
+    _structPropPos::Int,
+    _structPropTyp::PL.Type,
+    _structPropName::String
 }
 
-makeFields ''StructProps
+makeFields ''StructProp
 
-type Struct=M.Map String StructProps
+type Struct=M.Map String StructProp
+
+astToStruct :: PM.StructMembers -> Struct
+astToStruct = undefined
 
 type FunctionMap=M.Map String (Int,PM.FuncDef)
 type StructMap=M.Map String Struct

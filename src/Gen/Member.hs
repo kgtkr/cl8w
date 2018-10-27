@@ -22,7 +22,7 @@ fromASTStruct :: PM.StructMembers -> Struct
 fromASTStruct ms = M.fromList (f 0 (sortOn fst ms))
   where
     f pos ((ident, t) : xs) =
-        (ident, StructProps pos t ident) : (f (pos + GL.sizeOf t) xs)
+        (ident, StructProp pos t ident) : (f (pos + GL.sizeOf t) xs)
     f _ [] = []
 
 toMemberData :: [PM.Member] -> MemberData
