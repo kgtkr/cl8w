@@ -42,7 +42,7 @@ type StructMembers=[StructMember]
 
 data Member=MStruct L.Ident StructMembers
             |MFun FuncDef E.Expr
-            |MExternFun FuncDef String
+            |MExternFun FuncDef String String
             deriving (Show, Eq)
 
 type Module=[Member]
@@ -73,7 +73,10 @@ funP =
   MFun <$> (L.reserved "fun" *> funcDefP) <*> (L.reservedOp "=" *> E.exprP)
 
 externFunP :: Parser Member
-externFunP =
-  flip MExternFun
-    <$> (L.reserved "extern" *> L.reserved "fun" *> L.stringLiteral)
-    <*> funcDefP
+externFunP = do
+  L.reserved "extern"
+  L.reserved "fun"
+  n1 <- L.stringLiteral
+  n2 <- L.stringLiteral
+  fd <- funcDefP
+  return $ MExternFun fd n1 n2

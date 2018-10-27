@@ -18,9 +18,9 @@ memberMap m =
   , (M.fromList . mapMaybe stMap) m
   )
  where
-  fnMap (PM.MFun       fd _) = Just $ fd ^. PM.name
-  fnMap (PM.MExternFun fd _) = Just $ fd ^. PM.name
-  fnMap _                    = Nothing
+  fnMap (PM.MFun fd _        ) = Just $ fd ^. PM.name
+  fnMap (PM.MExternFun fd _ _) = Just $ fd ^. PM.name
+  fnMap _                      = Nothing
   stMap (PM.MStruct a b) = Just (a, b)
   stMap _                = Nothing
 

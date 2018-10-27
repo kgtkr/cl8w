@@ -40,8 +40,8 @@ toMemberData ms = MemberData
         ms
     externFunDefs = mapMaybe
         (\case
-            PM.MExternFun fd _ -> Just fd
-            _                  -> Nothing
+            PM.MExternFun fd _ _ -> Just fd
+            _                    -> Nothing
         )
         ms
     structs = mapMaybe
@@ -120,3 +120,4 @@ memberGen md (PM.MFun fd stat) = do
                ((D.toList . opCodeF . (^. GO.opCodes)) s)
            )
     return ()
+memberGen _ (PM.MStruct _ _) = return ()

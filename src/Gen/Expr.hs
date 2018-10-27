@@ -12,7 +12,6 @@ import qualified Gen.Lang                      as GL
 import           Control.Monad.Reader
 import qualified Gen.OpCodeGen                 as GO
 
-
 type ExprType=Maybe PL.Type
 
 exprType :: PE.Expr -> GO.OpCodeGen (Maybe PL.Type)
@@ -120,12 +119,11 @@ dropExprGen e = do
             exprGen e
             addOpCode WA.OpDrop
         Nothing -> exprGen e
-
 exprGen :: PE.Expr -> GO.OpCodeGen ()
 exprGen (PE.EStructL name exprs) =
     blockGen (WA.BlockType (Just WA.ValI32)) $ do
         fMap <- view GL.functions
-        sDef <- (M.! name) <$> view GL.structs
+        sDef <- ((M.! name) <$> view GL.structs)
         res  <- addLocal WA.ValI32
         callGen fMap "malloc" [addOpCode $ WA.OpI32Const (GL.structSize sDef)]
         mapM_
