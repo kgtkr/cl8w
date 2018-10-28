@@ -2,12 +2,15 @@
 
 [![Build Status](https://travis-ci.org/kgtkr/cl8w.svg?branch=master)](https://travis-ci.org/kgtkr/cl8w)
 
-WebAssemblyで動く自作言語
+WebAssemblyで動く実験的な言語
 
-## 進捗
-* [x] メモリ周りのランタイム作成
-* [x] AST作成
-* [x] コード→AST
-* [x] WasmAST作成
-* [x] WasmAST→バイナリ
-* [ ] AST→WasmAST(めっちゃ大変)
+## 特徴
+* LLVMなどに一切依存せず直接wasmバイナリを吐きます
+
+## 使い方
+まだcliなどは完成していません。ビルドして実行するとtest.cl8wがコンパイルされtest.wasmが出力されます。
+`node test.js`でtest.wasmを読み込み実行出来ます。
+
+## 注意
+エラー処理などは全くしていないので少しでも間違ったコードを書くとコンパイラがクラッシュするか不正なwasmを吐くか未定義動作を踏みます。
+またまだバグだらけです。
