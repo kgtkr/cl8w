@@ -34,16 +34,16 @@ opLoad t =
 exprType :: PE.Expr -> GO.OpCodeGen (Maybe PL.Type)
 exprType (PE.EStructL ident _) =
     (return . Just) $ PL.RefType $ PL.TStruct ident
-exprType (PE.EI32L    _   ) = (return . Just) PL.TI32
-exprType (PE.EI64L    _   ) = (return . Just) PL.TI64
-exprType (PE.EF32L    _   ) = (return . Just) PL.TF32
-exprType (PE.EF64L    _   ) = (return . Just) PL.TF64
-exprType (PE.EStringL _   ) = (return . Just) $ PL.RefType PL.TString
-exprType (PE.EArrayL t _  ) = (return . Just) $ PL.RefType $ PL.TArray t
-exprType (PE.EBoolL _     ) = (return . Just) PL.TBool
-exprType (PE.ECharL _     ) = (return . Just) PL.TChar
-exprType (PE.EVar   ident ) = Just . (^. _1) . (M.! ident) <$> use GO.localsMap
-exprType (PE.ECall ident _) = do
+exprType (PE.EI32L    _             ) = (return . Just) PL.TI32
+exprType (PE.EI64L    _             ) = (return . Just) PL.TI64
+exprType (PE.EF32L    _             ) = (return . Just) PL.TF32
+exprType (PE.EF64L    _             ) = (return . Just) PL.TF64
+exprType (PE.EStringL _             ) = (return . Just) $ PL.RefType PL.TString
+exprType (PE.EArrayL t _) = (return . Just) $ PL.RefType $ PL.TArray t
+exprType (PE.EBoolL _               ) = (return . Just) PL.TBool
+exprType (PE.ECharL _               ) = (return . Just) PL.TChar
+exprType (PE.EVar ident) = Just . (^. _1) . (M.! ident) <$> use GO.localsMap
+exprType (PE.ECall _ (PE.EVar ident)) = do
     fd <- (^. _2) . (M.! ident) <$> view GL.functions
     return $ fd ^. PM.result
 exprType (PE.ENot   _        ) = (return . Just) PL.TBool
@@ -155,8 +155,8 @@ exprGen (PE.EBoolL x) = addOpCode $ WA.OpI32Const (if x then 1 else 0)
 exprGen (PE.EVar   x) = do
     l <- snd . (M.! x) <$> use GO.localsMap
     addOpCode $ WA.OpGetLocal l
-exprGen (PE.ECall name ex) = callGen name (fmap exprGen ex)
-exprGen (PE.ENot x       ) = do
+exprGen (PE.ECall ex (PE.EVar name)) = callGen name (fmap exprGen ex)
+exprGen (PE.ENot x                 ) = do
     exprGen x
     addOpCode $ WA.OpI32Const 0
     addOpCode WA.OpI32Eq
