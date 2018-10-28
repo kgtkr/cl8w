@@ -288,13 +288,11 @@ exprGen (PE.EIf (e, s1) [] s2) = do
         Nothing -> return ()
     addOpCode $ WA.OpEnd
 exprGen (PE.EWhile a b) = do
-    loopID <- use GO.loopCount
-    GO.loopCount += 1
     addOpCode $ WA.OpLoop (WA.BlockType Nothing)
     exprGen a
     addOpCode $ WA.OpIf $ WA.BlockType Nothing
     exprGen b
-    addOpCode $ WA.OpBr loopID
+    addOpCode $ WA.OpBr 1
     addOpCode $ WA.OpEnd
     addOpCode $ WA.OpEnd
     return ()

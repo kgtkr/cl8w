@@ -21,8 +21,7 @@ data OpCodeGenData=OpCodeGenData{
     _opCodeGenDataOpCodes::OpCodes,
     _opCodeGenDataLocals:: Locals,
     _opCodeGenDataLocalsLen:: LocalsLen,
-    _opCodeGenDataLocalsMap:: LocalsMap,
-    _opCodeGenDataLoopCount::Int
+    _opCodeGenDataLocalsMap:: LocalsMap
 }
 makeFields ''OpCodeGenData
 
@@ -33,7 +32,6 @@ emptyOpCodeGenData lo = OpCodeGenData
     , _opCodeGenDataLocalsLen = length lo
     , _opCodeGenDataLocalsMap = M.fromList
         $ (map (\(i, (name, t)) -> (name, (t, i))) . zip [0 ..]) lo
-    , _opCodeGenDataLoopCount = 0
     }
 
 type OpCodeGen = ReaderT WL.MemberData (State OpCodeGenData)

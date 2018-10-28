@@ -7,8 +7,11 @@ struct Hoge{
 }
 
 fun main()={
-    let arr=[i32;Hoge];
-    print(x.a+x.b);
-    print(10000);
+    while(true){
+    };
+    while(true){
+        while(true){
+        }
+    };
 }
 
