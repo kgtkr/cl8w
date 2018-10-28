@@ -182,7 +182,7 @@ exprGen (PE.EIndex index e) = do
     let size = GL.sizeOf t
     exprGen e
     addOpCode $ WA.OpI32Const size
-    exprGen e
+    exprGen index
     addOpCode WA.OpI32Mul
     addOpCode WA.OpI32Add
     let loadOp = opLoad (GL.typeToValueType t) (WA.MemoryImmediate 0)
@@ -320,7 +320,7 @@ exprGen (PE.ESet a b) = do
             let size = GL.sizeOf t
             exprGen e
             addOpCode $ WA.OpI32Const size
-            exprGen e
+            exprGen i
             addOpCode WA.OpI32Mul
             addOpCode WA.OpI32Add
             let storeOp = opStore (GL.typeToValueType t) (WA.MemoryImmediate 0)
