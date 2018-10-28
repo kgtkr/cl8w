@@ -13,6 +13,24 @@ import           Control.Monad.Reader
 import qualified Gen.OpCodeGen                 as GO
 type ExprType=Maybe PL.Type
 
+opStore :: WA.ValueType -> WA.MemoryImmediate -> WA.OperatorCode
+opStore t =
+    (case t of
+        WA.ValI32 -> WA.OpI32Store
+        WA.ValI64 -> WA.OpI64Store
+        WA.ValF32 -> WA.OpF32Store
+        WA.ValF64 -> WA.OpF64Store
+    )
+
+opLoad :: WA.ValueType -> WA.MemoryImmediate -> WA.OperatorCode
+opLoad t =
+    (case t of
+        WA.ValI32 -> WA.OpI32Load
+        WA.ValI64 -> WA.OpI64Load
+        WA.ValF32 -> WA.OpF32Load
+        WA.ValF64 -> WA.OpF64Load
+    )
+
 exprType :: PE.Expr -> GO.OpCodeGen (Maybe PL.Type)
 exprType (PE.EStructL ident _) =
     (return . Just) $ PL.RefType $ PL.TStruct ident
@@ -99,14 +117,7 @@ blockGen t x = do
 storeGen :: PE.Expr -> PE.Expr -> Int -> GO.OpCodeGen ()
 storeGen e i o = do
     Just et <- exprType e
-    let storeOp =
-            (case GL.typeToValueType et of
-                    WA.ValI32 -> WA.OpI32Store
-                    WA.ValI64 -> WA.OpI64Store
-                    WA.ValF32 -> WA.OpF32Store
-                    WA.ValF64 -> WA.OpF64Store
-                )
-                (WA.MemoryImmediate 2 o)
+    let storeOp = opStore (GL.typeToValueType et) (WA.MemoryImmediate 2 o)
     opCallGen storeOp [exprGen i, exprGen e]
 dropExprGen :: PE.Expr -> GO.OpCodeGen ()
 dropExprGen e = do
@@ -125,14 +136,8 @@ exprGen (PE.EStructL name exprs) = do
     mapM_
         (\(ident, ex) -> do
             let prop = sDef M.! ident
-            let storeOp =
-                    (case GL.typeToValueType (prop ^. GL.typ) of
-                            WA.ValI32 -> WA.OpI32Store
-                            WA.ValI64 -> WA.OpI64Store
-                            WA.ValF32 -> WA.OpF32Store
-                            WA.ValF64 -> WA.OpF64Store
-                        )
-                        (WA.MemoryImmediate 2 (prop ^. GL.pos))
+            let storeOp = opStore (GL.typeToValueType (prop ^. GL.typ))
+                                  (WA.MemoryImmediate 2 (prop ^. GL.pos))
             opCallGen storeOp [addOpCode $ WA.OpGetLocal res, exprGen ex]
         )
         exprs
@@ -167,14 +172,8 @@ exprGen (PE.EMember ident e) = do
     Just (PL.RefType (PL.TStruct sName)) <- exprType e
     prop <- (M.! ident) . (M.! sName) <$> view GL.structs
     exprGen e
-    let loadOp =
-            (case GL.typeToValueType (prop ^. GL.typ) of
-                    WA.ValI32 -> WA.OpI32Load
-                    WA.ValI64 -> WA.OpI64Load
-                    WA.ValF32 -> WA.OpF32Load
-                    WA.ValF64 -> WA.OpF64Load
-                )
-                (WA.MemoryImmediate 2 (prop ^. GL.pos))
+    let loadOp = opLoad (GL.typeToValueType (prop ^. GL.typ))
+                        (WA.MemoryImmediate 2 (prop ^. GL.pos))
     addOpCode loadOp
 
     return ()
@@ -186,14 +185,7 @@ exprGen (PE.EIndex index e) = do
     exprGen e
     addOpCode WA.OpI32Mul
     addOpCode WA.OpI32Add
-    let loadOp =
-            (case GL.typeToValueType t of
-                    WA.ValI32 -> WA.OpI32Load
-                    WA.ValI64 -> WA.OpI64Load
-                    WA.ValF32 -> WA.OpF32Load
-                    WA.ValF64 -> WA.OpF64Load
-                )
-                (WA.MemoryImmediate 2 0)
+    let loadOp = opLoad (GL.typeToValueType t) (WA.MemoryImmediate 2 0)
     addOpCode loadOp
 exprGen (PE.EAdd a b) = do
     ta <- exprType a
@@ -322,5 +314,9 @@ exprGen (PE.ESet a b) = do
             exprGen b
             (_, id) <- (M.! ident) <$> use GO.localsMap
             addOpCode $ WA.OpSetLocal id
+            return ()
+        PE.EIndex _ _ -> do
+            return ()
+        PE.EMember _ _ -> do
             return ()
     return ()
