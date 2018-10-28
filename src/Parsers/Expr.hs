@@ -147,14 +147,22 @@ boolLP =
 varP :: Parser Expr
 varP = EVar <$> L.identifier
 
+-- https://stackoverflow.com/questions/10475337/parsec-expr-repeated-prefix-postfix-operator-not-supported?lq=1
+prefix p = Prefix . chainl1 p $ return (.)
+postfix p = Postfix . chainl1 p $ return (flip (.))
+
 table =
-  [ [ Postfix (EMember <$> (L.dot *> L.identifier))
-    , Postfix $ EIndex <$> L.brackets exprP
-    , Postfix $ ECall <$> (L.parens . L.commaSep) exprP
+  [ [ (postfix . choice)
+        [ (EMember <$> (L.dot *> L.identifier))
+        , EIndex <$> L.brackets exprP
+        , ECall <$> (L.parens . L.commaSep) exprP
+        ]
     ]
-  , [ Prefix (ENot <$ L.reservedOp "!")
-    , Prefix (EPlus <$ L.reservedOp "+")
-    , Prefix (EMinus <$ L.reservedOp "-")
+  , [ (prefix . choice)
+        [ (ENot <$ L.reservedOp "!")
+        , (EPlus <$ L.reservedOp "+")
+        , (EMinus <$ L.reservedOp "-")
+        ]
     ]
   , [Infix (L.reservedOp "**" >> return EPow) AssocLeft]
   , [ Infix (L.reservedOp "*" >> return EMul) AssocLeft

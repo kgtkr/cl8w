@@ -8,16 +8,16 @@ struct Hoge{
 
 fun main()={
     let n=10;
-    let arr=[i32;n];
+    let arr=[Hoge;n];
     let i=0;
     while(i<n){
-        arr[i]=i*2;
+        arr[i]=Hoge{a:i,b:i*2};
         i=i+1;
     };
     i=0;
     while(i<n){
-        print(arr[i]);
+        print(arr[i].a+arr[i].b);
         i=i+1;
-    };
+    }
 }
 
