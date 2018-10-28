@@ -7,7 +7,7 @@ struct Hoge{
 }
 
 fun main()={
-    let x=[i32;10];
-    print(x[2]);
+    let x=Hoge{a:2,b:3};
+    print(x.a+x.b);
 }
 

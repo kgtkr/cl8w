@@ -245,9 +245,9 @@ instance WasmAST WA.DataSegment where
         putBytes y
 
 instance WasmAST WA.MemoryImmediate where
-    putWasmAST (WA.MemoryImmediate x y)=do
+    putWasmAST (WA.MemoryImmediate x)=do
+        putVaruint32 0
         putVaruint32 x
-        putVaruint32 y
 
 putOpcode :: Putter Int
 putOpcode = putUint8

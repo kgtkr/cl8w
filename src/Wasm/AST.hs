@@ -63,7 +63,7 @@ data DataSection = DataSection [DataSegment]
 
 data DataSegment = DataSegment InitExpr BS.ByteString
 
-data MemoryImmediate = MemoryImmediate Int Int
+data MemoryImmediate = MemoryImmediate Int
 
 data OperatorCode =
     OpUnreachable

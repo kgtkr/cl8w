@@ -117,7 +117,7 @@ blockGen t x = do
 storeGen :: PE.Expr -> PE.Expr -> Int -> GO.OpCodeGen ()
 storeGen e i o = do
     Just et <- exprType e
-    let storeOp = opStore (GL.typeToValueType et) (WA.MemoryImmediate 2 o)
+    let storeOp = opStore (GL.typeToValueType et) (WA.MemoryImmediate o)
     opCallGen storeOp [exprGen i, exprGen e]
 dropExprGen :: PE.Expr -> GO.OpCodeGen ()
 dropExprGen e = do
@@ -137,7 +137,7 @@ exprGen (PE.EStructL name exprs) = do
         (\(ident, ex) -> do
             let prop = sDef M.! ident
             let storeOp = opStore (GL.typeToValueType (prop ^. GL.typ))
-                                  (WA.MemoryImmediate 2 (prop ^. GL.pos))
+                                  (WA.MemoryImmediate (prop ^. GL.pos))
             opCallGen storeOp [addOpCode $ WA.OpGetLocal res, exprGen ex]
         )
         exprs
@@ -173,7 +173,7 @@ exprGen (PE.EMember ident e) = do
     prop <- (M.! ident) . (M.! sName) <$> view GL.structs
     exprGen e
     let loadOp = opLoad (GL.typeToValueType (prop ^. GL.typ))
-                        (WA.MemoryImmediate 2 (prop ^. GL.pos))
+                        (WA.MemoryImmediate (prop ^. GL.pos))
     addOpCode loadOp
 
     return ()
@@ -185,7 +185,7 @@ exprGen (PE.EIndex index e) = do
     exprGen e
     addOpCode WA.OpI32Mul
     addOpCode WA.OpI32Add
-    let loadOp = opLoad (GL.typeToValueType t) (WA.MemoryImmediate 2 0)
+    let loadOp = opLoad (GL.typeToValueType t) (WA.MemoryImmediate 0)
     addOpCode loadOp
 exprGen (PE.EAdd a b) = do
     ta <- exprType a
