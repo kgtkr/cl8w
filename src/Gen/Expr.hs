@@ -299,3 +299,11 @@ exprGen (PE.EWhile a b) = do
 exprGen (PE.EReturn e) = do
     forM_ e exprGen
     addOpCode $ WA.OpReturn
+exprGen (PE.ESet a b) = do
+    case a of
+        PE.EVar ident -> do
+            exprGen b
+            (_, id) <- (M.! ident) <$> use GO.localsMap
+            addOpCode $ WA.OpSetLocal id
+            return ()
+    return ()

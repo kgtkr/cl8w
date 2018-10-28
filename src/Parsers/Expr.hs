@@ -7,11 +7,6 @@ import qualified Text.ParserCombinators.Parsec.Token
 import           Text.ParserCombinators.Parsec.Expr
 import qualified Parsers.Lang                  as L
 
-data SetIdent=SIIdent L.Ident
-              |SIField SetIdent L.Ident
-              |SIIndex SetIdent Expr
-              deriving (Show, Eq)
-
 data Expr = EStructL L.Ident [(L.Ident,Expr)]
         |EI32L Int
         |EI64L Int
@@ -53,23 +48,8 @@ data Expr = EStructL L.Ident [(L.Ident,Expr)]
         |EIf (Expr,Expr) [(Expr,Expr)] (Maybe Expr)
         |EWhile Expr Expr
         |EReturn (Maybe Expr)
-        |ESet SetIdent Expr
+        |ESet Expr Expr
       deriving (Show, Eq)
-
-setIdentP :: Parser SetIdent
-setIdentP = siIdentP <|> siFieldP <|> siIndexP
-
-siIdentP :: Parser SetIdent
-siIdentP = SIIdent <$> L.identifier
-
-siFieldP :: Parser SetIdent
-siFieldP = SIField <$> setIdentP <*> (L.dot *> L.identifier)
-
-siIndexP :: Parser SetIdent
-siIndexP = do
-  si <- setIdentP
-  e  <- L.brackets exprP
-  return $ SIIndex si e
 
 blockP :: Parser Expr
 blockP =
@@ -96,10 +76,6 @@ whileP = EWhile <$> (L.reserved "while" *> L.parens exprP) <*> exprP
 returnP :: Parser Expr
 returnP = EReturn <$> (L.reserved "return" *> optionMaybe exprP)
 
-setP :: Parser Expr
-setP = ESet <$> setIdentP <*> (L.reservedOp "=" *> exprP)
-
-
 exprP :: Parser Expr
 exprP = buildExpressionParser table termP
 
@@ -121,7 +97,6 @@ termP =
     <|> ifP
     <|> whileP
     <|> returnP
-    -- <|> setP
 
 parensP :: Parser Expr
 parensP = L.parens exprP
@@ -206,4 +181,5 @@ table =
   , [ Infix (L.reservedOp "&&" >> return EAnd) AssocLeft
     , Infix (L.reservedOp "||" >> return EOr)  AssocLeft
     ]
+  , [Infix (L.reservedOp "=" >> return ESet) AssocLeft]
   ]

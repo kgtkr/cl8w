@@ -7,11 +7,10 @@ struct Hoge{
 }
 
 fun main()={
-    while(true){
-    };
-    while(true){
-        while(true){
-        }
+    let x=0;
+    while(x!=10){
+        print(x);
+        x=x+1;
     };
 }
 
