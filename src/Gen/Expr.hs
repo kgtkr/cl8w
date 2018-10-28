@@ -315,8 +315,25 @@ exprGen (PE.ESet a b) = do
             (_, id) <- (M.! ident) <$> use GO.localsMap
             addOpCode $ WA.OpSetLocal id
             return ()
-        PE.EIndex _ _ -> do
+        PE.EIndex i e -> do
+            Just (PL.RefType (PL.TArray t)) <- exprType e
+            let size = GL.sizeOf t
+            exprGen e
+            addOpCode $ WA.OpI32Const size
+            exprGen e
+            addOpCode WA.OpI32Mul
+            addOpCode WA.OpI32Add
+            let storeOp = opStore (GL.typeToValueType t) (WA.MemoryImmediate 0)
+            exprGen b
+            addOpCode storeOp
             return ()
-        PE.EMember _ _ -> do
+        PE.EMember ident e -> do
+            Just (PL.RefType (PL.TStruct sName)) <- exprType e
+            prop <- (M.! ident) . (M.! sName) <$> view GL.structs
+            exprGen e
+            let storeOp = opStore (GL.typeToValueType (prop ^. GL.typ))
+                                  (WA.MemoryImmediate (prop ^. GL.pos))
+            exprGen b
+            addOpCode storeOp
             return ()
     return ()

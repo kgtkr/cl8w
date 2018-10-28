@@ -8,6 +8,7 @@ struct Hoge{
 
 fun main()={
     let x=Hoge{a:2,b:3};
+    x.b=10;
     print(x.a+x.b);
 }
 
