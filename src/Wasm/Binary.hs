@@ -12,6 +12,19 @@ import           Data.Bytes.Serial              ( serialize )
 import qualified Data.ByteString               as BS
 import qualified Data.ByteString.UTF8          as BSU
 import           Control.Lens
+import           Data.Bits
+
+putSleb128 :: Putter Int
+putSleb128 x
+    | (v == 0 && b .&. 0x40 == 0) || (v == -1 && b .&. 0x40 /= 0)
+    = (putWord8 . fromIntegral) b
+    | otherwise
+    = do
+        (putWord8 . fromIntegral) (b .|. 0x80)
+        putSleb128 v
+  where
+    b = x .&. 0x7f
+    v = x `shiftR` 7
 
 putUint8 :: Putter Int
 putUint8 = putWord8 . fromIntegral
@@ -36,7 +49,7 @@ putVarint7 :: Putter Int
 putVarint7 x = serialize (fromIntegral x :: VarInt Int8)
 
 putVarint32 :: Putter Int
-putVarint32 x = serialize (fromIntegral x :: VarInt Int32)
+putVarint32 x = putSleb128 x
 
 putVarint64 :: Putter Int
 putVarint64 x = serialize (fromIntegral x :: VarInt Int64)
