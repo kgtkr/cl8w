@@ -178,6 +178,23 @@ exprGen (PE.EMember ident e) = do
     addOpCode loadOp
 
     return ()
+exprGen (PE.EIndex index e) = do
+    Just (PL.RefType (PL.TArray t)) <- exprType e
+    let size = GL.sizeOf t
+    exprGen e
+    addOpCode $ WA.OpI32Const size
+    exprGen e
+    addOpCode WA.OpI32Mul
+    addOpCode WA.OpI32Add
+    let loadOp =
+            (case GL.typeToValueType t of
+                    WA.ValI32 -> WA.OpI32Load
+                    WA.ValI64 -> WA.OpI64Load
+                    WA.ValF32 -> WA.OpF32Load
+                    WA.ValF64 -> WA.OpF64Load
+                )
+                (WA.MemoryImmediate 2 0)
+    addOpCode loadOp
 exprGen (PE.EAdd a b) = do
     ta <- exprType a
     tb <- exprType b

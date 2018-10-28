@@ -7,10 +7,7 @@ struct Hoge{
 }
 
 fun main()={
-    let x=0;
-    while(x!=10){
-        print(x);
-        x=x+1;
-    };
+    let x=[i32;10];
+    print(x[2]);
 }
 
