@@ -80,6 +80,13 @@ exprType (PE.EWhile _ _    ) = return Nothing
 exprType (PE.EReturn _     ) = return Nothing
 exprType (PE.ESet _ _      ) = return Nothing
 
+makeScope :: GO.OpCodeGen () -> GO.OpCodeGen ()
+makeScope m = do
+    lm <- use GO.localsMap
+    m
+    GO.localsMap .= lm
+    return ()
+
 addLocal :: WA.ValueType -> GO.OpCodeGen Int
 addLocal t = do
     len <- use GO.localsLen
@@ -275,7 +282,7 @@ exprGen (PE.ELte a b) = do
             exprGen a
             exprGen b
             addOpCode $ WA.OpI32Les
-exprGen (PE.EBlock ss e) = do
+exprGen (PE.EBlock ss e) = makeScope $ do
     mapM_ dropExprGen ss
     case e of
         Just e  -> exprGen e

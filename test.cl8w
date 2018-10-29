@@ -1,28 +1,18 @@
 extern fun "memory" "malloc" malloc(x:i32):i32
 extern fun "io" "print" print(x:i32)
 
-struct Hoge{
-    a:i32,
-    b:i32
-}
-
-fun createArray(n:i32):[Hoge]={
-    let arr=[Hoge;n];
-    let i=0;
-    while(i<n){
-        arr[i]=Hoge{a:i,b:i*2};
-        i=i+1;
-    };
-    arr
-}
-
 fun main()={
-    let n=10;
-    let arr=createArray(n);
-    let i=0;
-    while(i<n){
-        print(arr[i].a+arr[i].b);
-        i=i+1;
-    }
+    let x=1;
+    print(x);
+    {
+        print(x);
+        x=2;
+        print(x);
+        let x=3;
+        print(x);
+        x=4;
+        print(x);
+    };
+    print(x);
 }
 
