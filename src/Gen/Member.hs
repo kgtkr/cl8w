@@ -107,7 +107,8 @@ compile x = WA.wasmASTRootDefault
         Just $ WA.TableSection
             [WA.TableType WA.ElAnyFunc (WA.ResizableLimits (length x) Nothing)]
     , WA._wasmASTRootElementSection  =
-        Just $ WA.ElementSection [WA.ElemSegment (WA.InitI32 0) [0 .. length x]]
+        Just $ WA.ElementSection
+            [WA.ElemSegment (WA.InitI32 0) [0 .. length x - 1]]
     }
   where
     md  = toMemberData x
