@@ -170,8 +170,9 @@ exprGen (PE.ECall ex f) = do
     let waType = WA.FuncType (fmap GL.typeToValueType params)
                              (fmap GL.typeToValueType res)
     let typeID = types M.! waType
+    mapM_ exprGen ex
     exprGen f
-    opCallGen (WA.OpCallIndirect typeID) (fmap exprGen ex)
+    addOpCode $ WA.OpCallIndirect typeID
 exprGen (PE.ENot x) = do
     exprGen x
     addOpCode $ WA.OpI32Const 0
