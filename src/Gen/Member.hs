@@ -85,14 +85,15 @@ type MemberGen=State MemberGenData
 
 compile :: PM.Module -> WA.WasmASTRoot
 compile x = WA.wasmASTRootDefault
-    { WA._wasmASTRootTypeSection     = ( Just
-                                       . WA.TypeSection
-                                       . map (^. _1)
-                                       . sortOn snd
-                                       . M.toList
-                                       . (^. typeSection)
-                                       )
-                                           res
+    { WA._wasmASTRootTypeSection     =
+        ( Just
+            . WA.TypeSection
+            . map (^. _1)
+            . sortOn snd
+            . M.toList
+            . (^. GL.types)
+            )
+            md
     , WA._wasmASTRootImportSection   =
         ( Just
             . WA.ImportSection

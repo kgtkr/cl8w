@@ -2,13 +2,12 @@ extern fun "memory" "malloc" malloc(x:i32):i32
 extern fun "io" "print" print(x:i32)
 
 fun main()={
-    for(let i=0;i<10;i=i+1){
-        print(i);
-    };
 }
 
+/*
 struct A{}
 struct B{}
 
 fun f1():A={}
 fun f2():B={}
+*/
