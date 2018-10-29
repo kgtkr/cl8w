@@ -42,7 +42,7 @@ exprType (PE.EStringL _             ) = (return . Just) $ PL.RefType PL.TString
 exprType (PE.EArrayL t _) = (return . Just) $ PL.RefType $ PL.TArray t
 exprType (PE.EBoolL _               ) = (return . Just) PL.TBool
 exprType (PE.ECharL _               ) = (return . Just) PL.TChar
-exprType (PE.EVar ident) = Just . (^. _1) . (M.! ident) <$> use GO.localsMap
+exprType (PE.EVar ident) = Just . (^. _1) . (M.! ident) <$> use GO.symbolMap
 exprType (PE.ECall _ (PE.EVar ident)) = do
     fd <- (^. _2) . (M.! ident) <$> view GL.functions
     return $ fd ^. PM.result
@@ -82,9 +82,9 @@ exprType (PE.ESet _ _      ) = return Nothing
 exprType (PE.EFor _ _ _ _  ) = return Nothing
 makeScope :: GO.OpCodeGen () -> GO.OpCodeGen ()
 makeScope m = do
-    lm <- use GO.localsMap
+    lm <- use GO.symbolMap
     m
-    GO.localsMap .= lm
+    GO.symbolMap .= lm
     return ()
 
 addLocal :: WA.ValueType -> GO.OpCodeGen Int
@@ -97,7 +97,7 @@ addLocal t = do
 addNamedLocalData :: PL.Type -> PL.Ident -> GO.OpCodeGen Int
 addNamedLocalData t name = do
     id <- (addLocal . GL.typeToValueType) t
-    GO.localsMap %= M.insert name (t, id)
+    GO.symbolMap %= M.insert name (t, GO.SDLocal id)
     return id
 
 addOpCode :: WA.OperatorCode -> GO.OpCodeGen ()
@@ -160,8 +160,10 @@ exprGen (PE.EArrayL t x) = do
         [addOpCode $ WA.OpI32Const size, exprGen x, addOpCode WA.OpI32Mul]
 exprGen (PE.EBoolL x) = addOpCode $ WA.OpI32Const (if x then 1 else 0)
 exprGen (PE.EVar   x) = do
-    l <- snd . (M.! x) <$> use GO.localsMap
-    addOpCode $ WA.OpGetLocal l
+    l <- snd . (M.! x) <$> use GO.symbolMap
+    case l of
+        GO.SDLocal x -> addOpCode $ WA.OpGetLocal x
+        GO.SDConst x -> addOpCode $ WA.OpI32Const x
 exprGen (PE.ECall ex (PE.EVar name)) = callGen name (fmap exprGen ex)
 exprGen (PE.ENot x                 ) = do
     exprGen x
@@ -319,7 +321,7 @@ exprGen (PE.ESet a b) = do
     case a of
         PE.EVar ident -> do
             exprGen b
-            (_, id) <- (M.! ident) <$> use GO.localsMap
+            (_, GO.SDLocal id) <- (M.! ident) <$> use GO.symbolMap
             addOpCode $ WA.OpSetLocal id
             return ()
         PE.EIndex i e -> do

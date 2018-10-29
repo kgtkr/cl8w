@@ -14,14 +14,14 @@ import           Control.Monad.Reader
 type OpCodes=D.DList WA.OperatorCode
 type Locals=D.DList WA.ValueType
 type LocalsLen=Int
-type LocalsMap=M.Map String LocalData
-type LocalData=(PL.Type,Int)
+type SymbolMap=M.Map String (PL.Type,SymbolData)
+data SymbolData=SDLocal Int|SDConst Int
 
 data OpCodeGenData=OpCodeGenData{
     _opCodeGenDataOpCodes::OpCodes,
     _opCodeGenDataLocals:: Locals,
     _opCodeGenDataLocalsLen:: LocalsLen,
-    _opCodeGenDataLocalsMap:: LocalsMap
+    _opCodeGenDataSymbolMap:: SymbolMap
 }
 makeFields ''OpCodeGenData
 
@@ -30,8 +30,8 @@ emptyOpCodeGenData lo = OpCodeGenData
     { _opCodeGenDataOpCodes   = D.empty
     , _opCodeGenDataLocals    = D.empty
     , _opCodeGenDataLocalsLen = length lo
-    , _opCodeGenDataLocalsMap = M.fromList
-        $ (map (\(i, (name, t)) -> (name, (t, i))) . zip [0 ..]) lo
+    , _opCodeGenDataSymbolMap = M.fromList
+        $ (map (\(i, (name, t)) -> (name, (t, SDLocal i))) . zip [0 ..]) lo
     }
 
 type OpCodeGen = ReaderT WL.MemberData (State OpCodeGenData)
