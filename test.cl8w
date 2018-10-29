@@ -4,6 +4,6 @@ extern fun "io" "print" print(x:i32)
 fun main()={
     for(let i=0;i<10;i=i+1){
         print(i);
-    }
+    };
 }
 

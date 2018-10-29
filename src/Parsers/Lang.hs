@@ -54,8 +54,8 @@ def = LanguageDef
   , nestedComments  = True
   , identStart      = letter
   , identLetter     = alphaNum <|> oneOf "_"
-  , opStart         = oneOf "+-*/%&|^=<>!"
-  , opLetter        = oneOf "+-*/%&|^=<>!"
+  , opStart         = oneOf []
+  , opLetter        = oneOf []
   , reservedOpNames = op
   , reservedNames   = keywords
   , caseSensitive   = True
