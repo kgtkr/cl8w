@@ -34,18 +34,18 @@ opLoad t =
 exprType :: PE.Expr -> GO.OpCodeGen (Maybe PL.Type)
 exprType (PE.EStructL ident _) =
     (return . Just) $ PL.RefType $ PL.TStruct ident
-exprType (PE.EI32L    _             ) = (return . Just) PL.TI32
-exprType (PE.EI64L    _             ) = (return . Just) PL.TI64
-exprType (PE.EF32L    _             ) = (return . Just) PL.TF32
-exprType (PE.EF64L    _             ) = (return . Just) PL.TF64
-exprType (PE.EStringL _             ) = (return . Just) $ PL.RefType PL.TString
-exprType (PE.EArrayL t _) = (return . Just) $ PL.RefType $ PL.TArray t
-exprType (PE.EBoolL _               ) = (return . Just) PL.TBool
-exprType (PE.ECharL _               ) = (return . Just) PL.TChar
-exprType (PE.EVar ident) = Just . (^. _1) . (M.! ident) <$> use GO.symbolMap
-exprType (PE.ECall _ (PE.EVar ident)) = do
-    fd <- (^. _2) . (M.! ident) <$> view GL.functions
-    return $ fd ^. PM.result
+exprType (PE.EI32L    _   ) = (return . Just) PL.TI32
+exprType (PE.EI64L    _   ) = (return . Just) PL.TI64
+exprType (PE.EF32L    _   ) = (return . Just) PL.TF32
+exprType (PE.EF64L    _   ) = (return . Just) PL.TF64
+exprType (PE.EStringL _   ) = (return . Just) $ PL.RefType PL.TString
+exprType (PE.EArrayL t _  ) = (return . Just) $ PL.RefType $ PL.TArray t
+exprType (PE.EBoolL _     ) = (return . Just) PL.TBool
+exprType (PE.ECharL _     ) = (return . Just) PL.TChar
+exprType (PE.EVar   ident ) = Just . (^. _1) . (M.! ident) <$> use GO.symbolMap
+exprType (PE.ECall _ ident) = do
+    Just (PL.RefType (PL.TFunc _ res)) <- exprType ident
+    return res
 exprType (PE.ENot   _        ) = (return . Just) PL.TBool
 exprType (PE.EPlus  e        ) = exprType e
 exprType (PE.EMinus e        ) = exprType e

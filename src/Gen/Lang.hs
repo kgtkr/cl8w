@@ -39,7 +39,8 @@ type StructMap=M.Map String Struct
 
 data MemberData=MemberData{
     _memberDataFunctions::FunctionMap,
-    _memberDataStructs::StructMap
+    _memberDataStructs::StructMap,
+    _memberDataTypes::M.Map WA.FuncType Int
 } deriving(Show)
 
 makeFields ''MemberData

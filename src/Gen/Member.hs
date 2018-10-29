@@ -23,11 +23,20 @@ fromASTStruct ms = M.fromList (f 0 (sortOn fst ms))
         (ident, StructProp pos t ident) : (f (pos + GL.sizeOf t) xs)
     f _ [] = []
 
+fDefToType :: PM.FuncDef -> WA.FuncType
+fDefToType fd = WA.FuncType
+    (fmap (GL.typeToValueType . snd) (fd ^. PM.params))
+    (fmap GL.typeToValueType (fd ^. PM.result))
+
+makeTypeMap :: [PM.FuncDef] -> M.Map WA.FuncType Int
+makeTypeMap = M.fromList . map swap . zip [0 ..] . nub . fmap fDefToType
+
 toMemberData :: [PM.Member] -> MemberData
 toMemberData ms = MemberData
     { _memberDataStructs   = (M.fromList . map (over _2 fromASTStruct)) structs
     , _memberDataFunctions = M.fromList
         (fdToMap 0 externFunDefs ++ fdToMap (length externFunDefs) funDefs)
+    , _memberDataTypes     = makeTypeMap (externFunDefs ++ funDefs)
     }
   where
     fdToMap initID =
@@ -73,11 +82,6 @@ memberGenData = MemberGenData
     }
 
 type MemberGen=State MemberGenData
-
-fDefToType :: PM.FuncDef -> WA.FuncType
-fDefToType fd = WA.FuncType
-    (fmap (GL.typeToValueType . snd) (fd ^. PM.params))
-    (fmap GL.typeToValueType (fd ^. PM.result))
 
 compile :: PM.Module -> WA.WasmASTRoot
 compile x = WA.wasmASTRootDefault
@@ -125,24 +129,12 @@ compile x = WA.wasmASTRootDefault
 membersGen :: MemberData -> [PM.Member] -> MemberGen ()
 membersGen md = mapM_ (memberGen md)
 
-typeID :: PM.FuncDef -> MemberGen Int
-typeID fd = do
-    let t = fDefToType fd
-    tID <- (M.!? t) <$> use typeSection
-    tID <- case tID of
-        Just x  -> return x
-        Nothing -> do
-            x <- M.size <$> use typeSection
-            typeSection %= (M.insert t x)
-            return x
-    return tID
-
 memberGen :: MemberData -> PM.Member -> MemberGen ()
 memberGen md (PM.MFun fd stat) = do
     functionIndex <- (+) <$> use defineFunctionsLen <*> use externFunctionsLen
     defineFunctionsLen += 1
 
-    ti <- typeID fd
+    let ti = ((md ^. GL.types) M.! fDefToType fd)
 
     functionSection %= (`D.snoc` ti)
     exportSection
@@ -164,7 +156,7 @@ memberGen _  (PM.MStruct _ _              ) = return ()
 memberGen md (PM.MExternFun fd name1 name2) = do
     functionIndex <- (+) <$> use defineFunctionsLen <*> use externFunctionsLen
     externFunctionsLen += 1
-    ti <- typeID fd
+    let ti = ((md ^. GL.types) M.! fDefToType fd)
     importSection
         %= (`D.snoc` (WA.ImportEntry name1 name2 (WA.ExImFunction ti)))
 
