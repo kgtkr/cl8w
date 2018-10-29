@@ -87,6 +87,12 @@ makeScope m = do
     GO.symbolMap .= lm
     return ()
 
+callGen :: String -> [GO.OpCodeGen ()] -> GO.OpCodeGen ()
+callGen f args = do
+    m <- view GL.functions
+    let (id, _) = m M.! f
+    opCallGen (WA.OpCall id) args
+
 addLocal :: WA.ValueType -> GO.OpCodeGen Int
 addLocal t = do
     len <- use GO.localsLen
@@ -102,12 +108,6 @@ addNamedLocalData t name = do
 
 addOpCode :: WA.OperatorCode -> GO.OpCodeGen ()
 addOpCode x = GO.opCodes %= (`D.snoc` x)
-
-callGen :: String -> [GO.OpCodeGen ()] -> GO.OpCodeGen ()
-callGen f args = do
-    m <- view GL.functions
-    let (id, _) = m M.! f
-    opCallGen (WA.OpCall id) args
 
 opCallGen :: WA.OperatorCode -> [GO.OpCodeGen ()] -> GO.OpCodeGen ()
 opCallGen op args = do
@@ -164,8 +164,15 @@ exprGen (PE.EVar   x) = do
     case l of
         GO.SDLocal x -> addOpCode $ WA.OpGetLocal x
         GO.SDConst x -> addOpCode $ WA.OpI32Const x
-exprGen (PE.ECall ex (PE.EVar name)) = callGen name (fmap exprGen ex)
-exprGen (PE.ENot x                 ) = do
+exprGen (PE.ECall ex f) = do
+    types <- view GL.types
+    Just (PL.RefType (PL.TFunc params res)) <- exprType f
+    let waType = WA.FuncType (fmap GL.typeToValueType params)
+                             (fmap GL.typeToValueType res)
+    let typeID = types M.! waType
+    exprGen f
+    opCallGen (WA.OpCallIndirect typeID) (fmap exprGen ex)
+exprGen (PE.ENot x) = do
     exprGen x
     addOpCode $ WA.OpI32Const 0
     addOpCode WA.OpI32Eq
