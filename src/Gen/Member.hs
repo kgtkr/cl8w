@@ -121,7 +121,9 @@ memberGen :: MemberData -> PM.Member -> MemberGen ()
 memberGen md (PM.MFun fd stat) = do
     functionIndex <- (+) <$> use defineFunctionsLen <*> use externFunctionsLen
     defineFunctionsLen += 1
+
     typeSection %= (`D.snoc` fDefToType fd)
+
     functionSection %= (`D.snoc` functionIndex)
     exportSection
         %= (`D.snoc` WA.ExportEntry (fd ^. PM.name) WA.ExFunction functionIndex)

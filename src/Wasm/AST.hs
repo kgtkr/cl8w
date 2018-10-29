@@ -3,15 +3,15 @@ import qualified Data.ByteString               as BS
 import           Data.Int
 import           Control.Lens
 
-data ValueType = ValI32|ValI64|ValF32|ValF64
+data ValueType = ValI32|ValI64|ValF32|ValF64  deriving (Eq,Ord,Show)
 
-data BlockType = BlockType (Maybe ValueType)
+data BlockType = BlockType (Maybe ValueType)  deriving (Eq,Ord,Show)
 
-data ElemType = ElAnyFunc
+data ElemType = ElAnyFunc deriving (Eq,Ord,Show)
 
-data FuncType = FuncType [ValueType] (Maybe ValueType)
+data FuncType = FuncType [ValueType] (Maybe ValueType) deriving (Eq,Ord,Show)
 
-data LanguageType = LangValueType ValueType|LangElemType ElemType|LangFuncType FuncType|LangBlockType BlockType
+data LanguageType = LangValueType ValueType|LangElemType ElemType|LangFuncType FuncType|LangBlockType BlockType  deriving (Eq,Ord,Show)
 
 data GlobalType = GlobalType ValueType Bool
 
