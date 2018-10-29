@@ -6,3 +6,9 @@ fun main()={
         print(i);
     };
 }
+
+struct A{}
+struct B{}
+
+fun f1():A={}
+fun f2():B={}

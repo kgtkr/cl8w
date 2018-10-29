@@ -112,14 +112,15 @@ compile x = WA.wasmASTRootDefault
         (Just . WA.CodeSection . D.toList . (^. codeSection)) res
     , WA._wasmASTRootTableSection    =
         Just $ WA.TableSection
-            [WA.TableType WA.ElAnyFunc (WA.ResizableLimits (length x) Nothing)]
+            [WA.TableType WA.ElAnyFunc (WA.ResizableLimits funcLen Nothing)]
     , WA._wasmASTRootElementSection  =
         Just $ WA.ElementSection
-            [WA.ElemSegment (WA.InitI32 0) [0 .. length x - 1]]
+            [WA.ElemSegment (WA.InitI32 0) [0 .. funcLen - 1]]
     }
   where
-    md  = toMemberData x
-    res = execState (membersGen md x) memberGenData
+    md      = toMemberData x
+    res     = execState (membersGen md x) memberGenData
+    funcLen = res ^. defineFunctionsLen + res ^. externFunctionsLen
 
 membersGen :: MemberData -> [PM.Member] -> MemberGen ()
 membersGen md = mapM_ (memberGen md)
