@@ -14,6 +14,7 @@ import qualified Data.DList                    as D
 import           Data.Maybe
 import           Control.Monad.State
 import           Control.Monad.Reader
+import           Data.Tuple
 import qualified Gen.OpCodeGen                 as GO
 fromASTStruct :: PM.StructMembers -> Struct
 fromASTStruct ms = M.fromList (f 0 (sortOn fst ms))
@@ -53,7 +54,7 @@ toMemberData ms = MemberData
 data MemberGenData=MemberGenData{
     _memberGenDataDefineFunctionsLen::Int,
     _memberGenDataExternFunctionsLen::Int,
-    _memberGenDataTypeSection::D.DList WA.FuncType,
+    _memberGenDataTypeSection::M.Map WA.FuncType Int,
     _memberGenDataImportSection::D.DList WA.ImportEntry,
     _memberGenDataFunctionSection::D.DList Int,
     _memberGenDataExportSection::D.DList WA.ExportEntry,
@@ -64,7 +65,7 @@ makeFields ''MemberGenData
 memberGenData = MemberGenData
     { _memberGenDataDefineFunctionsLen = 0
     , _memberGenDataExternFunctionsLen = 0
-    , _memberGenDataTypeSection        = D.empty
+    , _memberGenDataTypeSection        = M.empty
     , _memberGenDataImportSection      = D.empty
     , _memberGenDataFunctionSection    = D.empty
     , _memberGenDataExportSection      = D.empty
@@ -80,8 +81,14 @@ fDefToType fd = WA.FuncType
 
 compile :: PM.Module -> WA.WasmASTRoot
 compile x = WA.wasmASTRootDefault
-    { WA._wasmASTRootTypeSection     =
-        (Just . WA.TypeSection . D.toList . (^. typeSection)) res
+    { WA._wasmASTRootTypeSection     = ( Just
+                                       . WA.TypeSection
+                                       . map (^. _1)
+                                       . sortOn snd
+                                       . M.toList
+                                       . (^. typeSection)
+                                       )
+                                           res
     , WA._wasmASTRootImportSection   =
         ( Just
             . WA.ImportSection
@@ -117,14 +124,26 @@ compile x = WA.wasmASTRootDefault
 membersGen :: MemberData -> [PM.Member] -> MemberGen ()
 membersGen md = mapM_ (memberGen md)
 
+typeID :: PM.FuncDef -> MemberGen Int
+typeID fd = do
+    let t = fDefToType fd
+    tID <- (M.!? t) <$> use typeSection
+    tID <- case tID of
+        Just x  -> return x
+        Nothing -> do
+            x <- M.size <$> use typeSection
+            typeSection %= (M.insert t x)
+            return x
+    return 1
+
 memberGen :: MemberData -> PM.Member -> MemberGen ()
 memberGen md (PM.MFun fd stat) = do
     functionIndex <- (+) <$> use defineFunctionsLen <*> use externFunctionsLen
     defineFunctionsLen += 1
 
-    typeSection %= (`D.snoc` fDefToType fd)
+    ti <- typeID fd
 
-    functionSection %= (`D.snoc` functionIndex)
+    functionSection %= (`D.snoc` ti)
     exportSection
         %= (`D.snoc` WA.ExportEntry (fd ^. PM.name) WA.ExFunction functionIndex)
     let x  = GO.emptyOpCodeGenData (fd ^. PM.params)
@@ -144,10 +163,8 @@ memberGen _  (PM.MStruct _ _              ) = return ()
 memberGen md (PM.MExternFun fd name1 name2) = do
     functionIndex <- (+) <$> use defineFunctionsLen <*> use externFunctionsLen
     externFunctionsLen += 1
-    typeSection %= (`D.snoc` fDefToType fd)
+    ti <- typeID fd
     importSection
-        %= (`D.snoc` (WA.ImportEntry name1 name2 (WA.ExImFunction functionIndex)
-                     )
-           )
+        %= (`D.snoc` (WA.ImportEntry name1 name2 (WA.ExImFunction ti)))
 
     return ()
