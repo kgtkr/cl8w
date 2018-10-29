@@ -147,11 +147,11 @@ instance WasmAST WA.ExternalKind where
     putWasmAST WA.ExGlobal=putUint8 3
 
 instance WasmAST WA.InitExpr where
-    putWasmAST (WA.InitI32 x)=putWasmAST (WA.OpI32Const x)
-    putWasmAST (WA.InitI64 x)=putWasmAST (WA.OpI64Const x)
-    putWasmAST (WA.InitF32 x)=putWasmAST (WA.OpF32Const x)
-    putWasmAST (WA.InitF64 x)=putWasmAST (WA.OpF64Const x)
-    putWasmAST (WA.InitGlobal x)=putWasmAST (WA.OpGetGlobal x)
+    putWasmAST (WA.InitI32 x)=putWasmAST (WA.OpI32Const x)>>putWasmAST WA.OpEnd
+    putWasmAST (WA.InitI64 x)=putWasmAST (WA.OpI64Const x)>>putWasmAST WA.OpEnd
+    putWasmAST (WA.InitF32 x)=putWasmAST (WA.OpF32Const x)>>putWasmAST WA.OpEnd
+    putWasmAST (WA.InitF64 x)=putWasmAST (WA.OpF64Const x)>>putWasmAST WA.OpEnd
+    putWasmAST (WA.InitGlobal x)=putWasmAST (WA.OpGetGlobal x)>>putWasmAST WA.OpEnd
 instance WasmAST WA.TypeSection where
     putWasmAST (WA.TypeSection x)=putSction 1 (putArrayAST x)
 instance WasmAST WA.ExternalKindImport where
