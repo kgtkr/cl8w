@@ -134,7 +134,7 @@ data Type = TI32
           | RefType RefType
           deriving (Show, Eq)
 
-data RefType=TString|TArray Type|TStruct Ident deriving (Show, Eq)
+data RefType=TString|TArray Type|TStruct Ident|TFunc [Type] (Maybe Type) deriving (Show, Eq)
 
 typeParser :: Parser Type
 typeParser =
