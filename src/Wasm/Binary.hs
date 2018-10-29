@@ -100,7 +100,7 @@ instance WasmAST WA.BlockType where
     putWasmAST (WA.BlockType Nothing)  = putVarint7 0x40
 
 instance WasmAST WA.ElemType where
-    putWasmAST WA.ElAnyFunc = putVarint7 0x7c
+    putWasmAST WA.ElAnyFunc = putVarint7 0x70
 
 instance WasmAST WA.FuncType where
     putWasmAST (WA.FuncType p r) = do
