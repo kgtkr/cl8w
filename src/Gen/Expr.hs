@@ -79,7 +79,7 @@ exprType (PE.EIf (_, e) _ _) = exprType e
 exprType (PE.EWhile _ _    ) = return Nothing
 exprType (PE.EReturn _     ) = return Nothing
 exprType (PE.ESet _ _      ) = return Nothing
-
+exprType (PE.EFor _ _ _ _  ) = return Nothing
 makeScope :: GO.OpCodeGen () -> GO.OpCodeGen ()
 makeScope m = do
     lm <- use GO.localsMap
@@ -343,4 +343,15 @@ exprGen (PE.ESet a b) = do
             exprGen b
             addOpCode storeOp
             return ()
+    return ()
+exprGen (PE.EFor init cond proc body) = makeScope $ do
+    exprGen init
+    addOpCode $ WA.OpLoop (WA.BlockType Nothing)
+    exprGen cond
+    addOpCode $ WA.OpIf $ WA.BlockType Nothing
+    exprGen body
+    exprGen proc
+    addOpCode $ WA.OpBr 1
+    addOpCode $ WA.OpEnd
+    addOpCode $ WA.OpEnd
     return ()

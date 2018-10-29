@@ -49,6 +49,7 @@ data Expr = EStructL L.Ident [(L.Ident,Expr)]
         |EWhile Expr Expr
         |EReturn (Maybe Expr)
         |ESet Expr Expr
+        |EFor Expr Expr Expr Expr
       deriving (Show, Eq)
 
 blockP :: Parser Expr
@@ -76,6 +77,19 @@ whileP = EWhile <$> (L.reserved "while" *> L.parens exprP) <*> exprP
 returnP :: Parser Expr
 returnP = EReturn <$> (L.reserved "return" *> optionMaybe exprP)
 
+forP :: Parser Expr
+forP = do
+  L.reserved "for"
+  (a, b, c) <- L.parens $ do
+    a <- exprP
+    L.semi
+    b <- exprP
+    L.semi
+    c <- exprP
+    return (a, b, c)
+  d <- exprP
+  return $ EFor a b c d
+
 exprP :: Parser Expr
 exprP = buildExpressionParser table termP
 
@@ -96,6 +110,7 @@ termP =
     <|> ifP
     <|> whileP
     <|> returnP
+    <|> forP
 
 parensP :: Parser Expr
 parensP = L.parens exprP

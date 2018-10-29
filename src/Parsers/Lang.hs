@@ -23,6 +23,7 @@ keywords =
   , "struct"
   , "fun"
   , "extern"
+  , "for"
   ]
 
 op =

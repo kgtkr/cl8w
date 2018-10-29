@@ -2,17 +2,8 @@ extern fun "memory" "malloc" malloc(x:i32):i32
 extern fun "io" "print" print(x:i32)
 
 fun main()={
-    let x=1;
-    print(x);
-    {
-        print(x);
-        x=2;
-        print(x);
-        let x=3;
-        print(x);
-        x=4;
-        print(x);
-    };
-    print(x);
+    for(let i=0;i<10;i=i+1){
+        print(i);
+    }
 }
 
