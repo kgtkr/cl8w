@@ -2,12 +2,6 @@ extern fun "memory" "malloc" malloc(x:i32):i32
 extern fun "io" "print" print(x:i32)
 
 fun main()={
+    let f=print;
+    f(1);
 }
-
-/*
-struct A{}
-struct B{}
-
-fun f1():A={}
-fun f2():B={}
-*/
