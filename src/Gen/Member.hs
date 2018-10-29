@@ -134,7 +134,7 @@ typeID fd = do
             x <- M.size <$> use typeSection
             typeSection %= (M.insert t x)
             return x
-    return 1
+    return tID
 
 memberGen :: MemberData -> PM.Member -> MemberGen ()
 memberGen md (PM.MFun fd stat) = do

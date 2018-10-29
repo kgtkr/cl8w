@@ -6,4 +6,3 @@ fun main()={
         print(i);
     };
 }
-
