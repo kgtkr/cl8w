@@ -88,6 +88,17 @@ makeScope m = do
     GO.symbolMap .= lm
     return ()
 
+initGen :: GO.OpCodeGen ()
+initGen = do
+    params <- use GO.params
+    ( mapM_
+                (\(i, (ident, t)) -> addNamedLocalData t ident
+                    >> setNamedLocal ident (addOpCode $ WA.OpGetLocal i)
+                )
+        . zip [0 ..]
+        )
+        params
+
 callGen :: String -> [GO.OpCodeGen ()] -> GO.OpCodeGen ()
 callGen f args = do
     m <- view GL.functions

@@ -17,11 +17,14 @@ type LocalsLen=Int
 type SymbolMap=M.Map String (PL.Type,SymbolData)
 data SymbolData=SDLocal Int|SDFunc Int
 
+type Params=[(PL.Ident, PL.Type)]
+
 data OpCodeGenData=OpCodeGenData{
     _opCodeGenDataOpCodes::OpCodes,
     _opCodeGenDataLocals:: Locals,
     _opCodeGenDataLocalsLen:: LocalsLen,
-    _opCodeGenDataSymbolMap:: SymbolMap
+    _opCodeGenDataSymbolMap:: SymbolMap,
+    _opCodeGenDataParams::Params
 }
 makeFields ''OpCodeGenData
 
@@ -29,15 +32,14 @@ funcDefToType :: PM.FuncDef -> PL.Type
 funcDefToType fd =
     PL.RefType (PL.TFunc ((map snd) (fd ^. PM.params)) (fd ^. PM.result))
 
-emptyOpCodeGenData :: GL.FunctionMap -> [(PL.Ident, PL.Type)] -> OpCodeGenData
-emptyOpCodeGenData fm lo = OpCodeGenData
+emptyOpCodeGenData :: GL.FunctionMap -> Params -> OpCodeGenData
+emptyOpCodeGenData fm ps = OpCodeGenData
     { _opCodeGenDataOpCodes   = D.empty
     , _opCodeGenDataLocals    = D.empty
-    , _opCodeGenDataLocalsLen = length lo
-    , _opCodeGenDataSymbolMap = M.fromList (fmList ++ loList)
+    , _opCodeGenDataLocalsLen = length ps
+    , _opCodeGenDataSymbolMap = fmMap
+    , _opCodeGenDataParams    = ps
     }
-  where
-    fmList = (M.toList . fmap (\(a, b) -> (funcDefToType b, SDFunc a))) fm
-    loList = (map (\(i, (name, t)) -> (name, (t, SDLocal i))) . zip [0 ..]) lo
+    where fmMap = fmap (\(a, b) -> (funcDefToType b, SDFunc a)) fm
 
 type OpCodeGen = ReaderT GL.MemberData (State OpCodeGenData)
