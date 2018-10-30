@@ -80,6 +80,7 @@ exprType (PE.EWhile _ _    ) = return Nothing
 exprType (PE.EReturn _     ) = return Nothing
 exprType (PE.ESet _ _      ) = return Nothing
 exprType (PE.EFor _ _ _ _  ) = return Nothing
+
 makeScope :: GO.OpCodeGen () -> GO.OpCodeGen ()
 makeScope m = do
     lm <- use GO.symbolMap
@@ -113,12 +114,6 @@ opCallGen :: WA.OperatorCode -> [GO.OpCodeGen ()] -> GO.OpCodeGen ()
 opCallGen op args = do
     sequence_ args
     addOpCode op
-
-blockGen :: WA.BlockType -> GO.OpCodeGen () -> GO.OpCodeGen ()
-blockGen t x = do
-    addOpCode $ WA.OpBlock t
-    x
-    addOpCode $ WA.OpEnd
 
 -- 値/位置/オフセット
 storeGen :: PE.Expr -> PE.Expr -> Int -> GO.OpCodeGen ()
