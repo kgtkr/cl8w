@@ -160,14 +160,25 @@ exprGen (PE.EVar   x) = do
         GO.SDLocal x -> addOpCode $ WA.OpGetLocal x
         GO.SDFunc  x -> addOpCode $ WA.OpI32Const x
 exprGen (PE.ECall ex f) = do
-    types <- view GL.types
-    Just (PL.RefType (PL.TFunc params res)) <- exprType f
-    let waType = WA.FuncType (fmap GL.typeToValueType params)
-                             (fmap GL.typeToValueType res)
-    let typeID = types M.! waType
     mapM_ exprGen ex
-    exprGen f
-    addOpCode $ WA.OpCallIndirect typeID
+
+    sMap <- use GO.symbolMap
+    case (fmap (\x -> snd (sMap M.! x)) . getIdent) f >>= getFuncID of
+        -- 関数を静的呼び出し出来る時は最適化
+        Just x  -> addOpCode $ WA.OpCall x
+        Nothing -> do
+            types <- view GL.types
+            Just (PL.RefType (PL.TFunc params res)) <- exprType f
+            let waType = WA.FuncType (fmap GL.typeToValueType params)
+                                     (fmap GL.typeToValueType res)
+            let typeID = types M.! waType
+            exprGen f
+            addOpCode $ WA.OpCallIndirect typeID
+  where
+    getIdent (PE.EVar x) = Just x
+    getIdent _           = Nothing
+    getFuncID (GO.SDFunc x) = Just x
+    getFuncID _             = Nothing
 exprGen (PE.ENot x) = do
     exprGen x
     addOpCode $ WA.OpI32Const 0
