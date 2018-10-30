@@ -136,6 +136,8 @@ data Type = TI32
 
 data RefType=TString|TArray Type|TStruct Ident|TFunc [Type] (Maybe Type) deriving (Show, Eq)
 
+
+
 typeParser :: Parser Type
 typeParser =
   try (TI32 <$ reserved "i32")
@@ -147,3 +149,10 @@ typeParser =
     <|> try (TBool <$ reserved "bool")
     <|> try (TChar <$ reserved "char")
     <|> try (RefType . TStruct <$> identifier)
+    <|> try
+          (do
+            params <- parens (semiSep typeParser)
+            reservedOp "=>"
+            res <- optionMaybe typeParser
+            return $ RefType (TFunc params res)
+          )
