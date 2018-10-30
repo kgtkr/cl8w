@@ -158,7 +158,7 @@ exprGen (PE.EVar   x) = do
     l <- snd . (M.! x) <$> use GO.symbolMap
     case l of
         GO.SDLocal x -> addOpCode $ WA.OpGetLocal x
-        GO.SDConst x -> addOpCode $ WA.OpI32Const x
+        GO.SDFunc  x -> addOpCode $ WA.OpI32Const x
 exprGen (PE.ECall ex f) = do
     types <- view GL.types
     Just (PL.RefType (PL.TFunc params res)) <- exprType f

@@ -15,7 +15,7 @@ type OpCodes=D.DList WA.OperatorCode
 type Locals=D.DList WA.ValueType
 type LocalsLen=Int
 type SymbolMap=M.Map String (PL.Type,SymbolData)
-data SymbolData=SDLocal Int|SDConst Int
+data SymbolData=SDLocal Int|SDFunc Int
 
 data OpCodeGenData=OpCodeGenData{
     _opCodeGenDataOpCodes::OpCodes,
@@ -37,7 +37,7 @@ emptyOpCodeGenData fm lo = OpCodeGenData
     , _opCodeGenDataSymbolMap = M.fromList (fmList ++ loList)
     }
   where
-    fmList = (M.toList . fmap (\(a, b) -> (funcDefToType b, SDConst a))) fm
+    fmList = (M.toList . fmap (\(a, b) -> (funcDefToType b, SDFunc a))) fm
     loList = (map (\(i, (name, t)) -> (name, (t, SDLocal i))) . zip [0 ..]) lo
 
 type OpCodeGen = ReaderT GL.MemberData (State OpCodeGenData)
