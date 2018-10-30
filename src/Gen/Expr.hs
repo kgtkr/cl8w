@@ -129,11 +129,15 @@ dropExprGen e = do
             exprGen e
             addOpCode WA.OpDrop
         Nothing -> exprGen e
+
+mallocGen :: GO.OpCodeGen () -> GO.OpCodeGen ()
+mallocGen m = callGen "malloc" [m]
+
 exprGen :: PE.Expr -> GO.OpCodeGen ()
 exprGen (PE.EStructL name exprs) = do
     sDef <- (M.! name) <$> view GL.structs
     res  <- addLocal WA.ValI32
-    callGen "malloc" [addOpCode $ WA.OpI32Const (GL.structSize sDef)]
+    mallocGen (addOpCode $ WA.OpI32Const (GL.structSize sDef))
     addOpCode $ WA.OpSetLocal res
     mapM_
         (\(ident, ex) -> do
@@ -150,8 +154,7 @@ exprGen (PE.EF32L x    ) = addOpCode $ WA.OpF32Const x
 exprGen (PE.EF64L x    ) = addOpCode $ WA.OpF64Const x
 exprGen (PE.EArrayL t x) = do
     let size = GL.sizeOf t
-    callGen
-        "malloc"
+    mallocGen $ sequence_
         [addOpCode $ WA.OpI32Const size, exprGen x, addOpCode WA.OpI32Mul]
 exprGen (PE.EBoolL x) = addOpCode $ WA.OpI32Const (if x then 1 else 0)
 exprGen (PE.EVar   x) = do
