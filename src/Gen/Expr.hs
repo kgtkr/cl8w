@@ -101,11 +101,26 @@ addLocal t = do
     GO.locals %= (`D.snoc` t)
     return len
 
-addNamedLocalData :: PL.Type -> PL.Ident -> GO.OpCodeGen Int
+addNamedLocalData :: PL.Type -> PL.Ident -> GO.OpCodeGen ()
 addNamedLocalData t name = do
-    id <- (addLocal . GL.typeToValueType) t
+    id <- addLocal WA.ValI32
     GO.symbolMap %= M.insert name (t, GO.SDLocal id)
-    return id
+    mallocGen $ addOpCode $ WA.OpI32Const $ GL.sizeOf t
+    addOpCode $ WA.OpSetLocal id
+
+setNamedLocal :: PL.Ident -> GO.OpCodeGen () -> GO.OpCodeGen ()
+setNamedLocal ident e = do
+    (t, GO.SDLocal id) <- (M.! ident) <$> use GO.symbolMap
+    addOpCode $ WA.OpGetLocal id
+    e
+    addOpCode $ opStore (GL.typeToValueType t) (WA.MemoryImmediate 0)
+
+getNamedLocal :: PL.Ident -> GO.OpCodeGen ()
+getNamedLocal ident = do
+    (t, GO.SDLocal id) <- (M.! ident) <$> use GO.symbolMap
+    addOpCode $ WA.OpGetLocal id
+    addOpCode $ opLoad (GL.typeToValueType t) (WA.MemoryImmediate 0)
+    return ()
 
 addOpCode :: WA.OperatorCode -> GO.OpCodeGen ()
 addOpCode x = GO.opCodes %= (`D.snoc` x)
@@ -160,7 +175,7 @@ exprGen (PE.EBoolL x) = addOpCode $ WA.OpI32Const (if x then 1 else 0)
 exprGen (PE.EVar   x) = do
     l <- snd . (M.! x) <$> use GO.symbolMap
     case l of
-        GO.SDLocal x -> addOpCode $ WA.OpGetLocal x
+        GO.SDLocal _ -> getNamedLocal x
         GO.SDFunc  x -> addOpCode $ WA.OpI32Const x
 exprGen (PE.ECall ex f) = do
     mapM_ exprGen ex
@@ -309,8 +324,7 @@ exprGen (PE.EBlock ss e) = makeScope $ do
 exprGen (PE.ELet name e) = do
     Just t <- exprType e
     x      <- addNamedLocalData t name
-    exprGen e
-    addOpCode $ WA.OpSetLocal x
+    setNamedLocal name (exprGen e)
 exprGen (PE.EIf (e, s1) [] s2) = do
     t <- exprType s1
     exprGen e
@@ -337,9 +351,7 @@ exprGen (PE.EReturn e) = do
 exprGen (PE.ESet a b) = do
     case a of
         PE.EVar ident -> do
-            exprGen b
-            (_, GO.SDLocal id) <- (M.! ident) <$> use GO.symbolMap
-            addOpCode $ WA.OpSetLocal id
+            setNamedLocal ident (exprGen b)
             return ()
         PE.EIndex i e -> do
             Just (PL.RefType (PL.TArray t)) <- exprType e
