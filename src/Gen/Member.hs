@@ -63,7 +63,6 @@ toMemberData ms = MemberData
 data MemberGenData=MemberGenData{
     _memberGenDataDefineFunctionsLen::Int,
     _memberGenDataExternFunctionsLen::Int,
-    _memberGenDataTypeSection::M.Map WA.FuncType Int,
     _memberGenDataImportSection::D.DList WA.ImportEntry,
     _memberGenDataFunctionSection::D.DList Int,
     _memberGenDataExportSection::D.DList WA.ExportEntry,
@@ -74,7 +73,6 @@ makeFields ''MemberGenData
 memberGenData = MemberGenData
     { _memberGenDataDefineFunctionsLen = 0
     , _memberGenDataExternFunctionsLen = 0
-    , _memberGenDataTypeSection        = M.empty
     , _memberGenDataImportSection      = D.empty
     , _memberGenDataFunctionSection    = D.empty
     , _memberGenDataExportSection      = D.empty
