@@ -1,0 +1,3 @@
+[submodule "memory"]
+	path = memory
+	url = git@github.com:kgtkr/wasm-memory.git
