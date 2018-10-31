@@ -11,9 +11,6 @@ const instance = new WebAssembly.Instance(mod, {
   memory: new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync("./memory.wasm")), {
     resource: {
       memory: memory
-    },
-    config: {
-      start: 1
     }
   },
   ).exports,
