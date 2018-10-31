@@ -10,7 +10,7 @@ import qualified Parsers.Expr                  as PE
 import           Control.Lens
 import qualified Gen.Lang                      as GL
 import           Control.Monad.Reader
-import qualified Gen.FuncGen                 as FG
+import qualified Gen.FuncGen                 as GF
 type ExprType=Maybe PL.Type
 
 opStore :: WA.ValueType -> WA.MemoryImmediate -> WA.OperatorCode
@@ -31,7 +31,7 @@ opLoad t =
         WA.ValF64 -> WA.OpF64Load
     )
 
-exprType :: PE.Expr -> FG.FuncGen (Maybe PL.Type)
+exprType :: PE.Expr -> GF.FuncGen (Maybe PL.Type)
 exprType (PE.EStructL ident _) =
     (return . Just) $ PL.RefType $ PL.TStruct ident
 exprType (PE.EI32L    _   ) = (return . Just) PL.TI32
@@ -42,7 +42,7 @@ exprType (PE.EStringL _   ) = (return . Just) $ PL.RefType PL.TString
 exprType (PE.EArrayL t _  ) = (return . Just) $ PL.RefType $ PL.TArray t
 exprType (PE.EBoolL _     ) = (return . Just) PL.TBool
 exprType (PE.ECharL _     ) = (return . Just) PL.TChar
-exprType (PE.EVar   ident ) = Just . (^. _1) . (M.! ident) <$> use FG.symbolMap
+exprType (PE.EVar   ident ) = Just . (^. _1) . (M.! ident) <$> use GF.symbolMap
 exprType (PE.ECall _ ident) = do
     Just (PL.RefType (PL.TFunc _ res)) <- exprType ident
     return res
@@ -81,16 +81,16 @@ exprType (PE.EReturn _     ) = return Nothing
 exprType (PE.ESet _ _      ) = return Nothing
 exprType (PE.EFor _ _ _ _  ) = return Nothing
 
-makeScope :: FG.FuncGen () -> FG.FuncGen ()
+makeScope :: GF.FuncGen () -> GF.FuncGen ()
 makeScope m = do
-    lm <- use FG.symbolMap
+    lm <- use GF.symbolMap
     m
-    FG.symbolMap .= lm
+    GF.symbolMap .= lm
     return ()
 
-initGen :: FG.FuncGen ()
+initGen :: GF.FuncGen ()
 initGen = do
-    params <- use FG.params
+    params <- use GF.params
     ( mapM_
                 (\(i, (ident, t)) -> addNamedLocalData t ident
                     >> setNamedLocal ident (addOpCode $ WA.OpGetLocal i)
@@ -99,55 +99,55 @@ initGen = do
         )
         params
 
-callGen :: String -> [FG.FuncGen ()] -> FG.FuncGen ()
+callGen :: String -> [GF.FuncGen ()] -> GF.FuncGen ()
 callGen f args = do
     m <- view GL.functions
     let (id, _) = m M.! f
     opCallGen (WA.OpCall id) args
 
-addLocal :: WA.ValueType -> FG.FuncGen Int
+addLocal :: WA.ValueType -> GF.FuncGen Int
 addLocal t = do
-    len <- use FG.localsLen
-    FG.localsLen += 1
-    FG.locals %= (`D.snoc` t)
+    len <- use GF.localsLen
+    GF.localsLen += 1
+    GF.locals %= (`D.snoc` t)
     return len
 
-addNamedLocalData :: PL.Type -> PL.Ident -> FG.FuncGen ()
+addNamedLocalData :: PL.Type -> PL.Ident -> GF.FuncGen ()
 addNamedLocalData t name = do
     id <- addLocal WA.ValI32
-    FG.symbolMap %= M.insert name (t, FG.SDLocal id)
+    GF.symbolMap %= M.insert name (t, GF.SDLocal id)
     mallocGen $ addOpCode $ WA.OpI32Const $ GL.sizeOf t
     addOpCode $ WA.OpSetLocal id
 
-setNamedLocal :: PL.Ident -> FG.FuncGen () -> FG.FuncGen ()
+setNamedLocal :: PL.Ident -> GF.FuncGen () -> GF.FuncGen ()
 setNamedLocal ident e = do
-    (t, FG.SDLocal id) <- (M.! ident) <$> use FG.symbolMap
+    (t, GF.SDLocal id) <- (M.! ident) <$> use GF.symbolMap
     addOpCode $ WA.OpGetLocal id
     e
     addOpCode $ opStore (GL.typeToValueType t) (WA.MemoryImmediate 0)
 
-getNamedLocal :: PL.Ident -> FG.FuncGen ()
+getNamedLocal :: PL.Ident -> GF.FuncGen ()
 getNamedLocal ident = do
-    (t, FG.SDLocal id) <- (M.! ident) <$> use FG.symbolMap
+    (t, GF.SDLocal id) <- (M.! ident) <$> use GF.symbolMap
     addOpCode $ WA.OpGetLocal id
     addOpCode $ opLoad (GL.typeToValueType t) (WA.MemoryImmediate 0)
     return ()
 
-addOpCode :: WA.OperatorCode -> FG.FuncGen ()
-addOpCode x = FG.opCodes %= (`D.snoc` x)
+addOpCode :: WA.OperatorCode -> GF.FuncGen ()
+addOpCode x = GF.opCodes %= (`D.snoc` x)
 
-opCallGen :: WA.OperatorCode -> [FG.FuncGen ()] -> FG.FuncGen ()
+opCallGen :: WA.OperatorCode -> [GF.FuncGen ()] -> GF.FuncGen ()
 opCallGen op args = do
     sequence_ args
     addOpCode op
 
 -- 値/位置/オフセット
-storeGen :: PE.Expr -> PE.Expr -> Int -> FG.FuncGen ()
+storeGen :: PE.Expr -> PE.Expr -> Int -> GF.FuncGen ()
 storeGen e i o = do
     Just et <- exprType e
     let storeOp = opStore (GL.typeToValueType et) (WA.MemoryImmediate o)
     opCallGen storeOp [exprGen i, exprGen e]
-dropExprGen :: PE.Expr -> FG.FuncGen ()
+dropExprGen :: PE.Expr -> GF.FuncGen ()
 dropExprGen e = do
     t <- exprType e
     case t of
@@ -156,10 +156,10 @@ dropExprGen e = do
             addOpCode WA.OpDrop
         Nothing -> exprGen e
 
-mallocGen :: FG.FuncGen () -> FG.FuncGen ()
+mallocGen :: GF.FuncGen () -> GF.FuncGen ()
 mallocGen m = callGen "malloc" [m]
 
-exprGen :: PE.Expr -> FG.FuncGen ()
+exprGen :: PE.Expr -> GF.FuncGen ()
 exprGen (PE.EStructL name exprs) = do
     sDef <- (M.! name) <$> view GL.structs
     res  <- addLocal WA.ValI32
@@ -184,14 +184,14 @@ exprGen (PE.EArrayL t x) = do
         [addOpCode $ WA.OpI32Const size, exprGen x, addOpCode WA.OpI32Mul]
 exprGen (PE.EBoolL x) = addOpCode $ WA.OpI32Const (if x then 1 else 0)
 exprGen (PE.EVar   x) = do
-    l <- snd . (M.! x) <$> use FG.symbolMap
+    l <- snd . (M.! x) <$> use GF.symbolMap
     case l of
-        FG.SDLocal _ -> getNamedLocal x
-        FG.SDFunc  x -> addOpCode $ WA.OpI32Const x
+        GF.SDLocal _ -> getNamedLocal x
+        GF.SDFunc  x -> addOpCode $ WA.OpI32Const x
 exprGen (PE.ECall ex f) = do
     mapM_ exprGen ex
 
-    sMap <- use FG.symbolMap
+    sMap <- use GF.symbolMap
     case (fmap (\x -> snd (sMap M.! x)) . getIdent) f >>= getFuncID of
         -- 関数を静的呼び出し出来る時は最適化
         Just x  -> addOpCode $ WA.OpCall x
@@ -206,7 +206,7 @@ exprGen (PE.ECall ex f) = do
   where
     getIdent (PE.EVar x) = Just x
     getIdent _           = Nothing
-    getFuncID (FG.SDFunc x) = Just x
+    getFuncID (GF.SDFunc x) = Just x
     getFuncID _             = Nothing
 exprGen (PE.ENot x) = do
     exprGen x
