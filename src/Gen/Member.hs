@@ -15,7 +15,7 @@ import           Data.Maybe
 import           Control.Monad.State
 import           Control.Monad.Reader
 import           Data.Tuple
-import qualified Gen.FuncGen                 as GF
+import qualified Gen.FuncGen                   as GF
 fromASTStruct :: PM.StructMembers -> Struct
 fromASTStruct ms = M.fromList (f 0 (sortOn fst ms))
   where
@@ -138,11 +138,9 @@ memberGen md (PM.MFun fd stat) = do
     functionSection %= (`D.snoc` ti)
     exportSection
         %= (`D.snoc` WA.ExportEntry (fd ^. PM.name) WA.ExFunction functionIndex)
-    let x = GF.emptyFuncGenData (md ^. GL.functions) (fd ^. PM.params)
-    let
-        (et, s) = runState
-            (runReaderT (GE.initGen >> GE.exprGen stat >> GE.exprType stat) md)
-            x
+    let x = GF.emptyFuncGenData md (md ^. GL.functions) (fd ^. PM.params)
+    let (et, s) =
+            runState (GE.initGen >> GE.exprGen stat >> GE.exprType stat) x
     let opCodeF = case (fd ^. PM.result, et) of
             (Just _, Nothing) -> (`D.snoc` WA.OpUnreachable)
             _                 -> id

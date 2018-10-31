@@ -24,7 +24,8 @@ data FuncGenData=FuncGenData{
     _funcGenDataLocals:: Locals,
     _funcGenDataLocalsLen:: LocalsLen,
     _funcGenDataSymbolMap:: SymbolMap,
-    _funcGenDataParams::Params
+    _funcGenDataParams::Params,
+    _funcGenDataMd :: GL.MemberData
 }
 makeFields ''FuncGenData
 
@@ -32,14 +33,15 @@ funcDefToType :: PM.FuncDef -> PL.Type
 funcDefToType fd =
     PL.RefType (PL.TFunc ((map snd) (fd ^. PM.params)) (fd ^. PM.result))
 
-emptyFuncGenData :: GL.FunctionMap -> Params -> FuncGenData
-emptyFuncGenData fm ps = FuncGenData
+emptyFuncGenData :: GL.MemberData -> GL.FunctionMap -> Params -> FuncGenData
+emptyFuncGenData md fm ps = FuncGenData
     { _funcGenDataOpCodes   = D.empty
     , _funcGenDataLocals    = D.empty
     , _funcGenDataLocalsLen = length ps
     , _funcGenDataSymbolMap = fmMap
     , _funcGenDataParams    = ps
+    , _funcGenDataMd        = md
     }
     where fmMap = fmap (\(a, b) -> (funcDefToType b, SDFunc a)) fm
 
-type FuncGen = ReaderT GL.MemberData (State FuncGenData)
+type FuncGen = State FuncGenData

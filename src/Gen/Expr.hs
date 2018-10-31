@@ -10,7 +10,7 @@ import qualified Parsers.Expr                  as PE
 import           Control.Lens
 import qualified Gen.Lang                      as GL
 import           Control.Monad.Reader
-import qualified Gen.FuncGen                 as GF
+import qualified Gen.FuncGen                   as GF
 type ExprType=Maybe PL.Type
 
 opStore :: WA.ValueType -> WA.MemoryImmediate -> WA.OperatorCode
@@ -51,7 +51,8 @@ exprType (PE.EPlus  e        ) = exprType e
 exprType (PE.EMinus e        ) = exprType e
 exprType (PE.EMember pIdent e) = do
     Just (PL.RefType (PL.TStruct sIdent)) <- exprType e
-    Just . (^. GL.typ) . (M.! pIdent) . (M.! sIdent) <$> view GL.structs
+    Just . (^. GL.typ) . (M.! pIdent) . (M.! sIdent) <$> use
+        (GF.md . GL.structs)
 exprType (PE.EIndex _ e) = do
     Just (PL.RefType (PL.TArray t)) <- exprType e
     (return . Just) t
@@ -101,7 +102,7 @@ initGen = do
 
 callGen :: String -> [GF.FuncGen ()] -> GF.FuncGen ()
 callGen f args = do
-    m <- view GL.functions
+    m <- use (GF.md . GL.functions)
     let (id, _) = m M.! f
     opCallGen (WA.OpCall id) args
 
@@ -161,7 +162,7 @@ mallocGen m = callGen "malloc" [m]
 
 exprGen :: PE.Expr -> GF.FuncGen ()
 exprGen (PE.EStructL name exprs) = do
-    sDef <- (M.! name) <$> view GL.structs
+    sDef <- (M.! name) <$> use (GF.md . GL.structs)
     res  <- addLocal WA.ValI32
     mallocGen (addOpCode $ WA.OpI32Const (GL.structSize sDef))
     addOpCode $ WA.OpSetLocal res
@@ -196,7 +197,7 @@ exprGen (PE.ECall ex f) = do
         -- 関数を静的呼び出し出来る時は最適化
         Just x  -> addOpCode $ WA.OpCall x
         Nothing -> do
-            types <- view GL.types
+            types <- use (GF.md . GL.types)
             Just (PL.RefType (PL.TFunc params res)) <- exprType f
             let waType = WA.FuncType (fmap GL.typeToValueType params)
                                      (fmap GL.typeToValueType res)
@@ -222,7 +223,7 @@ exprGen (PE.EMinus x) = do
             addOpCode $ WA.OpI32Mul
 exprGen (PE.EMember ident e) = do
     Just (PL.RefType (PL.TStruct sName)) <- exprType e
-    prop <- (M.! ident) . (M.! sName) <$> view GL.structs
+    prop <- (M.! ident) . (M.! sName) <$> use (GF.md . GL.structs)
     exprGen e
     let loadOp = opLoad (GL.typeToValueType (prop ^. GL.typ))
                         (WA.MemoryImmediate (prop ^. GL.pos))
@@ -378,7 +379,7 @@ exprGen (PE.ESet a b) = do
             return ()
         PE.EMember ident e -> do
             Just (PL.RefType (PL.TStruct sName)) <- exprType e
-            prop <- (M.! ident) . (M.! sName) <$> view GL.structs
+            prop <- (M.! ident) . (M.! sName) <$> use (GF.md . GL.structs)
             exprGen e
             let storeOp = opStore (GL.typeToValueType (prop ^. GL.typ))
                                   (WA.MemoryImmediate (prop ^. GL.pos))
