@@ -1,4 +1,4 @@
-module Gen.OpCodeGen where
+module Gen.FuncGen where
 
 import qualified Data.DList                    as D
 import qualified Wasm.AST                      as WA
@@ -19,27 +19,27 @@ data SymbolData=SDLocal Int|SDFunc Int
 
 type Params=[(PL.Ident, PL.Type)]
 
-data OpCodeGenData=OpCodeGenData{
-    _opCodeGenDataOpCodes::OpCodes,
-    _opCodeGenDataLocals:: Locals,
-    _opCodeGenDataLocalsLen:: LocalsLen,
-    _opCodeGenDataSymbolMap:: SymbolMap,
-    _opCodeGenDataParams::Params
+data FuncGenData=FuncGenData{
+    _funcGenDataOpCodes::OpCodes,
+    _funcGenDataLocals:: Locals,
+    _funcGenDataLocalsLen:: LocalsLen,
+    _funcGenDataSymbolMap:: SymbolMap,
+    _funcGenDataParams::Params
 }
-makeFields ''OpCodeGenData
+makeFields ''FuncGenData
 
 funcDefToType :: PM.FuncDef -> PL.Type
 funcDefToType fd =
     PL.RefType (PL.TFunc ((map snd) (fd ^. PM.params)) (fd ^. PM.result))
 
-emptyOpCodeGenData :: GL.FunctionMap -> Params -> OpCodeGenData
-emptyOpCodeGenData fm ps = OpCodeGenData
-    { _opCodeGenDataOpCodes   = D.empty
-    , _opCodeGenDataLocals    = D.empty
-    , _opCodeGenDataLocalsLen = length ps
-    , _opCodeGenDataSymbolMap = fmMap
-    , _opCodeGenDataParams    = ps
+emptyFuncGenData :: GL.FunctionMap -> Params -> FuncGenData
+emptyFuncGenData fm ps = FuncGenData
+    { _funcGenDataOpCodes   = D.empty
+    , _funcGenDataLocals    = D.empty
+    , _funcGenDataLocalsLen = length ps
+    , _funcGenDataSymbolMap = fmMap
+    , _funcGenDataParams    = ps
     }
     where fmMap = fmap (\(a, b) -> (funcDefToType b, SDFunc a)) fm
 
-type OpCodeGen = ReaderT GL.MemberData (State OpCodeGenData)
+type FuncGen = ReaderT GL.MemberData (State FuncGenData)
