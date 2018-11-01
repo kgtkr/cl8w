@@ -50,11 +50,24 @@ data Expr = EStructL L.Ident [(L.Ident,Expr)]
         |EReturn (Maybe Expr)
         |ESet Expr Expr
         |EFor Expr Expr Expr Expr
+        |ELambda [L.Ident] [(L.Ident,L.Type)] L.Type Expr
       deriving (Show, Eq)
 
 blockP :: Parser Expr
 blockP =
   L.braces (EBlock <$> ((many . try) (exprP <* L.semi)) <*> optionMaybe exprP)
+
+lambdaP :: Parser Expr
+lambdaP = do
+  L.reservedOp "\\"
+  cap    <- (L.braces . L.semiSep) L.identifier
+  params <-
+    (L.parens . L.semiSep) $ (,) <$> (L.identifier <* L.colon) <*> L.typeParser
+  L.colon
+  ret <- L.typeParser
+  L.reservedOp "=>"
+  e <- exprP
+  return $ ELambda cap params ret e
 
 letP :: Parser Expr
 letP =
@@ -111,6 +124,7 @@ termP =
     <|> whileP
     <|> returnP
     <|> forP
+    <|> lambdaP
 
 parensP :: Parser Expr
 parensP = L.parens exprP
