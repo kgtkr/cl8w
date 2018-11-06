@@ -2,7 +2,7 @@ const fs = require("fs");
 
 const memory = new WebAssembly.Memory({ initial: 10 });
 
-const buf = fs.readFileSync("./test.wasm");
+const buf = fs.readFileSync("./main.wasm");
 const mod = new WebAssembly.Module(buf);
 const instance = new WebAssembly.Instance(mod, {
   resource: {

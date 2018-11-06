@@ -5,15 +5,17 @@ import qualified Data.ByteString               as BS
 import           Parsers.Member
 import           Text.ParserCombinators.Parsec
 import           Gen.Member
+import           System.Environment             ( getArgs )
 
 main = do
-    input <- readFile "test.cl8w"
-    let ast = (parse moduleP "test" input)
+    [fileName] <- getArgs
+    input      <- readFile fileName
+    let ast = (parse moduleP fileName input)
     case ast of
         Right ast -> do
             -- print ast
             let wAST = compile ast
             let bin  = runPut $ putWasmAST wAST
-            BS.writeFile "test.wasm" bin
+            BS.writeFile "main.wasm" bin
         Left e -> print e
     return ()
