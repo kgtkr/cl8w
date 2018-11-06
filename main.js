@@ -8,7 +8,7 @@ const instance = new WebAssembly.Instance(mod, {
   resource: {
     memory: memory
   },
-  memory: new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync("./memory.wasm")), {
+  memory: new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync("./memory/memory.wasm")), {
     resource: {
       memory: memory
     }
