@@ -1,0 +1,32 @@
+extern fun "memory" "malloc" malloc(x:i32):i32
+extern fun "io" "print" print(x:i32)
+
+fun main()={
+    let n=10;
+    let arr=[i32;n];
+    for(let i=0;i<n;i=i+1){
+        arr[i]=i;
+    };
+    map(inc,n,arr);
+    map(double,n,arr);
+    map(dec,n,arr);
+    forEach(print,n,arr);
+}
+
+fun double(x:i32):i32=x*2
+
+fun inc(x:i32):i32=x+1
+
+fun dec(x:i32):i32=x-1
+
+fun map(f:(i32)=>i32,n:i32,arr:[i32])={
+    for(let i=0;i<n;i=i+1){
+        arr[i]=f(arr[i]);
+    };
+}
+
+fun forEach(f:(i32)=>,n:i32,arr:[i32])={
+    for(let i=0;i<n;i=i+1){
+        f(arr[i]);
+    };
+}

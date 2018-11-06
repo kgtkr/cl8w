@@ -1,0 +1,7 @@
+extern fun "memory" "malloc" malloc(x:i32):i32
+extern fun "io" "print" print(x:i32)
+
+fun main()=print(gcd(12,16))
+
+
+fun gcd(a:i32,b:i32):i32=if(a%b==0) b else gcd(b,a%b)

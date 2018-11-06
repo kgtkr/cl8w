@@ -1,0 +1,16 @@
+extern fun "memory" "malloc" malloc(x:i32):i32
+extern fun "io" "print" print(x:i32)
+
+struct A{
+    x:i32,
+    y:i32
+}
+
+fun main()={
+    let a=A{x:10,y:20};
+    f(a);
+    print(a.x);
+    print(a.y);
+}
+
+fun f(a:A)=a.x=a.x+a.y
