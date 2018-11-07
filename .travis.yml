@@ -17,4 +17,4 @@ addons:
 script:
   - stack --no-terminal --skip-ghc-check test
 git:
-  submodule: false
+  submodules: false
