@@ -55,7 +55,7 @@ def = LanguageDef
   , identStart      = letter
   , identLetter     = alphaNum <|> oneOf "_"
   , opStart         = oneOf []
-  , opLetter        = oneOf []
+  , opLetter        = oneOf "!+-*/%&|^=<>"
   , reservedOpNames = op
   , reservedNames   = keywords
   , caseSensitive   = True
