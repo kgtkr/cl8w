@@ -79,3 +79,8 @@ spec = do
       (parse exprP "test" "return 1")
         `shouldBe` Right (EReturn (Just (EI32L 1)))
 
+      (parse exprP "test" "x=1") `shouldBe` Right (ESet (EVar "x") (EI32L 1))
+
+      (parse exprP "test" "for(1;2;3)4")
+        `shouldBe` Right (EFor (EI32L 1) (EI32L 2) (EI32L 3) (EI32L 4))
+
