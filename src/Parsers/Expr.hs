@@ -60,7 +60,7 @@ blockP =
 lambdaP :: Parser Expr
 lambdaP = do
   L.reservedOp "\\"
-  cap    <- (L.braces . L.semiSep) L.identifier
+  cap    <- (L.brackets . L.semiSep) L.identifier
   params <-
     (L.parens . L.semiSep) $ (,) <$> (L.identifier <* L.colon) <*> L.typeParser
   L.colon

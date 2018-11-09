@@ -84,3 +84,6 @@ spec = do
       (parse exprP "test" "for(1;2;3)4")
         `shouldBe` Right (EFor (EI32L 1) (EI32L 2) (EI32L 3) (EI32L 4))
 
+      (parse exprP "test" "\\[x](a:i32):i64=>1i64")
+        `shouldBe` Right (ELambda ["x"] [("a", TI32)] TI64 (EI64L 1))
+
