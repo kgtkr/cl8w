@@ -63,3 +63,12 @@ spec = do
       (parse exprP "test" "{1}") `shouldBe` Right (EBlock [] (Just (EI32L 1)))
       (parse exprP "test" "{1;}") `shouldBe` Right (EBlock [EI32L 1] Nothing)
 
+      (parse exprP "test" "let x=1") `shouldBe` Right (ELet "x" (EI32L 1))
+
+      (parse exprP "test" "if(1)2")
+        `shouldBe` Right (EIf (EI32L 1, EI32L 2) [] Nothing)
+      (parse exprP "test" "if(1)2 else if(3)4")
+        `shouldBe` Right (EIf (EI32L 1, EI32L 2) [(EI32L 3, EI32L 4)] Nothing)
+      (parse exprP "test" "if(1)2 else 3")
+        `shouldBe` Right (EIf (EI32L 1, EI32L 2) [] (Just (EI32L 3)))
+
