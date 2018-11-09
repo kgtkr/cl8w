@@ -72,3 +72,10 @@ spec = do
       (parse exprP "test" "if(1)2 else 3")
         `shouldBe` Right (EIf (EI32L 1, EI32L 2) [] (Just (EI32L 3)))
 
+      (parse exprP "test" "while(1)2")
+        `shouldBe` Right (EWhile (EI32L 1) (EI32L 2))
+
+      (parse exprP "test" "return") `shouldBe` Right (EReturn Nothing)
+      (parse exprP "test" "return 1")
+        `shouldBe` Right (EReturn (Just (EI32L 1)))
+
