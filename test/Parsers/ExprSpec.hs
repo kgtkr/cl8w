@@ -59,4 +59,7 @@ spec = do
       (parse exprP "test" "(a+b)*c")
         `shouldBe` Right (EMul (EAdd (EVar "a") (EVar "b")) (EVar "c"))
 
+      (parse exprP "test" "{}") `shouldBe` Right (EBlock [] Nothing)
+      (parse exprP "test" "{1}") `shouldBe` Right (EBlock [] (Just (EI32L 1)))
+      (parse exprP "test" "{1;}") `shouldBe` Right (EBlock [EI32L 1] Nothing)
 
