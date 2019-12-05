@@ -1,5 +1,5 @@
-extern fun "memory" "malloc" malloc(x:i32):i32
-extern fun "io" "print" print(x:i32)
+extern fun "memory" "malloc" malloc(x: i32): i32
+extern fun "io" "print" print(x: i32)
 
 fun main() = {
     let n = 10;
