@@ -10,6 +10,7 @@ COPY stack.yaml.lock $HOME/
 
 RUN stack build --dependencies-only
 
+COPY app $HOME/app
 COPY test $HOME/test
 COPY src $HOME/src
 
