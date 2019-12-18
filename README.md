@@ -18,18 +18,18 @@ WebAssemblyで動く実験的な言語
 ## 構文
 ### 関数定義
 ```
-fun ident(ident:type,*):type?=expr
+fun ident(ident: type, *): type? = expr
 ```
 
 ### 外部関数
 ```
-extern fun "module" "name" ident(ident:type,*):type?
+extern fun "module" "name" ident(ident: type, *): type?
 ```
 
 ### 構造体
 ```
-struct Ident{
-    ident:type,...
+struct Ident {
+    ident: type, ...
 }
 ```
 
