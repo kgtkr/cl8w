@@ -1,0 +1,20 @@
+name: main
+
+on: [push]
+
+env:
+  CL8W_IMAGE_TAG: docker.pkg.github.com/${{ github.repository }}/cl8w:${{ github.sha }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: login
+        run: docker login docker.pkg.github.com -u $GITHUB_ACTOR -p $PERSONAL_TOKEN
+        env:
+          PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+      - name: build
+        run: |
+          docker build -t $CL8W_IMAGE_TAG .
+          docker push $CL8W_IMAGE_TAG
